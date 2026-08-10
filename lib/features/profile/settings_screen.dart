@@ -76,6 +76,17 @@ class SettingsScreen extends ConsumerWidget {
           ),
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
+            title: const Text('AMOLED black'),
+            subtitle: Text(
+              settings.themeMode == ThemeMode.light
+                  ? 'Applies when the dark theme is active'
+                  : 'True-black surfaces to save power on OLED screens',
+            ),
+            value: settings.amoled,
+            onChanged: notifier.setAmoled,
+          ),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
             title: const Text('Grid view by default'),
             subtitle: const Text('How the Shop tab lays out results'),
             value: settings.gridView,

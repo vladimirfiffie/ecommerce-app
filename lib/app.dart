@@ -30,6 +30,7 @@ class NovaApp extends ConsumerWidget {
           theme: AppTheme.light(useDynamic ? lightDynamic?.harmonized() : null),
           darkTheme: AppTheme.dark(
             useDynamic ? darkDynamic?.harmonized() : null,
+            amoled: settings.amoled,
           ),
           routerConfig: router,
         );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,7 +8,6 @@ import '../../data/models/category.dart';
 import '../../data/models/product.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../shared/widgets/empty_state.dart';
-import '../../shared/widgets/product_card.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeletons.dart';
 import '../../state/app_providers.dart';
@@ -18,6 +16,8 @@ import 'widgets/category_chips.dart';
 import 'widgets/hero_carousel.dart';
 import 'widgets/home_app_bar.dart';
 import 'widgets/product_rail.dart';
+import '../../shared/widgets/product_grid.dart';
+import '../../core/layout/breakpoints.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -164,21 +164,15 @@ class HomeScreen extends ConsumerWidget {
         child: SectionHeader(title: 'Popular right now'),
       ),
       const SliverToBoxAdapter(child: SizedBox(height: 14)),
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-        sliver: SliverGrid.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 24,
-            crossAxisSpacing: 16,
-            childAspectRatio: 0.54,
-          ),
-          itemCount: popular.length,
-          itemBuilder: (BuildContext context, int index) =>
-              ProductCard(product: popular[index], heroPrefix: 'popular')
-                  .animate(delay: (index * 40).ms)
-                  .fadeIn(duration: 260.ms)
-                  .moveY(begin: 14, end: 0, curve: Curves.easeOutCubic),
+      ProductGrid(
+        products: popular,
+        heroPrefix: 'popular',
+        sliver: true,
+        padding: EdgeInsets.fromLTRB(
+          Breakpoints.gutter(Breakpoints.of(context)),
+          0,
+          Breakpoints.gutter(Breakpoints.of(context)),
+          28,
         ),
       ),
     ];

@@ -14,6 +14,8 @@ import '../../state/app_providers.dart';
 import '../../state/catalog_filter_provider.dart';
 import '../../state/settings_provider.dart';
 import 'widgets/filter_sheet.dart';
+import '../../shared/widgets/product_grid.dart';
+import '../../core/layout/breakpoints.dart';
 
 /// The full catalog: category strip, refinement bar, grid/list of results.
 class CatalogScreen extends ConsumerWidget {
@@ -227,20 +229,14 @@ class _ResultsGrid extends StatelessWidget {
   final List<Product> products;
 
   @override
-  Widget build(BuildContext context) => GridView.builder(
-    padding: const EdgeInsets.fromLTRB(20, 18, 20, 32),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      mainAxisSpacing: 24,
-      crossAxisSpacing: 16,
-      childAspectRatio: 0.54,
-    ),
-    itemCount: products.length,
-    itemBuilder: (BuildContext context, int index) => ProductCard(
-      product: products[index],
+  Widget build(BuildContext context) {
+    final double gutter = Breakpoints.gutter(Breakpoints.of(context));
+    return ProductGrid(
+      products: products,
       heroPrefix: 'catalog',
-    ).animate(delay: (index % 6 * 35).ms).fadeIn(duration: 240.ms),
-  );
+      padding: EdgeInsets.fromLTRB(gutter, 18, gutter, 32),
+    );
+  }
 }
 
 class _ResultsList extends StatelessWidget {

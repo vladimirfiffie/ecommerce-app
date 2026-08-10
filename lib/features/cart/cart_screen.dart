@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/layout/breakpoints.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
@@ -23,6 +24,7 @@ class CartScreen extends ConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final List<CartItem> items = ref.watch(cartItemsProvider);
     final CartSummary summary = ref.watch(cartSummaryProvider);
+    final bool wide = Breakpoints.of(context).isWide;
 
     return Scaffold(
       body: SafeArea(
@@ -58,7 +60,60 @@ class CartScreen extends ConsumerWidget {
                   onAction: () => context.go(Routes.catalog),
                 ),
               )
-            else ...<Widget>[
+            else if (wide) ...<Widget>[
+              // Wide windows put the summary in a sticky side panel so the
+              // total and checkout stay in view while the list scrolls.
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        children: <Widget>[
+                          if (!summary.hasFreeShipping)
+                            _FreeShippingBar(summary: summary),
+                          Expanded(
+                            child: ListView(
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+                              children: <Widget>[
+                                for (int i = 0; i < items.length; i++)
+                                  _CartLine(item: items[i], index: i)
+                                      .animate(delay: (i * 45).ms)
+                                      .fadeIn(duration: 240.ms),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(
+                      flex: 2,
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                        children: <Widget>[
+                          const PromoField(),
+                          const SizedBox(height: 20),
+                          const OrderSummary(),
+                          const SizedBox(height: 20),
+                          FilledButton.icon(
+                            onPressed: () => context.push(Routes.checkout),
+                            icon: const Icon(
+                              Icons.lock_outline_rounded,
+                              size: 18,
+                            ),
+                            label: Text(
+                              'Checkout · ${formatPrice(summary.total)}',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...<Widget>[
               if (!summary.hasFreeShipping) _FreeShippingBar(summary: summary),
               Expanded(
                 child: ListView(

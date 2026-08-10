@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
 import '../../data/models/product.dart';
 import '../../shared/widgets/empty_state.dart';
-import '../../shared/widgets/product_card.dart';
 import '../../state/cart_provider.dart';
 import '../../state/favorites_provider.dart';
+import '../../shared/widgets/product_grid.dart';
+import '../../core/layout/breakpoints.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -17,6 +17,7 @@ class FavoritesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final List<Product> products = ref.watch(favoriteProductsProvider);
+    final double gutter = Breakpoints.gutter(Breakpoints.of(context));
 
     return Scaffold(
       body: SafeArea(
@@ -74,23 +75,10 @@ class FavoritesScreen extends ConsumerWidget {
                       actionLabel: 'Browse the shop',
                       onAction: () => context.go(Routes.catalog),
                     )
-                  : GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 24,
-                            crossAxisSpacing: 16,
-                            childAspectRatio: 0.54,
-                          ),
-                      itemCount: products.length,
-                      itemBuilder: (BuildContext context, int index) =>
-                          ProductCard(
-                                product: products[index],
-                                heroPrefix: 'saved',
-                              )
-                              .animate(delay: (index % 6 * 40).ms)
-                              .fadeIn(duration: 250.ms),
+                  : ProductGrid(
+                      products: products,
+                      heroPrefix: 'saved',
+                      padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 32),
                     ),
             ),
           ],

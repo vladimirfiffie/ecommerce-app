@@ -18,9 +18,32 @@ abstract final class AppTheme {
   static ThemeData light(ColorScheme? dynamicScheme) =>
       _build(dynamicScheme ?? ColorScheme.fromSeed(seedColor: seed));
 
-  static ThemeData dark(ColorScheme? dynamicScheme) => _build(
-    dynamicScheme ??
-        ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark),
+  /// Dark theme. With [amoled] the surfaces collapse to true black so OLED
+  /// panels can switch those pixels off entirely.
+  static ThemeData dark(ColorScheme? dynamicScheme, {bool amoled = false}) {
+    final ColorScheme base =
+        dynamicScheme ??
+        ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark);
+    return _build(amoled ? _toAmoled(base) : base);
+  }
+
+  /// Pushes a dark scheme to true black.
+  ///
+  /// Only the surface family is flattened — keeping the accent, container and
+  /// "on" colours intact preserves contrast and the brand palette. Elevation
+  /// tiers stay faintly distinguishable so cards and sheets don't dissolve
+  /// into the background.
+  static ColorScheme _toAmoled(ColorScheme scheme) => scheme.copyWith(
+    surface: const Color(0xFF000000),
+    surfaceDim: const Color(0xFF000000),
+    surfaceBright: const Color(0xFF1A1A1A),
+    surfaceContainerLowest: const Color(0xFF000000),
+    surfaceContainerLow: const Color(0xFF0A0A0A),
+    surfaceContainer: const Color(0xFF101010),
+    surfaceContainerHigh: const Color(0xFF161616),
+    surfaceContainerHighest: const Color(0xFF1E1E1E),
+    onSurface: const Color(0xFFF2F2F2),
+    outlineVariant: const Color(0xFF2A2A2A),
   );
 
   static ThemeData _build(ColorScheme scheme) {

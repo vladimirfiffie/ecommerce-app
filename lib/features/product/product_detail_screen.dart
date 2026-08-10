@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../core/layout/breakpoints.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
@@ -128,6 +129,57 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       limit: 8,
     );
 
+    final bool wide = Breakpoints.of(context).isWide;
+
+    // On a wide window the gallery gets its own fixed pane on the left and
+    // the details scroll independently on the right; the phone layout keeps
+    // the collapsing app bar.
+    if (wide) {
+      return Scaffold(
+        body: SafeArea(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(
+                flex: 5,
+                child: Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                      child: ImageGallery(
+                        images: product.images,
+                        heroTag: 'product-${product.id}-catalog',
+                      ),
+                    ),
+                    Positioned(top: 4, left: 4, child: _CircleBackButton()),
+                  ],
+                ),
+              ),
+              const VerticalDivider(width: 1),
+              Expanded(
+                flex: 6,
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: _details(context, product)),
+                    SliverToBoxAdapter(child: ReviewsSection(product: product)),
+                    if (related.isNotEmpty) ...<Widget>[
+                      const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                      const SliverToBoxAdapter(
+                        child: SectionHeader(title: 'You might also like'),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                      SliverToBoxAdapter(child: _relatedRail(related)),
+                    ],
+                    const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: _buyBar(ref, product),
+      );
+    }
+
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
@@ -164,148 +216,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        product.brand.toUpperCase(),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.primary,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (product.isOnSale)
-                        Pill(
-                          label: 'SAVE ${product.discountPercent}%',
-                          background: AppTheme.accent,
-                          foreground: Colors.white,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(product.name, style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: <Widget>[
-                      Flexible(
-                        child: RatingStars(
-                          rating: product.rating,
-                          reviewCount: product.reviewCount,
-                          size: 17,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      _StockLabel(product: product),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: <Widget>[
-                      Text(
-                        formatPrice(product.price),
-                        style: theme.textTheme.headlineMedium,
-                      ),
-                      if (product.isOnSale) ...<Widget>[
-                        const SizedBox(width: 10),
-                        Text(
-                          formatPrice(product.compareAtPrice!),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            decoration: TextDecoration.lineThrough,
-                            decorationColor: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  if (product.sizes.isNotEmpty) ...<Widget>[
-                    SizeSelector(
-                      sizes: product.sizes,
-                      selected: _size,
-                      onSelected: (String value) =>
-                          setState(() => _size = value),
-                    ),
-                    const SizedBox(height: 22),
-                  ],
-                  if (product.colors.isNotEmpty) ...<Widget>[
-                    ColorSelector(
-                      colors: product.colors,
-                      selected: _color,
-                      onSelected: (ProductColor value) =>
-                          setState(() => _color = value),
-                    ),
-                    const SizedBox(height: 22),
-                  ],
-                  Row(
-                    children: <Widget>[
-                      Text('Quantity', style: theme.textTheme.titleSmall),
-                      const Spacer(),
-                      QuantityStepper(
-                        quantity: _quantity,
-                        max: product.stock.clamp(1, 99),
-                        onDecrement: () => setState(
-                          () => _quantity = (_quantity - 1).clamp(1, 99),
-                        ),
-                        onIncrement: () => setState(
-                          () => _quantity = (_quantity + 1).clamp(
-                            1,
-                            product.stock.clamp(1, 99),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 26),
-                  Text('Description', style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 240),
-                    curve: Curves.easeOut,
-                    alignment: Alignment.topCenter,
-                    child: Text(
-                      product.description,
-                      maxLines: _descriptionExpanded ? null : 3,
-                      overflow: _descriptionExpanded
-                          ? TextOverflow.visible
-                          : TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  if (product.description.length > 130)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () => setState(
-                          () => _descriptionExpanded = !_descriptionExpanded,
-                        ),
-                        child: Text(
-                          _descriptionExpanded ? 'Show less' : 'Read more',
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 20),
-                  const _DeliveryPerks(),
-                  const SizedBox(height: 28),
-                ],
-              ),
-            ),
-          ),
+          SliverToBoxAdapter(child: _details(context, product)),
           SliverToBoxAdapter(child: ReviewsSection(product: product)),
           if (related.isNotEmpty) ...<Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 28)),
@@ -313,38 +224,180 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               child: SectionHeader(title: 'You might also like'),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 14)),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 300,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: related.length,
-                  separatorBuilder: (BuildContext c, int i) =>
-                      const SizedBox(width: 16),
-                  itemBuilder: (BuildContext context, int index) => ProductCard(
-                    product: related[index],
-                    width: 168,
-                    heroPrefix: 'related',
-                  ).animate(delay: (index * 40).ms).fadeIn(duration: 240.ms),
-                ),
-              ),
-            ),
+            SliverToBoxAdapter(child: _relatedRail(related)),
           ],
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
-      bottomNavigationBar: HapticShake(
-        key: _shakeKey,
-        haptics: ref.watch(hapticsProvider).isOn(HapticChannel.notifications),
-        child: _BuyBar(
-          product: product,
-          quantity: _quantity,
-          onAdd: () => _addToCart(product),
-        ),
+      bottomNavigationBar: _buyBar(ref, product),
+    );
+  }
+
+  /// Everything below the gallery: title, price, variants, description.
+  Widget _details(BuildContext context, Product product) {
+    final ThemeData theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Text(
+                product.brand.toUpperCase(),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const Spacer(),
+              if (product.isOnSale)
+                Pill(
+                  label: 'SAVE ${product.discountPercent}%',
+                  background: AppTheme.accent,
+                  foreground: Colors.white,
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(product.name, style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 12),
+          Row(
+            children: <Widget>[
+              Flexible(
+                child: RatingStars(
+                  rating: product.rating,
+                  reviewCount: product.reviewCount,
+                  size: 17,
+                ),
+              ),
+              const SizedBox(width: 12),
+              _StockLabel(product: product),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: <Widget>[
+              Text(
+                formatPrice(product.price),
+                style: theme.textTheme.headlineMedium,
+              ),
+              if (product.isOnSale) ...<Widget>[
+                const SizedBox(width: 10),
+                Text(
+                  formatPrice(product.compareAtPrice!),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    decoration: TextDecoration.lineThrough,
+                    decorationColor: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 24),
+          if (product.sizes.isNotEmpty) ...<Widget>[
+            SizeSelector(
+              sizes: product.sizes,
+              selected: _size,
+              onSelected: (String value) => setState(() => _size = value),
+            ),
+            const SizedBox(height: 22),
+          ],
+          if (product.colors.isNotEmpty) ...<Widget>[
+            ColorSelector(
+              colors: product.colors,
+              selected: _color,
+              onSelected: (ProductColor value) =>
+                  setState(() => _color = value),
+            ),
+            const SizedBox(height: 22),
+          ],
+          Row(
+            children: <Widget>[
+              Text('Quantity', style: theme.textTheme.titleSmall),
+              const Spacer(),
+              QuantityStepper(
+                quantity: _quantity,
+                max: product.stock.clamp(1, 99),
+                onDecrement: () =>
+                    setState(() => _quantity = (_quantity - 1).clamp(1, 99)),
+                onIncrement: () => setState(
+                  () => _quantity = (_quantity + 1).clamp(
+                    1,
+                    product.stock.clamp(1, 99),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 26),
+          Text('Description', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeOut,
+            alignment: Alignment.topCenter,
+            child: Text(
+              product.description,
+              maxLines: _descriptionExpanded ? null : 3,
+              overflow: _descriptionExpanded
+                  ? TextOverflow.visible
+                  : TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          if (product.description.length > 130)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () => setState(
+                  () => _descriptionExpanded = !_descriptionExpanded,
+                ),
+                child: Text(_descriptionExpanded ? 'Show less' : 'Read more'),
+              ),
+            ),
+          const SizedBox(height: 20),
+          const _DeliveryPerks(),
+          const SizedBox(height: 28),
+        ],
       ),
     );
   }
+
+  Widget _relatedRail(List<Product> related) => SizedBox(
+    height: 300,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      itemCount: related.length,
+      separatorBuilder: (BuildContext c, int i) => const SizedBox(width: 16),
+      itemBuilder: (BuildContext context, int index) => ProductCard(
+        product: related[index],
+        width: 168,
+        heroPrefix: 'related',
+      ).animate(delay: (index * 40).ms).fadeIn(duration: 240.ms),
+    ),
+  );
+
+  Widget _buyBar(WidgetRef ref, Product product) => HapticShake(
+    key: _shakeKey,
+    haptics: ref.watch(hapticsProvider).isOn(HapticChannel.notifications),
+    child: _BuyBar(
+      product: product,
+      quantity: _quantity,
+      onAdd: () => _addToCart(product),
+    ),
+  );
 }
 
 /// Back chevron on a translucent disc, legible over product photography.
