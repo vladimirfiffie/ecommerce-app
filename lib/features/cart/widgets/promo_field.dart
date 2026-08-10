@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/theme/app_theme.dart';
+import '../../../state/cart_provider.dart';
+
+/// Promo code entry. Applied codes collapse into a removable row.
+class PromoField extends ConsumerStatefulWidget {
+  const PromoField({super.key});
+
+  @override
+  ConsumerState<PromoField> createState() => _PromoFieldState();
+}
+
+class _PromoFieldState extends ConsumerState<PromoField> {
+  final TextEditingController _controller = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _apply() {
+    final double subtotal = ref.read(cartSummaryProvider).subtotal;
+    final String? error = ref
+        .read(appliedPromoProvider.notifier)
+        .apply(_controller.text, subtotal);
+    setState(() => _error = error);
+    if (error == null) {
+      _controller.clear();
+      FocusScope.of(context).unfocus();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Promo? applied = ref.watch(appliedPromoProvider);
+
+    if (applied != null) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+        decoration: BoxDecoration(
+          color: AppTheme.success.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          border: Border.all(color: AppTheme.success.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          children: <Widget>[
+            const Icon(
+              Icons.local_offer_rounded,
+              size: 18,
+              color: AppTheme.success,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(applied.code, style: theme.textTheme.titleSmall),
+                  Text(
+                    applied.description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              tooltip: 'Remove code',
+              onPressed: () {
+                ref.read(appliedPromoProvider.notifier).clear();
+                setState(() => _error = null);
+              },
+              icon: const Icon(Icons.close_rounded, size: 18),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                textCapitalization: TextCapitalization.characters,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _apply(),
+                decoration: InputDecoration(
+                  hintText: 'Promo code',
+                  prefixIcon: const Icon(Icons.local_offer_outlined, size: 20),
+                  errorText: _error,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            // The themed minimumSize is `Size.fromHeight(54)`, i.e. infinite
+            // width — inside a Row that has to be constrained explicitly.
+            SizedBox(
+              height: 54,
+              width: 96,
+              child: OutlinedButton(
+                onPressed: _apply,
+                child: const Text('Apply'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: <Widget>[
+            for (final Promo promo in kPromos)
+              ActionChip(
+                label: Text(promo.code),
+                avatar: const Icon(Icons.bolt_rounded, size: 15),
+                onPressed: () {
+                  _controller.text = promo.code;
+                  _apply();
+                },
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
