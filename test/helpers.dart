@@ -2,6 +2,7 @@ import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +11,35 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Keeps tests hermetic: no font downloads, no HTTP.
 void configureTestEnvironment() {
   GoogleFonts.config.allowRuntimeFetching = false;
+}
+
+/// haptic_kit's method channel, as declared by the package.
+const MethodChannel _hapticChannel = MethodChannel('dev.erykkruk/haptic_kit');
+
+/// Answers haptic_kit's platform calls so tests don't hit a missing plugin.
+///
+/// The test binding reports Android, so the app takes its real haptic paths;
+/// without a stub every tick would raise `PlatformVibrationException` from an
+/// unawaited future inside the package's own widgets.
+void stubHaptics() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(_hapticChannel, (MethodCall call) async {
+        if (call.method == 'capabilities.query') {
+          return <Object?, Object?>{
+            'hasVibrator': true,
+            'hasAmplitudeControl': true,
+            'supportsCustomPatterns': true,
+            'supportsPredefinedEffects': true,
+            'supportsImpactFeedback': true,
+          };
+        }
+        return null;
+      });
+  addTearDown(
+    () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_hapticChannel, null),
+  );
 }
 
 /// Gives the test a phone-shaped viewport (360×800 logical).

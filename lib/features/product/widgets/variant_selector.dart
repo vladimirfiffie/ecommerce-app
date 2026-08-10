@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/product.dart';
+import '../../../state/haptics_provider.dart';
 
 /// Size chips. Nothing is preselected — the shopper has to choose, which is
 /// what the add-to-bag validation checks for.
-class SizeSelector extends StatelessWidget {
+class SizeSelector extends ConsumerWidget {
   const SizeSelector({
     required this.sizes,
     required this.selected,
@@ -18,7 +21,7 @@ class SizeSelector extends StatelessWidget {
   final ValueChanged<String> onSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
 
     return Column(
@@ -49,7 +52,7 @@ class SizeSelector extends StatelessWidget {
                 label: size,
                 selected: size == selected,
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  unawaited(ref.read(hapticsProvider).selection());
                   onSelected(size);
                 },
               ),
@@ -101,7 +104,7 @@ class _SizeChip extends StatelessWidget {
 }
 
 /// Colour swatches with a ring on the active one.
-class ColorSelector extends StatelessWidget {
+class ColorSelector extends ConsumerWidget {
   const ColorSelector({
     required this.colors,
     required this.selected,
@@ -114,7 +117,7 @@ class ColorSelector extends StatelessWidget {
   final ValueChanged<ProductColor> onSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
 
     return Column(
@@ -147,7 +150,7 @@ class ColorSelector extends StatelessWidget {
                   button: true,
                   child: GestureDetector(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      unawaited(ref.read(hapticsProvider).selection());
                       onSelected(color);
                     },
                     child: AnimatedContainer(

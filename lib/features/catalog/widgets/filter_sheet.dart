@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../../state/catalog_filter_provider.dart';
+import '../../../shared/widgets/haptic_controls.dart';
 
 /// Opens the filter & sort bottom sheet.
 Future<void> showFilterSheet(BuildContext context) =>
@@ -119,8 +120,9 @@ class FilterSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
-                Slider(
+                NovaSlider(
                   value: (filter.maxPrice ?? ceiling).clamp(0, ceiling),
+                  min: 0,
                   max: ceiling,
                   divisions: 40,
                   label: filter.maxPrice == null

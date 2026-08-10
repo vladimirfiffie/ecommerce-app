@@ -10,6 +10,9 @@ import '../../state/catalog_filter_provider.dart';
 import '../../state/favorites_provider.dart';
 import '../../state/orders_provider.dart';
 import '../../state/settings_provider.dart';
+import '../../state/haptics_provider.dart';
+import '../../core/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -22,6 +25,13 @@ class SettingsScreen extends ConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final AppSettings settings = ref.watch(settingsProvider);
     final SettingsNotifier notifier = ref.read(settingsProvider.notifier);
+    final HapticSettings haptics = ref.watch(hapticSettingsProvider);
+    final String hapticSummary = !HapticService.platformSupported
+        ? 'Not available on this platform'
+        : !haptics.enabled
+        ? 'Off'
+        : '${haptics.intensity.label} · '
+              '${haptics.channels.length} of ${HapticChannel.values.length} on';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -70,6 +80,17 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: const Text('How the Shop tab lays out results'),
             value: settings.gridView,
             onChanged: notifier.setGridView,
+          ),
+          const SizedBox(height: 18),
+          Text('Feedback', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 6),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.vibration_rounded),
+            title: Text('Haptics', style: theme.textTheme.titleSmall),
+            subtitle: Text(hapticSummary, style: theme.textTheme.bodySmall),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(Routes.haptics),
           ),
           const SizedBox(height: 26),
           Text('Your data', style: theme.textTheme.titleMedium),

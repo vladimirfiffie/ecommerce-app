@@ -9,15 +9,34 @@ import '../../core/utils/formatters.dart';
 import '../../data/models/order.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../state/orders_provider.dart';
+import '../../state/haptics_provider.dart';
+import 'dart:async';
 
 /// Success screen shown straight after an order is placed.
-class OrderConfirmationScreen extends ConsumerWidget {
+class OrderConfirmationScreen extends ConsumerStatefulWidget {
   const OrderConfirmationScreen({required this.orderId, super.key});
 
   final String orderId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OrderConfirmationScreen> createState() =>
+      _OrderConfirmationScreenState();
+}
+
+class _OrderConfirmationScreenState
+    extends ConsumerState<OrderConfirmationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Celebrate once the screen is actually up.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(ref.read(hapticsProvider).doubleTap());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String orderId = widget.orderId;
     final ThemeData theme = Theme.of(context);
     final Order? order = ref.watch(orderByIdProvider(orderId));
 

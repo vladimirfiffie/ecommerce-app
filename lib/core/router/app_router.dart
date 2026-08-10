@@ -7,6 +7,7 @@ import '../../features/checkout/checkout_screen.dart';
 import '../../features/checkout/order_confirmation_screen.dart';
 import '../../features/favorites/favorites_screen.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/profile/haptics_settings_screen.dart';
 import '../../features/orders/order_detail_screen.dart';
 import '../../features/orders/orders_screen.dart';
 import '../../features/product/product_detail_screen.dart';
@@ -25,6 +26,7 @@ abstract final class Routes {
 
   static const String search = '/search';
   static const String settings = '/settings';
+  static const String haptics = '/settings/haptics';
   static const String orders = '/orders';
 
   static String product(String id) => '/product/$id';
@@ -113,6 +115,14 @@ GoRouter createRouter() => GoRouter(
       parentNavigatorKey: _rootKey,
       builder: (BuildContext context, GoRouterState state) =>
           const SettingsScreen(),
+      routes: <RouteBase>[
+        GoRoute(
+          path: 'haptics',
+          parentNavigatorKey: _rootKey,
+          builder: (BuildContext context, GoRouterState state) =>
+              const HapticsSettingsScreen(),
+        ),
+      ],
     ),
     GoRoute(
       path: Routes.orders,

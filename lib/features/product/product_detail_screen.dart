@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +24,8 @@ import '../../state/catalog_filter_provider.dart';
 import 'widgets/image_gallery.dart';
 import 'widgets/reviews_section.dart';
 import 'widgets/variant_selector.dart';
+import '../../state/haptics_provider.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({required this.productId, super.key});
@@ -37,6 +38,9 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+  /// Wiggles the buy bar when a required variant hasn't been chosen.
+  final GlobalKey<HapticShakeState> _shakeKey = GlobalKey<HapticShakeState>();
+
   String? _size;
   ProductColor? _color;
   int _quantity = 1;
@@ -64,10 +68,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
 
     // Fire-and-forget: haptics must never gate (or fail) the cart write.
-    unawaited(HapticFeedback.mediumImpact());
+    unawaited(ref.read(hapticsProvider).impact(HapticImpactStyle.medium));
     await ref
         .read(cartProvider.notifier)
         .add(product, size: _size, color: _color, quantity: _quantity);
+    unawaited(
+      ref.read(hapticsProvider).notification(HapticNotificationStyle.success),
+    );
 
     if (!mounted) return;
     ScaffoldMessenger.of(context)
@@ -85,7 +92,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   void _nudge(String message) {
-    unawaited(HapticFeedback.lightImpact());
+    unawaited(
+      ref.read(hapticsProvider).notification(HapticNotificationStyle.warning),
+    );
+    _shakeKey.currentState?.shake();
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(SnackBar(content: Text(message)));
@@ -324,10 +334,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
-      bottomNavigationBar: _BuyBar(
-        product: product,
-        quantity: _quantity,
-        onAdd: () => _addToCart(product),
+      bottomNavigationBar: HapticShake(
+        key: _shakeKey,
+        haptics: ref.watch(hapticsProvider).isOn(HapticChannel.notifications),
+        child: _BuyBar(
+          product: product,
+          quantity: _quantity,
+          onAdd: () => _addToCart(product),
+        ),
       ),
     );
   }

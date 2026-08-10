@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,6 +17,8 @@ import '../../state/cart_provider.dart';
 import '../../state/orders_provider.dart';
 import '../cart/widgets/order_summary.dart';
 import 'widgets/address_sheet.dart';
+import '../../state/haptics_provider.dart';
+import '../../shared/widgets/haptic_controls.dart';
 
 /// Three-step checkout: shipping → payment → review.
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -39,7 +40,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
 
     setState(() => _placing = true);
-    unawaited(HapticFeedback.mediumImpact());
+    unawaited(ref.read(hapticsProvider).chargeUp());
     // A beat of latency so the button's progress state is visible; a real
     // backend call would sit here.
     await Future<void>.delayed(const Duration(milliseconds: 900));
@@ -50,6 +51,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           address: address,
           payment: ref.read(selectedPaymentProvider),
         );
+    unawaited(ref.read(hapticsProvider).success());
 
     if (!mounted) return;
     setState(() => _placing = false);
@@ -125,24 +127,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
                   ),
                 Expanded(
-                  child: FilledButton(
-                    onPressed: _placing
-                        ? null
-                        : _step < 2
-                        ? () => setState(() => _step += 1)
-                        : _placeOrder,
-                    child: _placing
-                        ? const SizedBox(
+                  child: _placing
+                      ? const FilledButton(
+                          onPressed: null,
+                          child: SizedBox(
                             height: 22,
                             width: 22,
                             child: CircularProgressIndicator(strokeWidth: 2.4),
-                          )
-                        : Text(
-                            _step < 2
-                                ? 'Continue'
-                                : 'Pay ${formatPrice(summary.total)}',
                           ),
-                  ),
+                        )
+                      : _step < 2
+                      ? FilledButton(
+                          onPressed: () => setState(() => _step += 1),
+                          child: const Text('Continue'),
+                        )
+                      // The last step is the irreversible one, so it asks for
+                      // a deliberate gesture rather than a single tap.
+                      : NovaSlideToConfirm(
+                          label: 'Slide to pay ${formatPrice(summary.total)}',
+                          fallbackLabel: 'Pay ${formatPrice(summary.total)}',
+                          onConfirmed: _placeOrder,
+                        ),
                 ),
               ],
             ),

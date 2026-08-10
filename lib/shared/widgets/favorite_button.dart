@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/favorites_provider.dart';
+import '../../state/haptics_provider.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 /// Heart toggle with a pop animation, wired straight to the wishlist.
 class FavoriteButton extends ConsumerStatefulWidget {
@@ -58,7 +59,7 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton>
         .read(favoritesProvider.notifier)
         .toggle(widget.productId);
     if (added) {
-      unawaited(HapticFeedback.selectionClick());
+      unawaited(ref.read(hapticsProvider).impact(HapticImpactStyle.light));
       _controller.forward(from: 0);
     }
   }

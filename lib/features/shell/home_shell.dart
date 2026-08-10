@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../state/cart_provider.dart';
 import '../../state/favorites_provider.dart';
+import '../../state/haptics_provider.dart';
 
 /// Bottom-nav scaffold hosting the five root tabs.
 ///
@@ -15,8 +17,8 @@ class HomeShell extends ConsumerWidget {
 
   final StatefulNavigationShell shell;
 
-  void _onTap(int index) {
-    HapticFeedback.selectionClick();
+  void _onTap(WidgetRef ref, int index) {
+    unawaited(ref.read(hapticsProvider).selection());
     // Tapping the active tab pops it back to its root.
     shell.goBranch(index, initialLocation: index == shell.currentIndex);
   }
@@ -30,7 +32,7 @@ class HomeShell extends ConsumerWidget {
       body: shell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: shell.currentIndex,
-        onDestinationSelected: _onTap,
+        onDestinationSelected: (int i) => _onTap(ref, i),
         destinations: <Widget>[
           const NavigationDestination(
             icon: Icon(Icons.home_outlined),

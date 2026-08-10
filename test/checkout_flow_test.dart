@@ -36,6 +36,7 @@ void main() {
 
   Future<ProviderContainer> pumpApp(WidgetTester tester) async {
     useMobileSurface(tester);
+    stubHaptics();
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProviderContainer container = ProviderContainer(
@@ -99,7 +100,12 @@ void main() {
     await settle(tester);
 
     expect(find.text('Review your order'), findsOneWidget);
-    await tester.tap(find.textContaining('Pay '));
+
+    // The final step is a slide gesture, not a tap: drag the handle (the
+    // GestureDetector lives on the handle, not the track) past the 98% mark.
+    expect(find.textContaining('Slide to pay'), findsOneWidget);
+    await tester.drag(find.byIcon(Icons.arrow_forward), const Offset(500, 0));
+    await tester.pump();
     // The placing state holds for ~900ms before the order lands.
     await tester.pump(const Duration(milliseconds: 1200));
     await settle(tester);
@@ -118,6 +124,7 @@ void main() {
     WidgetTester tester,
   ) async {
     useMobileSurface(tester);
+    stubHaptics();
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final Catalog sized = Catalog(

@@ -1,0 +1,310 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haptic_kit/haptic_kit.dart';
+
+import '../../core/theme/app_theme.dart';
+import '../../state/haptics_provider.dart';
+
+/// Adaptive wrappers around `haptic_kit`'s widgets.
+///
+/// Several of them ([HapticToggle], [HapticSlider], [HapticStepper],
+/// [HapticRating], [SlideToConfirm], [PressAndHoldToConfirm]) fire haptics
+/// internally with no way to switch that off, and they call into a plugin that
+/// only exists on Android and iOS. Each wrapper below therefore renders the
+/// haptic version only when the relevant channel is live, and a plain Material
+/// equivalent otherwise — so the settings screen's master switch actually
+/// silences the app instead of muting only half of it.
+
+/// Switch that ticks on flip.
+class NovaToggle extends ConsumerWidget {
+  const NovaToggle({required this.value, required this.onChanged, super.key});
+
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final HapticService haptics = ref.watch(hapticsProvider);
+    if (!haptics.isOn(HapticChannel.selection) || onChanged == null) {
+      return Switch.adaptive(value: value, onChanged: onChanged);
+    }
+    return HapticToggle(
+      value: value,
+      onChanged: onChanged,
+      activeColor: Theme.of(context).colorScheme.primary,
+    );
+  }
+}
+
+/// Slider that ticks as it crosses detents.
+class NovaSlider extends ConsumerWidget {
+  const NovaSlider({
+    required this.value,
+    required this.onChanged,
+    required this.min,
+    required this.max,
+    super.key,
+    this.divisions,
+    this.label,
+  });
+
+  final double value;
+  final ValueChanged<double> onChanged;
+  final double min;
+  final double max;
+  final int? divisions;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final HapticService haptics = ref.watch(hapticsProvider);
+    final double safeValue = value.clamp(min, max);
+
+    if (!haptics.isOn(HapticChannel.selection)) {
+      return Slider(
+        value: safeValue,
+        min: min,
+        max: max,
+        divisions: divisions,
+        label: label,
+        onChanged: onChanged,
+      );
+    }
+    return HapticSlider(
+      value: safeValue,
+      min: min,
+      max: max,
+      divisions: divisions,
+      label: label,
+      activeColor: Theme.of(context).colorScheme.primary,
+      tickStyle: haptics.scale(HapticImpactStyle.light),
+      endTickStyle: haptics.scale(HapticImpactStyle.medium),
+      onChanged: onChanged,
+    );
+  }
+}
+
+/// Star rating with a cascading fill.
+class NovaRating extends ConsumerWidget {
+  const NovaRating({
+    required this.value,
+    required this.onChanged,
+    super.key,
+    this.starCount = 5,
+    this.size = 36,
+  });
+
+  final int value;
+  final ValueChanged<int> onChanged;
+  final int starCount;
+  final double size;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final HapticService haptics = ref.watch(hapticsProvider);
+
+    if (!haptics.isOn(HapticChannel.selection)) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          for (int i = 1; i <= starCount; i++)
+            IconButton(
+              onPressed: () => onChanged(i),
+              iconSize: size,
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              constraints: const BoxConstraints(),
+              tooltip: '$i star${i == 1 ? '' : 's'}',
+              icon: Icon(
+                i <= value ? Icons.star_rounded : Icons.star_outline_rounded,
+                color: i <= value
+                    ? const Color(0xFFF5A623)
+                    : theme.colorScheme.outlineVariant,
+              ),
+            ),
+        ],
+      );
+    }
+    return HapticRating(
+      value: value,
+      starCount: starCount,
+      size: size,
+      onChanged: onChanged,
+      inactiveColor: theme.colorScheme.outlineVariant,
+    );
+  }
+}
+
+/// Slide-to-confirm pill, falling back to a plain button.
+class NovaSlideToConfirm extends ConsumerWidget {
+  const NovaSlideToConfirm({
+    required this.label,
+    required this.fallbackLabel,
+    required this.onConfirmed,
+    super.key,
+  });
+
+  final String label;
+
+  /// Shown on the plain button when sliding isn't available.
+  final String fallbackLabel;
+  final VoidCallback onConfirmed;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final HapticService haptics = ref.watch(hapticsProvider);
+    if (!haptics.isOn(HapticChannel.buttons)) {
+      return FilledButton.icon(
+        onPressed: onConfirmed,
+        icon: const Icon(Icons.lock_outline_rounded, size: 18),
+        label: Text(fallbackLabel),
+      );
+    }
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return SlideToConfirm(
+      label: label,
+      onConfirmed: onConfirmed,
+      trackColor: scheme.primaryContainer,
+      handleColor: scheme.primary,
+      textColor: scheme.onPrimaryContainer,
+    );
+  }
+}
+
+/// Hold-to-confirm target for destructive actions. Without haptics it becomes
+/// a normal button — the caller still confirms via dialog either way.
+class NovaHoldToConfirm extends ConsumerWidget {
+  const NovaHoldToConfirm({
+    required this.onConfirm,
+    required this.label,
+    required this.icon,
+    super.key,
+    this.holdDuration = const Duration(milliseconds: 1400),
+    this.destructive = false,
+  });
+
+  final VoidCallback onConfirm;
+  final String label;
+  final IconData icon;
+  final Duration holdDuration;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final HapticService haptics = ref.watch(hapticsProvider);
+    final Color color = destructive
+        ? theme.colorScheme.error
+        : theme.colorScheme.primary;
+
+    final Widget face = Container(
+      height: 92,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(icon, color: color),
+          const SizedBox(height: 6),
+          Text(
+            haptics.isOn(HapticChannel.buttons) ? 'Hold to $label' : label,
+            style: theme.textTheme.titleSmall?.copyWith(color: color),
+          ),
+        ],
+      ),
+    );
+
+    if (!haptics.isOn(HapticChannel.buttons)) {
+      return InkWell(
+        onTap: onConfirm,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        child: face,
+      );
+    }
+    return PressAndHoldToConfirm(
+      onConfirm: onConfirm,
+      holdDuration: holdDuration,
+      ringColor: color,
+      child: face,
+    );
+  }
+}
+
+/// −/+ counter that bounces and ticks.
+class NovaStepper extends ConsumerWidget {
+  const NovaStepper({
+    required this.value,
+    required this.onChanged,
+    super.key,
+    this.min = 0,
+    this.max = 99,
+  });
+
+  final int value;
+  final ValueChanged<int> onChanged;
+  final int min;
+  final int max;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final HapticService haptics = ref.watch(hapticsProvider);
+    if (!haptics.isOn(HapticChannel.selection)) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          IconButton.filledTonal(
+            onPressed: value > min ? () => onChanged(value - 1) : null,
+            icon: const Icon(Icons.remove_rounded),
+          ),
+          SizedBox(
+            width: 44,
+            child: Text(
+              '$value',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          IconButton.filledTonal(
+            onPressed: value < max ? () => onChanged(value + 1) : null,
+            icon: const Icon(Icons.add_rounded),
+          ),
+        ],
+      );
+    }
+    return HapticStepper(
+      value: value,
+      min: min,
+      max: max,
+      onChanged: onChanged,
+    );
+  }
+}
+
+/// Tap wrapper with a squash-and-settle bounce.
+///
+/// [HapticBounce] takes a `haptics` flag, so this only has to forward the
+/// setting rather than swap the widget out.
+class NovaBounce extends ConsumerWidget {
+  const NovaBounce({
+    required this.child,
+    super.key,
+    this.onTap,
+    this.bounceOnRelease = true,
+  });
+
+  final Widget child;
+  final VoidCallback? onTap;
+  final bool bounceOnRelease;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => HapticBounce(
+    onTap: onTap,
+    bounceOnRelease: bounceOnRelease,
+    haptics: ref.watch(hapticsProvider).isOn(HapticChannel.buttons),
+    child: child,
+  );
+}

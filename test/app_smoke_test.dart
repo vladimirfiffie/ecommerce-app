@@ -13,6 +13,7 @@ import 'helpers.dart';
 
 void main() {
   setUpAll(configureTestEnvironment);
+  setUp(stubHaptics);
 
   final Catalog catalog = Catalog(
     categories: const <Category>[
