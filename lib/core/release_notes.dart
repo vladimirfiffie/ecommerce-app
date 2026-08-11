@@ -30,6 +30,33 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.4.1',
+    headline: 'Clearer warnings',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'warning_amber_rounded',
+        'Deleting looks like deleting',
+        'Anything that removes, cancels or signs you out is red now, and '
+            'asks first.',
+      ),
+      ReleaseHighlight(
+        'assignment_return_outlined',
+        'Cancelled orders say so',
+        'No more delivery estimate on an order that isn’t coming.',
+      ),
+      ReleaseHighlight(
+        'photo_library_outlined',
+        'See what you bought',
+        'The confirmation screen shows the items, not just a total.',
+      ),
+      ReleaseHighlight(
+        'tune_rounded',
+        'Tidier Profile',
+        'Orders, addresses and cards each live in one place instead of two.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.4.0',
     headline: 'A real shop, and room to breathe',
     highlights: <ReleaseHighlight>[

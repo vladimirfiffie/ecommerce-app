@@ -117,6 +117,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
           'It will be removed from ${widget.product.name}. You can '
           'always write another.',
       confirmLabel: 'Delete',
+      cancelLabel: 'Keep review',
     );
     if (!yes || !mounted) return;
 
@@ -151,10 +152,17 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Back'),
+            child: const Text('Keep editing'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
+            // Matches DangerButton's dialog sizing; the theme's 54px
+            // minimum is for page buttons, not dialog actions.
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(64, 40),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
             child: Text(confirmLabel),
           ),
         ],

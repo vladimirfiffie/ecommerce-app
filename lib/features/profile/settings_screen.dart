@@ -332,7 +332,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Version 0.4.0 · prerelease',
+                'Version 0.4.1 · prerelease',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

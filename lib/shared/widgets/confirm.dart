@@ -3,10 +3,22 @@ import 'package:flutter/material.dart';
 /// A filled button in the error colour, for the action that deletes,
 /// cancels, or otherwise can't be taken back.
 class DangerButton extends StatelessWidget {
-  const DangerButton({required this.onPressed, required this.label, super.key});
+  const DangerButton({
+    required this.onPressed,
+    required this.label,
+    super.key,
+    this.dense = false,
+  });
 
   final VoidCallback? onPressed;
   final String label;
+
+  /// Sized for a dialog's action row rather than a page.
+  ///
+  /// The app theme gives every filled button a 54px minimum height, which is
+  /// right for a full-width call to action and far too heavy sitting next to
+  /// a plain "Cancel" in an AlertDialog.
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +28,11 @@ class DangerButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: theme.colorScheme.error,
         foregroundColor: theme.colorScheme.onError,
+        minimumSize: dense ? const Size(64, 40) : null,
+        padding: dense
+            ? const EdgeInsets.symmetric(horizontal: 18, vertical: 8)
+            : null,
+        textStyle: dense ? theme.textTheme.labelLarge : null,
       ),
       child: Text(label),
     );
@@ -36,7 +53,7 @@ Future<bool> confirmDestructive(
   required String title,
   required String message,
   required String confirmLabel,
-  String cancelLabel = 'Keep',
+  String cancelLabel = 'Cancel',
 }) async {
   final bool? yes = await showDialog<bool>(
     context: context,
@@ -49,6 +66,7 @@ Future<bool> confirmDestructive(
           child: Text(cancelLabel),
         ),
         DangerButton(
+          dense: true,
           onPressed: () => Navigator.of(context).pop(true),
           label: confirmLabel,
         ),

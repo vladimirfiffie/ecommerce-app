@@ -83,6 +83,7 @@ class PaymentMethodsScreen extends ConsumerWidget {
       title: 'Remove card?',
       message: '${card.label} will be removed from this device.',
       confirmLabel: 'Remove',
+      cancelLabel: 'Keep card',
     );
     if (yes) {
       await ref.read(paymentCardsProvider.notifier).remove(card.id);

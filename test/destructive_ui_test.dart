@@ -3,6 +3,7 @@ import 'package:ecommerce_app/features/orders/orders_screen.dart';
 import 'package:ecommerce_app/shared/widgets/confirm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ecommerce_app/core/theme/app_theme.dart';
 
 void main() {
   ColorScheme schemeOf(WidgetTester tester, Finder finder) =>
@@ -48,7 +49,82 @@ void main() {
         reason: 'a delete must not look like a save',
       );
       // The way out stays neutral.
-      expect(find.widgetWithText(TextButton, 'Keep'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Cancel'), findsOneWidget);
+    });
+
+    testWidgets('the dialog button is dialog-sized, not page-sized', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          // The real theme is what makes this go wrong: it sets a 54px
+          // minimum height on every filled button, for page CTAs.
+          theme: AppTheme.light(null),
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) => TextButton(
+                onPressed: () => confirmDestructive(
+                  context,
+                  title: 'Remove card?',
+                  message: 'Visa 4242',
+                  confirmLabel: 'Remove',
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final Size confirm = tester.getSize(
+        find.ancestor(
+          of: find.text('Remove'),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      final Size cancel = tester.getSize(
+        find.ancestor(
+          of: find.text('Cancel'),
+          matching: find.byType(TextButton),
+        ),
+      );
+
+      // 48 is the accessible tap-target floor, so that's the target — the
+      // bug was the theme's 54px page-button minimum leaking into dialogs.
+      expect(confirm.height, lessThanOrEqualTo(48));
+      // And it sits level with the plain button beside it rather than
+      // towering over it.
+      expect((confirm.height - cancel.height).abs(), lessThan(12));
+    });
+
+    testWidgets('the way out is named, not a bare "Keep"', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) => TextButton(
+                onPressed: () => confirmDestructive(
+                  context,
+                  title: 'Sign out?',
+                  message: 'Your bag stays on this device.',
+                  confirmLabel: 'Sign out',
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      // "Keep" on its own reads as an instruction with no object.
+      expect(find.text('Keep'), findsNothing);
+      expect(find.text('Cancel'), findsOneWidget);
     });
 
     testWidgets('returns false when dismissed rather than null', (

@@ -9,9 +9,13 @@ import 'dart:io';
 import 'package:ecommerce_app/core/release_notes.dart';
 
 void main(List<String> args) {
+  // Strip the leading v and any prerelease suffix: v0.4.1-beta.1 documents
+  // the same release as 0.4.1. Without this the lookup misses and silently
+  // falls back to the newest notes, which is wrong for a hotfix on an
+  // older version.
   final String? requested = args.isEmpty
       ? null
-      : args.first.replaceFirst(RegExp('^v'), '');
+      : args.first.replaceFirst(RegExp('^v'), '').split('-').first;
 
   final ReleaseNote note = kReleaseNotes.firstWhere(
     (ReleaseNote n) => requested == null || n.version == requested,

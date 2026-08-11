@@ -306,26 +306,14 @@ class _AccountCard extends ConsumerWidget {
   const _AccountCard();
 
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
-    final bool? yes = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text(
-          'Your bag, wishlist and orders stay on this device.',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          DangerButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            label: 'Sign out',
-          ),
-        ],
-      ),
+    final bool yes = await confirmDestructive(
+      context,
+      title: 'Sign out?',
+      message: 'Your bag, wishlist and orders stay on this device.',
+      confirmLabel: 'Sign out',
+      cancelLabel: 'Stay signed in',
     );
-    if (yes ?? false) await ref.read(authProvider.notifier).signOut();
+    if (yes) await ref.read(authProvider.notifier).signOut();
   }
 
   @override
