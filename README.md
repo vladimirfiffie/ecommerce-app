@@ -19,7 +19,7 @@ just Flutter widgets and pub plugins.
 | **Orders** | History with a status tracker that advances over time, reorder |
 | **Saved** | Wishlist with bulk add-to-bag |
 | **Reviews** | Verified buyers can write, edit and delete a review; it pins to the top of the list and folds into the rating average |
-| **Profile** | Light/dark/auto, AMOLED black, Material You, haptics, notifications, biometrics, data reset |
+| **Profile** | Editable name, light/dark/auto, 8 theme presets, AMOLED black, Material You, haptics, notifications, biometrics, data reset |
 
 ### Device integration
 
@@ -30,6 +30,7 @@ just Flutter widgets and pub plugins.
 | **Biometrics** | Opt-in verification before payment, with a capability report and a test prompt |
 | **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
 | **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
+| **Personalization** | Time-aware greeting using your name, and 8 seed-colour presets that Material 3 expands into full light/dark schemes |
 
 Everything the shopper does — bag, wishlist, orders, addresses, search history,
 recently viewed, theme — persists across restarts via `shared_preferences`.
@@ -91,7 +92,7 @@ flutter run -d linux        # desktop
 
 ```bash
 flutter analyze --fatal-infos
-flutter test                # 97 tests
+flutter test                # 111 tests
 ```
 
 Coverage spans cart maths (variant merging, stock caps, promos, shipping

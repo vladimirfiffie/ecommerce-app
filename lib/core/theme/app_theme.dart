@@ -15,15 +15,27 @@ abstract final class AppTheme {
   static const double radiusMd = 18;
   static const double radiusLg = 28;
 
-  static ThemeData light(ColorScheme? dynamicScheme) =>
-      _build(dynamicScheme ?? ColorScheme.fromSeed(seedColor: seed));
+  /// Light theme. [dynamicScheme] wins when the platform supplies one;
+  /// otherwise the scheme is derived from [seedColor] (a preset, or the brand
+  /// seed by default).
+  static ThemeData light(ColorScheme? dynamicScheme, {Color? seedColor}) =>
+      _build(
+        dynamicScheme ?? ColorScheme.fromSeed(seedColor: seedColor ?? seed),
+      );
 
   /// Dark theme. With [amoled] the surfaces collapse to true black so OLED
   /// panels can switch those pixels off entirely.
-  static ThemeData dark(ColorScheme? dynamicScheme, {bool amoled = false}) {
+  static ThemeData dark(
+    ColorScheme? dynamicScheme, {
+    bool amoled = false,
+    Color? seedColor,
+  }) {
     final ColorScheme base =
         dynamicScheme ??
-        ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark);
+        ColorScheme.fromSeed(
+          seedColor: seedColor ?? seed,
+          brightness: Brightness.dark,
+        );
     return _build(amoled ? _toAmoled(base) : base);
   }
 

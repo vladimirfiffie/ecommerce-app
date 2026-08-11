@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/theme/theme_presets.dart';
 import 'app_providers.dart';
 
 @immutable
@@ -11,6 +12,7 @@ class AppSettings {
     this.useDynamicColor = true,
     this.gridView = true,
     this.amoled = false,
+    this.presetId = 'nova',
   });
 
   final ThemeMode themeMode;
@@ -24,16 +26,23 @@ class AppSettings {
   /// Collapse dark-theme surfaces to true black for OLED panels.
   final bool amoled;
 
+  /// Chosen [ThemePreset] id. Ignored while the wallpaper palette is in use.
+  final String presetId;
+
+  ThemePreset get preset => presetById(presetId);
+
   AppSettings copyWith({
     ThemeMode? themeMode,
     bool? useDynamicColor,
     bool? gridView,
     bool? amoled,
+    String? presetId,
   }) => AppSettings(
     themeMode: themeMode ?? this.themeMode,
     useDynamicColor: useDynamicColor ?? this.useDynamicColor,
     gridView: gridView ?? this.gridView,
     amoled: amoled ?? this.amoled,
+    presetId: presetId ?? this.presetId,
   );
 }
 
@@ -42,6 +51,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const String _dynamicKey = 'settings.dynamicColor';
   static const String _gridKey = 'settings.gridView';
   static const String _amoledKey = 'settings.amoled';
+  static const String _presetKey = 'settings.themePreset';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
 
@@ -56,6 +66,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       useDynamicColor: prefs.getBool(_dynamicKey) ?? true,
       gridView: prefs.getBool(_gridKey) ?? true,
       amoled: prefs.getBool(_amoledKey) ?? false,
+      presetId: presetById(prefs.getString(_presetKey)).id,
     );
   }
 
@@ -77,6 +88,11 @@ class SettingsNotifier extends Notifier<AppSettings> {
   Future<void> setAmoled(bool value) async {
     state = state.copyWith(amoled: value);
     await _prefs.setBool(_amoledKey, value);
+  }
+
+  Future<void> setPreset(ThemePreset preset) async {
+    state = state.copyWith(presetId: preset.id);
+    await _prefs.setString(_presetKey, preset.id);
   }
 }
 

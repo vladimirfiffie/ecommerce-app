@@ -10,6 +10,8 @@ import '../../state/cart_provider.dart';
 import '../../state/favorites_provider.dart';
 import '../../state/orders_provider.dart';
 import '../checkout/widgets/address_sheet.dart';
+import 'widgets/edit_name_sheet.dart';
+import '../../state/profile_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -146,64 +148,83 @@ class _ProfileHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
-    final String name =
-        ref.watch(selectedAddressProvider)?.recipient ?? 'Guest shopper';
+    final String name = ref.watch(displayNameProvider);
 
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: <Color>[
-            theme.colorScheme.primaryContainer,
-            theme.colorScheme.primaryContainer.withValues(alpha: 0.55),
-          ],
+    return InkWell(
+      onTap: () => showEditNameSheet(context),
+      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: <Color>[
+              theme.colorScheme.primaryContainer,
+              theme.colorScheme.primaryContainer.withValues(alpha: 0.55),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-      ),
-      child: Row(
-        children: <Widget>[
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: theme.colorScheme.primary,
-            child: Text(
-              name.isEmpty ? '?' : name[0].toUpperCase(),
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.onPrimary,
+        child: Row(
+          children: <Widget>[
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: theme.colorScheme.primary,
+              child: Text(
+                name.isEmpty ? '?' : name[0].toUpperCase(),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  name,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.edit_outlined,
+                        size: 15,
+                        color: theme.colorScheme.onPrimaryContainer.withValues(
+                          alpha: 0.7,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.workspace_premium_rounded,
-                      size: 15,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'Nova member',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                  const SizedBox(height: 2),
+                  Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.workspace_premium_rounded,
+                        size: 15,
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 5),
+                      Text(
+                        'Nova member',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

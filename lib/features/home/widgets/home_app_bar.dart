@@ -5,22 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../state/cart_provider.dart';
+import '../../../state/profile_provider.dart';
 
 /// Greeting + brand mark + a tap-through search field.
 class HomeAppBar extends ConsumerWidget {
   const HomeAppBar({super.key});
 
-  String _greeting() {
-    final int hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final int cartCount = ref.watch(cartCountProvider);
+    final String firstName = ref.watch(firstNameProvider);
 
     return SliverToBoxAdapter(
       child: Padding(
@@ -34,26 +29,30 @@ class HomeAppBar extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        _greeting(),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
                       Row(
                         children: <Widget>[
-                          Text('Nova', style: theme.textTheme.headlineMedium),
-                          const SizedBox(width: 6),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Icon(
-                              Icons.auto_awesome_rounded,
-                              size: 18,
-                              color: theme.colorScheme.primary,
+                          Icon(
+                            Icons.auto_awesome_rounded,
+                            size: 13,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Nova',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.4,
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${greetingFor(DateTime.now())}, $firstName',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.headlineMedium,
                       ),
                     ],
                   ),

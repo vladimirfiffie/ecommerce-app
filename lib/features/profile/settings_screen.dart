@@ -15,6 +15,9 @@ import '../../core/router/app_router.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/biometrics_provider.dart';
 import '../../state/notifications_provider.dart';
+import 'widgets/theme_picker.dart';
+import 'widgets/edit_name_sheet.dart';
+import '../../state/profile_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -40,6 +43,31 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: <Widget>[
+          Text('You', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 6),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.badge_outlined),
+            title: Text('Name', style: theme.textTheme.titleSmall),
+            subtitle: Text(
+              'Nova greets you with this',
+              style: theme.textTheme.bodySmall,
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  ref.watch(displayNameProvider),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded),
+              ],
+            ),
+            onTap: () => showEditNameSheet(context),
+          ),
+          const SizedBox(height: 18),
           Text('Appearance', style: theme.textTheme.titleMedium),
           const SizedBox(height: 14),
           SegmentedButton<ThemeMode>(
@@ -63,6 +91,17 @@ class SettingsScreen extends ConsumerWidget {
             selected: <ThemeMode>{settings.themeMode},
             onSelectionChanged: (Set<ThemeMode> selection) =>
                 notifier.setThemeMode(selection.first),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'Colour',
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ThemePicker(
+            dynamicActive: settings.useDynamicColor && _dynamicColorSupported,
           ),
           const SizedBox(height: 8),
           SwitchListTile.adaptive(

@@ -27,10 +27,14 @@ class NovaApp extends ConsumerWidget {
           title: 'Nova',
           debugShowCheckedModeBanner: false,
           themeMode: settings.themeMode,
-          theme: AppTheme.light(useDynamic ? lightDynamic?.harmonized() : null),
+          theme: AppTheme.light(
+            useDynamic ? lightDynamic?.harmonized() : null,
+            seedColor: settings.preset.seed,
+          ),
           darkTheme: AppTheme.dark(
             useDynamic ? darkDynamic?.harmonized() : null,
             amoled: settings.amoled,
+            seedColor: settings.preset.seed,
           ),
           routerConfig: router,
         );
