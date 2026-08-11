@@ -30,6 +30,18 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.5.0',
+    headline: 'Pull for fresh stock',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'refresh_rounded',
+        'Pull to refresh',
+        'Drag down on the shop, home, saved or search to fetch the latest '
+            'products — with a tick when it lands.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.4.1',
     headline: 'Clearer warnings',
     highlights: <ReleaseHighlight>[
