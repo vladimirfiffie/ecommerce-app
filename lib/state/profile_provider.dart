@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_providers.dart';
+import 'auth_provider.dart';
+import '../data/models/account.dart';
 
 /// The account name the OS knows the user by, when there is one.
 ///
@@ -37,14 +39,26 @@ class DisplayNameNotifier extends Notifier<String> {
 
   @override
   String build() {
+    // A signed-in account is the most authoritative name we have.
+    final Account? account = ref.watch(authProvider).account;
+    if (account != null && account.name.isNotEmpty) return account.name;
+
     final String stored = _prefs.getString(_key)?.trim() ?? '';
     if (stored.isNotEmpty) return stored;
     return systemUserName() ?? '';
   }
 
   /// Blank clears the override, falling back to the OS name if there is one.
+  ///
+  /// When signed in the change is written to the account, so it survives a
+  /// sign-out and back in.
   Future<void> set(String value) async {
     final String trimmed = value.trim();
+    if (ref.read(authProvider).signedIn && trimmed.isNotEmpty) {
+      await ref.read(authProvider.notifier).updateName(trimmed);
+      state = trimmed;
+      return;
+    }
     if (trimmed.isEmpty) {
       await _prefs.remove(_key);
       state = systemUserName() ?? '';

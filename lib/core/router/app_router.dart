@@ -17,6 +17,7 @@ import '../../features/search/search_screen.dart';
 import '../../features/shell/home_shell.dart';
 import '../../features/profile/security_settings_screen.dart';
 import '../../features/profile/notification_settings_screen.dart';
+import '../../features/auth/auth_screen.dart';
 
 /// Route paths, referenced by name everywhere else.
 abstract final class Routes {
@@ -27,6 +28,8 @@ abstract final class Routes {
   static const String profile = '/profile';
 
   static const String search = '/search';
+  static const String signIn = '/signin';
+  static const String signUp = '/signup';
   static const String settings = '/settings';
   static const String haptics = '/settings/haptics';
   static const String security = '/settings/security';
@@ -113,6 +116,18 @@ GoRouter createRouter() => GoRouter(
       parentNavigatorKey: _rootKey,
       builder: (BuildContext context, GoRouterState state) =>
           const SearchScreen(),
+    ),
+    GoRoute(
+      path: Routes.signIn,
+      parentNavigatorKey: _rootKey,
+      builder: (BuildContext context, GoRouterState state) =>
+          const AuthScreen(),
+    ),
+    GoRoute(
+      path: Routes.signUp,
+      parentNavigatorKey: _rootKey,
+      builder: (BuildContext context, GoRouterState state) =>
+          const AuthScreen(startOnSignUp: true),
     ),
     GoRoute(
       path: Routes.settings,

@@ -31,6 +31,7 @@ just Flutter widgets and pub plugins.
 | **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
 | **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
 | **Personalization** | Time-aware greeting using your name, and 8 seed-colour presets that Material 3 expands into full light/dark schemes |
+| **Accounts** | Local sign-up / sign-in with PBKDF2-hashed passwords. Optional — everything works as a guest |
 
 Everything the shopper does — bag, wishlist, orders, addresses, search history,
 recently viewed, theme — persists across restarts via `shared_preferences`.
@@ -48,6 +49,7 @@ recently viewed, theme — persists across restarts via `shared_preferences`.
 - **flutter_local_notifications** + **timezone** — order-status notifications
 - **flutter_animate** — entrance choreography
 - **dynamic_color** — Material You palette on Android 12+
+- **crypto** — PBKDF2-HMAC-SHA256 for local account passwords
 - **google_fonts**, **intl**, **share_plus**, **url_launcher**
 
 ## Where the data comes from
@@ -92,7 +94,7 @@ flutter run -d linux        # desktop
 
 ```bash
 flutter analyze --fatal-infos
-flutter test                # 111 tests
+flutter test                # 137 tests
 ```
 
 Coverage spans cart maths (variant merging, stock caps, promos, shipping

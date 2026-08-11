@@ -155,3 +155,7 @@ Future<ProviderContainer> testContainer({
   addTearDown(container.dispose);
   return container;
 }
+
+/// Override for tests that build a second container over the same store.
+Override sharedPreferencesProviderOverride(SharedPreferences prefs) =>
+    sharedPreferencesProvider.overrideWithValue(prefs);

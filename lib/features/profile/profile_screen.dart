@@ -12,6 +12,8 @@ import '../../state/orders_provider.dart';
 import '../checkout/widgets/address_sheet.dart';
 import 'widgets/edit_name_sheet.dart';
 import '../../state/profile_provider.dart';
+import '../../state/auth_provider.dart';
+import '../../data/models/account.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -33,7 +35,9 @@ class ProfileScreen extends ConsumerWidget {
             Text('Profile', style: theme.textTheme.headlineMedium),
             const SizedBox(height: 22),
             const _ProfileHeader(),
-            const SizedBox(height: 22),
+            const SizedBox(height: 14),
+            const _AccountCard(),
+            const SizedBox(height: 18),
             Row(
               children: <Widget>[
                 Expanded(
@@ -310,6 +314,125 @@ class _Tile extends StatelessWidget {
       subtitle: Text(subtitle, style: theme.textTheme.bodySmall),
       trailing: const Icon(Icons.chevron_right_rounded),
       onTap: onTap,
+    );
+  }
+}
+
+/// Signed-in account summary, or a prompt to sign in / create one.
+class _AccountCard extends ConsumerWidget {
+  const _AccountCard();
+
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final bool? yes = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Sign out?'),
+        content: const Text(
+          'Your bag, wishlist and orders stay on this device.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+    if (yes ?? false) await ref.read(authProvider.notifier).signOut();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final Account? account = ref.watch(authProvider).account;
+
+    if (account == null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.4,
+          ),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'You’re browsing as a guest',
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Everything works without an account — signing in just keeps '
+              'your details together.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => context.push(Routes.signIn),
+                    child: const Text('Sign in'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => context.push(Routes.signUp),
+                    child: const Text('Sign up'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.verified_user_outlined,
+            size: 20,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Signed in', style: theme.textTheme.titleSmall),
+                Text(
+                  account.email,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () => _confirmSignOut(context, ref),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
     );
   }
 }
