@@ -11,6 +11,7 @@ import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
 import '../product/product_detail_screen.dart';
 import '../../core/layout/two_pane.dart';
+import '../../shared/widgets/nova_refresh.dart';
 
 class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
@@ -85,14 +86,16 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                     actionLabel: 'Browse the shop',
                     onAction: () => context.go(Routes.catalog),
                   )
-                : ProductGrid(
-                    products: products,
-                    heroPrefix: 'saved',
-                    padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 32),
-                    selectedId: selected,
-                    onSelect: twoPane
-                        ? (String id) => setState(() => _selectedId = id)
-                        : null,
+                : NovaRefresh(
+                    child: ProductGrid(
+                      products: products,
+                      heroPrefix: 'saved',
+                      padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 32),
+                      selectedId: selected,
+                      onSelect: twoPane
+                          ? (String id) => setState(() => _selectedId = id)
+                          : null,
+                    ),
                   ),
           ),
         ],

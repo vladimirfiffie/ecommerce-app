@@ -18,6 +18,7 @@ import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
 import '../product/product_detail_screen.dart';
 import '../../core/layout/two_pane.dart';
+import '../../shared/widgets/nova_refresh.dart';
 
 /// The full catalog: category strip, refinement bar, grid/list of results.
 ///
@@ -93,13 +94,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                           .clearRefinements()
                     : null,
               ),
-              _ => _Results(
-                products: products,
-                gridView: gridView,
-                selectedId: selected,
-                onSelect: twoPane
-                    ? (String id) => setState(() => _selectedId = id)
-                    : null,
+              _ => NovaRefresh(
+                child: _Results(
+                  products: products,
+                  gridView: gridView,
+                  selectedId: selected,
+                  onSelect: twoPane
+                      ? (String id) => setState(() => _selectedId = id)
+                      : null,
+                ),
               ),
             },
           ),

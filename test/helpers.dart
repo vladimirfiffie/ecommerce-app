@@ -130,8 +130,19 @@ class FakeProductRepository implements ProductRepository {
 
   final Catalog catalog;
 
+  /// How many times the catalog was fetched, so a test can prove that a
+  /// pull-to-refresh actually went back to the source.
+  int loads = 0;
+  int cacheClears = 0;
+
   @override
-  Future<Catalog> loadCatalog() async => catalog;
+  Future<Catalog> loadCatalog() async {
+    loads++;
+    return catalog;
+  }
+
+  @override
+  void clearCache() => cacheClears++;
 }
 
 /// Builds a container wired to in-memory preferences and an optional

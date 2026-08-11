@@ -8,6 +8,13 @@ import '../models/product.dart';
 /// `productRepositoryProvider` — no screen code changes.
 abstract class ProductRepository {
   Future<Catalog> loadCatalog();
+
+  /// Drops any cached copy so the next [loadCatalog] goes to the source.
+  ///
+  /// Without this, pull-to-refresh is a no-op: invalidating the provider
+  /// just re-reads the repository's own cache and returns the same catalog.
+  /// Concrete for the benefit of implementations that never cache.
+  void clearCache() {}
 }
 
 /// The in-memory result of a catalog load.

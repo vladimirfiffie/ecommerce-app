@@ -111,6 +111,9 @@ class DummyJsonProductRepository implements ProductRepository {
   static const int _featuredCount = 12;
 
   @override
+  void clearCache() => _cache = null;
+
+  @override
   Future<Catalog> loadCatalog() async {
     final Catalog? cached = _cache;
     if (cached != null) return cached;

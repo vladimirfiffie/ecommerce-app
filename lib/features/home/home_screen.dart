@@ -18,6 +18,7 @@ import 'widgets/home_app_bar.dart';
 import 'widgets/product_rail.dart';
 import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
+import '../../shared/widgets/nova_refresh.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -29,8 +30,7 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: RefreshIndicator(
-          onRefresh: () async => ref.refresh(catalogProvider.future),
+        child: NovaRefresh(
           child: CustomScrollView(
             slivers: <Widget>[
               const HomeAppBar(),

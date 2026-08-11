@@ -15,6 +15,7 @@ import '../../state/app_providers.dart';
 import '../../state/catalog_filter_provider.dart';
 import '../product/product_detail_screen.dart';
 import '../../core/layout/two_pane.dart';
+import '../../shared/widgets/nova_refresh.dart';
 
 /// Live search over the catalog with recent terms and trending suggestions.
 class SearchScreen extends ConsumerStatefulWidget {
@@ -133,52 +134,56 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 title: 'No results for “$_query”',
                 message: 'Check the spelling, or try a broader term.',
               )
-            : ListView.separated(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: matches.length,
-                separatorBuilder: (BuildContext c, int i) =>
-                    const Divider(height: 1, indent: 84),
-                itemBuilder: (BuildContext context, int index) {
-                  final Product product = matches[index];
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
-                    ),
-                    leading: SizedBox(
-                      width: 52,
-                      height: 52,
-                      child: AppImage(
-                        url: product.thumbnail,
-                        fit: BoxFit.contain,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+            : NovaRefresh(
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: matches.length,
+                  separatorBuilder: (BuildContext c, int i) =>
+                      const Divider(height: 1, indent: 84),
+                  itemBuilder: (BuildContext context, int index) {
+                    final Product product = matches[index];
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
                       ),
-                    ),
-                    title: Text(
-                      product.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall,
-                    ),
-                    subtitle: Text(
-                      '${product.brand}  ·  ${product.subcategory}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: PriceText(product: product, compact: true),
-                    selected: product.id == selected,
-                    onTap: () {
-                      ref
-                          .read(searchHistoryProvider.notifier)
-                          .record(product.name);
-                      if (twoPane) {
-                        setState(() => _selectedId = product.id);
-                      } else {
-                        context.push(Routes.product(product.id));
-                      }
-                    },
-                  );
-                },
+                      leading: SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: AppImage(
+                          url: product.thumbnail,
+                          fit: BoxFit.contain,
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusSm,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        product.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      subtitle: Text(
+                        '${product.brand}  ·  ${product.subcategory}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: PriceText(product: product, compact: true),
+                      selected: product.id == selected,
+                      onTap: () {
+                        ref
+                            .read(searchHistoryProvider.notifier)
+                            .record(product.name);
+                        if (twoPane) {
+                          setState(() => _selectedId = product.id);
+                        } else {
+                          context.push(Routes.product(product.id));
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
       ),
     );
