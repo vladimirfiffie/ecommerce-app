@@ -61,85 +61,91 @@ class _OrderConfirmationScreenState
       },
       child: Scaffold(
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-            child: Column(
-              children: <Widget>[
-                const Spacer(),
-                Container(
-                      width: 108,
-                      height: 108,
+          child: Center(
+            child: ConstrainedBox(
+              // Centred and width-limited rather than stretched: a
+              // confirmation is a short message, not a page of content.
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+                child: Column(
+                  children: <Widget>[
+                    const Spacer(),
+                    Container(
+                          width: 108,
+                          height: 108,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.success.withValues(alpha: 0.14),
+                          ),
+                          child: const Icon(
+                            Icons.check_rounded,
+                            size: 58,
+                            color: AppTheme.success,
+                          ),
+                        )
+                        .animate()
+                        .scale(
+                          duration: 460.ms,
+                          curve: Curves.easeOutBack,
+                          begin: const Offset(0.5, 0.5),
+                        )
+                        .fadeIn(),
+                    const SizedBox(height: 28),
+                    Text(
+                      'Order confirmed',
+                      style: theme.textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
+                    ).animate(delay: 160.ms).fadeIn().moveY(begin: 12, end: 0),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Thanks! We’re getting order ${order.id} ready to ship.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ).animate(delay: 240.ms).fadeIn(),
+                    const SizedBox(height: 32),
+                    Container(
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppTheme.success.withValues(alpha: 0.14),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.45),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        size: 58,
-                        color: AppTheme.success,
+                      child: Column(
+                        children: <Widget>[
+                          _Row(
+                            label: 'Items',
+                            value:
+                                '${order.itemCount} ${order.itemCount == 1 ? 'item' : 'items'}',
+                          ),
+                          _Row(
+                            label: 'Total paid',
+                            value: formatPrice(order.total),
+                          ),
+                          _Row(
+                            label: 'Arrives by',
+                            value: formatDeliveryDate(order.estimatedDelivery),
+                          ),
+                          _Row(label: 'Paid with', value: order.paymentLabel),
+                        ],
                       ),
-                    )
-                    .animate()
-                    .scale(
-                      duration: 460.ms,
-                      curve: Curves.easeOutBack,
-                      begin: const Offset(0.5, 0.5),
-                    )
-                    .fadeIn(),
-                const SizedBox(height: 28),
-                Text(
-                  'Order confirmed',
-                  style: theme.textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ).animate(delay: 160.ms).fadeIn().moveY(begin: 12, end: 0),
-                const SizedBox(height: 10),
-                Text(
-                  'Thanks! We’re getting order ${order.id} ready to ship.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ).animate(delay: 240.ms).fadeIn(),
-                const SizedBox(height: 32),
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.45,
+                    ).animate(delay: 320.ms).fadeIn().moveY(begin: 16, end: 0),
+                    const Spacer(),
+                    FilledButton(
+                      onPressed: () =>
+                          context.pushReplacement(Routes.order(order.id)),
+                      child: const Text('Track this order'),
                     ),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                  ),
-                  child: Column(
-                    children: <Widget>[
-                      _Row(
-                        label: 'Items',
-                        value:
-                            '${order.itemCount} ${order.itemCount == 1 ? 'item' : 'items'}',
-                      ),
-                      _Row(
-                        label: 'Total paid',
-                        value: formatPrice(order.total),
-                      ),
-                      _Row(
-                        label: 'Arrives by',
-                        value: formatDeliveryDate(order.estimatedDelivery),
-                      ),
-                      _Row(label: 'Paid with', value: order.paymentLabel),
-                    ],
-                  ),
-                ).animate(delay: 320.ms).fadeIn().moveY(begin: 16, end: 0),
-                const Spacer(),
-                FilledButton(
-                  onPressed: () =>
-                      context.pushReplacement(Routes.order(order.id)),
-                  child: const Text('Track this order'),
+                    const SizedBox(height: 10),
+                    OutlinedButton(
+                      onPressed: () => context.go(Routes.home),
+                      child: const Text('Keep shopping'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                OutlinedButton(
-                  onPressed: () => context.go(Routes.home),
-                  child: const Text('Keep shopping'),
-                ),
-              ],
+              ),
             ),
           ),
         ),

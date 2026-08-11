@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers.dart';
+import 'package:ecommerce_app/state/favorites_provider.dart';
 
 void main() {
   setUpAll(configureTestEnvironment);
@@ -202,6 +203,104 @@ void main() {
 
       expect(find.byType(ProductDetailScreen), findsNothing);
       expect(find.text('Linen Tee'), findsWidgets);
+    });
+  });
+
+  group('saved', () {
+    testWidgets('a tablet opens the saved item beside the grid', (
+      WidgetTester tester,
+    ) async {
+      final ProviderContainer c = await pumpAt(tester, tablet);
+      await c.read(favoritesProvider.notifier).toggle('tee');
+      await settle(tester);
+
+      await tester.tap(find.text('Saved').last);
+      await settle(tester);
+      expect(
+        find.text('Pick something you saved to see it here.'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Linen Tee').first);
+      await settle(tester);
+      expect(find.byType(ProductDetailScreen), findsOneWidget);
+    });
+  });
+
+  group('search', () {
+    testWidgets('a tablet previews the result in place', (
+      WidgetTester tester,
+    ) async {
+      await pumpAt(tester, tablet);
+      await tester.tap(find.text('Shop').last);
+      await settle(tester);
+      await tester.tap(find.byIcon(Icons.search_rounded).first);
+      await settle(tester);
+
+      await tester.enterText(find.byType(TextField).first, 'Linen');
+      await tester.pump(const Duration(milliseconds: 400));
+      await settle(tester);
+
+      await tester.tap(find.text('Linen Tee').first);
+      await settle(tester);
+
+      expect(find.byType(ProductDetailScreen), findsOneWidget);
+      // The search field is still there — the result opened beside it.
+      expect(find.byType(TextField), findsWidgets);
+    });
+  });
+
+  group('checkout', () {
+    testWidgets('a tablet keeps the total beside the step', (
+      WidgetTester tester,
+    ) async {
+      final ProviderContainer c = await pumpAt(tester, tablet);
+      await c.read(cartProvider.notifier).add(catalog.byId('tee')!);
+      await settle(tester);
+
+      await tester.tap(find.text('Cart').last);
+      await settle(tester);
+      await tester.tap(find.textContaining('Checkout').last);
+      await settle(tester);
+
+      // Step content and the running order summary are both on screen.
+      expect(find.text('Ship to'), findsOneWidget);
+      expect(find.text('Order summary'), findsOneWidget);
+    });
+
+    testWidgets('a phone shows only the step', (WidgetTester tester) async {
+      final ProviderContainer c = await pumpAt(tester, phone);
+      await c.read(cartProvider.notifier).add(catalog.byId('tee')!);
+      await settle(tester);
+
+      await tester.tap(find.text('Cart').last);
+      await settle(tester);
+      await tester.tap(find.textContaining('Checkout').last);
+      await settle(tester);
+
+      expect(find.text('Ship to'), findsOneWidget);
+      expect(find.text('Order summary'), findsNothing);
+    });
+  });
+
+  group('settings', () {
+    testWidgets('a tablet opens a section in the pane', (
+      WidgetTester tester,
+    ) async {
+      await pumpAt(tester, tablet);
+      await tester.tap(find.text('Profile').last);
+      await settle(tester);
+      await tester.tap(find.text('Settings').first);
+      await settle(tester);
+
+      expect(find.text('Choose a section to open it here.'), findsOneWidget);
+
+      await tester.tap(find.text('Addresses').first);
+      await settle(tester);
+
+      // The settings list is still visible beside the opened section.
+      expect(find.text('Appearance'.toUpperCase()), findsOneWidget);
+      expect(find.text('Payment methods'), findsWidgets);
     });
   });
 }

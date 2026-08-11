@@ -5,7 +5,11 @@ import '../../core/theme/app_theme.dart';
 import '../../state/notifications_provider.dart';
 
 class NotificationSettingsScreen extends ConsumerWidget {
-  const NotificationSettingsScreen({super.key});
+  const NotificationSettingsScreen({super.key, this.embedded = false});
+
+  /// Shown inside the settings detail pane, where a back button
+  /// would have nothing to pop.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +34,10 @@ class NotificationSettingsScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
+      appBar: AppBar(
+        title: const Text('Notifications'),
+        automaticallyImplyLeading: !embedded,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: <Widget>[

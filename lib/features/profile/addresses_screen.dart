@@ -8,7 +8,11 @@ import '../../state/addresses_provider.dart';
 import '../checkout/widgets/address_sheet.dart';
 
 class AddressesScreen extends ConsumerWidget {
-  const AddressesScreen({super.key});
+  const AddressesScreen({super.key, this.embedded = false});
+
+  /// Shown inside the settings detail pane, where a back button
+  /// would have nothing to pop.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,7 +21,10 @@ class AddressesScreen extends ConsumerWidget {
     final Address? selected = ref.watch(selectedAddressProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Addresses')),
+      appBar: AppBar(
+        title: const Text('Addresses'),
+        automaticallyImplyLeading: !embedded,
+      ),
       floatingActionButton: addresses.isEmpty
           ? null
           : FloatingActionButton.extended(

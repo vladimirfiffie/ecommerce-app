@@ -13,6 +13,8 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/price_text.dart';
 import '../../state/app_providers.dart';
 import '../../state/catalog_filter_provider.dart';
+import '../product/product_detail_screen.dart';
+import '../../core/layout/two_pane.dart';
 
 /// Live search over the catalog with recent terms and trending suggestions.
 class SearchScreen extends ConsumerStatefulWidget {
@@ -27,6 +29,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final FocusNode _focus = FocusNode();
   Timer? _debounce;
   String _query = '';
+  String? _selectedId;
 
   @override
   void initState() {
@@ -74,6 +77,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               .take(24)
               .toList();
 
+    final bool twoPane = useTwoPane(context);
+    final String? selected =
+        twoPane && matches.any((Product p) => p.id == _selectedId)
+        ? _selectedId
+        : null;
+
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
@@ -107,62 +116,96 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ),
       ),
-      body: q.isEmpty
-          ? _Suggestions(
-              onPick: (String term) {
-                _controller.text = term;
-                setState(() => _query = term);
-              },
-              onSubmit: _submit,
-            )
-          : matches.isEmpty
-          ? EmptyState(
-              icon: Icons.search_off_rounded,
-              title: 'No results for “$_query”',
-              message: 'Check the spelling, or try a broader term.',
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: matches.length,
-              separatorBuilder: (BuildContext c, int i) =>
-                  const Divider(height: 1, indent: 84),
-              itemBuilder: (BuildContext context, int index) {
-                final Product product = matches[index];
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 6,
-                  ),
-                  leading: SizedBox(
-                    width: 52,
-                    height: 52,
-                    child: AppImage(
-                      url: product.thumbnail,
-                      fit: BoxFit.contain,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+      body: _maybeTwoPane(
+        twoPane: twoPane,
+        selected: selected,
+        child: q.isEmpty
+            ? _Suggestions(
+                onPick: (String term) {
+                  _controller.text = term;
+                  setState(() => _query = term);
+                },
+                onSubmit: _submit,
+              )
+            : matches.isEmpty
+            ? EmptyState(
+                icon: Icons.search_off_rounded,
+                title: 'No results for “$_query”',
+                message: 'Check the spelling, or try a broader term.',
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: matches.length,
+                separatorBuilder: (BuildContext c, int i) =>
+                    const Divider(height: 1, indent: 84),
+                itemBuilder: (BuildContext context, int index) {
+                  final Product product = matches[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
                     ),
-                  ),
-                  title: Text(
-                    product.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  subtitle: Text(
-                    '${product.brand}  ·  ${product.subcategory}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: PriceText(product: product, compact: true),
-                  onTap: () {
-                    ref
-                        .read(searchHistoryProvider.notifier)
-                        .record(product.name);
-                    context.push(Routes.product(product.id));
-                  },
-                );
-              },
+                    leading: SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: AppImage(
+                        url: product.thumbnail,
+                        fit: BoxFit.contain,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                      ),
+                    ),
+                    title: Text(
+                      product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    subtitle: Text(
+                      '${product.brand}  ·  ${product.subcategory}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: PriceText(product: product, compact: true),
+                    selected: product.id == selected,
+                    onTap: () {
+                      ref
+                          .read(searchHistoryProvider.notifier)
+                          .record(product.name);
+                      if (twoPane) {
+                        setState(() => _selectedId = product.id);
+                      } else {
+                        context.push(Routes.product(product.id));
+                      }
+                    },
+                  );
+                },
+              ),
+      ),
+    );
+  }
+
+  /// Results alone on a phone; results beside the chosen product on a tablet.
+  Widget _maybeTwoPane({
+    required bool twoPane,
+    required String? selected,
+    required Widget child,
+  }) {
+    if (!twoPane) return child;
+    return TwoPane(
+      list: child,
+      detail: selected == null
+          ? null
+          : DetailPaneSurface(
+              child: ProductDetailScreen(
+                key: ValueKey<String>(selected),
+                productId: selected,
+                embedded: true,
+              ),
             ),
+      placeholder: const TwoPanePlaceholder(
+        icon: Icons.search_rounded,
+        message: 'Pick a result to see it here.',
+      ),
     );
   }
 }

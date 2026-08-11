@@ -26,6 +26,7 @@ import '../profile/payment_methods_screen.dart';
 import '../../data/models/delivery_option.dart';
 import '../../state/payments_provider.dart';
 import '../../data/models/payment_card.dart';
+import '../../core/layout/two_pane.dart';
 
 /// Three-step checkout: shipping → payment → review.
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -127,6 +128,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       );
     }
 
+    final bool twoPane = useTwoPane(context);
+
+    final Widget stepBody = ListView(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      children: <Widget>[
+        switch (_step) {
+          0 => _ShippingStep(
+            address: address,
+            onEdit: () => showAddressSheet(context),
+          ),
+          1 => _PaymentStep(selected: payment),
+          _ => _ReviewStep(items: items, address: address, payment: payment),
+        },
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Checkout'),
@@ -135,19 +152,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           child: _StepIndicator(step: _step),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-        children: <Widget>[
-          switch (_step) {
-            0 => _ShippingStep(
-              address: address,
-              onEdit: () => showAddressSheet(context),
-            ),
-            1 => _PaymentStep(selected: payment),
-            _ => _ReviewStep(items: items, address: address, payment: payment),
-          },
-        ],
-      ),
+      // On a tablet the running total sits alongside the step instead of
+      // being something you scroll to at the end.
+      body: twoPane
+          ? TwoPane(
+              listFlex: 3,
+              detailFlex: 2,
+              list: stepBody,
+              detail: DetailPaneSurface(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                  children: <Widget>[
+                    _BagPreview(items: items),
+                    const SizedBox(height: 20),
+                    const OrderSummary(),
+                  ],
+                ),
+              ),
+            )
+          : stepBody,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainer,
@@ -761,6 +784,61 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Compact list of what's being bought, for the checkout side pane.
+class _BagPreview extends StatelessWidget {
+  const _BagPreview({required this.items});
+
+  final List<CartItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          '${items.length} ${items.length == 1 ? 'item' : 'items'}',
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: 12),
+        for (final CartItem item in items)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: AppImage(
+                    url: item.product.thumbnail,
+                    fit: BoxFit.contain,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    item.product.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '×${item.quantity}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

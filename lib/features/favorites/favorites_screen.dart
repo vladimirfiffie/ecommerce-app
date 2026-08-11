@@ -9,79 +9,113 @@ import '../../state/cart_provider.dart';
 import '../../state/favorites_provider.dart';
 import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
+import '../product/product_detail_screen.dart';
+import '../../core/layout/two_pane.dart';
 
-class FavoritesScreen extends ConsumerWidget {
+class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FavoritesScreen> createState() => _FavoritesScreenState();
+}
+
+class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
+  String? _selectedId;
+
+  @override
+  Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final List<Product> products = ref.watch(favoriteProductsProvider);
     final double gutter = Breakpoints.gutter(Breakpoints.of(context));
+    final bool twoPane = useTwoPane(context);
+    final String? selected =
+        twoPane && products.any((Product p) => p.id == _selectedId)
+        ? _selectedId
+        : null;
 
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: <Widget>[
+    final Widget master = SafeArea(
+      bottom: false,
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 12, 8),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text('Saved', style: theme.textTheme.headlineMedium),
+                ),
+                if (products.isNotEmpty)
+                  TextButton(
+                    onPressed: () =>
+                        ref.read(favoritesProvider.notifier).clear(),
+                    child: const Text('Clear'),
+                  ),
+              ],
+            ),
+          ),
+          if (products.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 12, 8),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: Text('Saved', style: theme.textTheme.headlineMedium),
-                  ),
-                  if (products.isNotEmpty)
-                    TextButton(
-                      onPressed: () =>
-                          ref.read(favoritesProvider.notifier).clear(),
-                      child: const Text('Clear'),
+                    child: Text(
+                      '${products.length} ${products.length == 1 ? 'item' : 'items'}',
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _addAll(context, ref, products),
+                    icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
+                    label: const Text('Add all'),
+                  ),
                 ],
               ),
             ),
-            if (products.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        '${products.length} ${products.length == 1 ? 'item' : 'items'}',
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    TextButton.icon(
-                      onPressed: () => _addAll(context, ref, products),
-                      icon: const Icon(
-                        Icons.add_shopping_cart_rounded,
-                        size: 18,
-                      ),
-                      label: const Text('Add all'),
-                    ),
-                  ],
+          Expanded(
+            child: products.isEmpty
+                ? EmptyState(
+                    icon: Icons.favorite_border_rounded,
+                    title: 'Nothing saved yet',
+                    message:
+                        'Tap the heart on anything you like and it’ll wait for you here.',
+                    actionLabel: 'Browse the shop',
+                    onAction: () => context.go(Routes.catalog),
+                  )
+                : ProductGrid(
+                    products: products,
+                    heroPrefix: 'saved',
+                    padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 32),
+                    selectedId: selected,
+                    onSelect: twoPane
+                        ? (String id) => setState(() => _selectedId = id)
+                        : null,
+                  ),
+          ),
+        ],
+      ),
+    );
+
+    if (!twoPane) return Scaffold(body: master);
+
+    return Scaffold(
+      body: TwoPane(
+        list: master,
+        detail: selected == null
+            ? null
+            : DetailPaneSurface(
+                child: ProductDetailScreen(
+                  key: ValueKey<String>(selected),
+                  productId: selected,
+                  embedded: true,
                 ),
               ),
-            Expanded(
-              child: products.isEmpty
-                  ? EmptyState(
-                      icon: Icons.favorite_border_rounded,
-                      title: 'Nothing saved yet',
-                      message:
-                          'Tap the heart on anything you like and it’ll wait for you here.',
-                      actionLabel: 'Browse the shop',
-                      onAction: () => context.go(Routes.catalog),
-                    )
-                  : ProductGrid(
-                      products: products,
-                      heroPrefix: 'saved',
-                      padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 32),
-                    ),
-            ),
-          ],
+        placeholder: const TwoPanePlaceholder(
+          icon: Icons.favorite_border_rounded,
+          message: 'Pick something you saved to see it here.',
         ),
       ),
     );
