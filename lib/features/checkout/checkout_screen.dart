@@ -22,6 +22,10 @@ import '../../shared/widgets/haptic_controls.dart';
 import '../../state/biometrics_provider.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 import '../../state/notifications_provider.dart';
+import '../profile/payment_methods_screen.dart';
+import '../../data/models/delivery_option.dart';
+import '../../state/payments_provider.dart';
+import '../../data/models/payment_card.dart';
 
 /// Three-step checkout: shipping → payment → review.
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -78,11 +82,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     // backend call would sit here.
     await Future<void>.delayed(const Duration(milliseconds: 900));
 
+    final PaymentCard? card = ref.read(selectedCardProvider);
     final Order order = await ref
         .read(ordersProvider.notifier)
         .placeOrder(
           address: address,
-          payment: ref.read(selectedPaymentProvider),
+          paymentLabel: card?.label ?? 'Card on file',
+          delivery: ref.read(deliveryOptionProvider),
         );
     unawaited(ref.read(hapticsProvider).success());
     unawaited(
@@ -106,7 +112,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final List<CartItem> items = ref.watch(cartItemsProvider);
     final CartSummary summary = ref.watch(cartSummaryProvider);
     final Address? address = ref.watch(selectedAddressProvider);
-    final PaymentMethod payment = ref.watch(selectedPaymentProvider);
+    final PaymentCard? payment = ref.watch(selectedCardProvider);
 
     if (items.isEmpty) {
       return Scaffold(
@@ -309,16 +315,25 @@ class _ShippingStep extends ConsumerWidget {
           label: const Text('Add a new address'),
         ),
         const SizedBox(height: 26),
-        Text('Delivery speed', style: theme.textTheme.titleLarge),
+        Text('Delivery', style: theme.textTheme.titleLarge),
         const SizedBox(height: 14),
-        _SelectableTile(
-          selected: true,
-          onTap: () {},
-          leading: const Icon(Icons.local_shipping_outlined),
-          title: 'Standard  ·  3–5 business days',
-          subtitle:
-              'Arrives by ${formatDeliveryDate(DateTime.now().add(const Duration(days: 4)))}',
-        ),
+        for (final DeliveryOption option in DeliveryOption.values)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _SelectableTile(
+              selected: option == ref.watch(deliveryOptionProvider),
+              onTap: () =>
+                  ref.read(deliveryOptionProvider.notifier).select(option),
+              leading: Icon(option.icon),
+              title: option.price == 0
+                  ? '${option.label}  ·  Free'
+                  : '${option.label}  ·  ${formatPrice(option.price)}',
+              subtitle: option == DeliveryOption.pickup
+                  ? option.blurb
+                  : '${option.blurb} · by '
+                        '${formatDeliveryDate(option.estimatedArrival(DateTime.now()))}',
+            ),
+          ),
       ],
     );
   }
@@ -327,35 +342,74 @@ class _ShippingStep extends ConsumerWidget {
 class _PaymentStep extends ConsumerWidget {
   const _PaymentStep({required this.selected});
 
-  final PaymentMethod selected;
+  final PaymentCard? selected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
+    final List<PaymentCard> cards = ref.watch(paymentCardsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text('Pay with', style: theme.textTheme.titleLarge),
         const SizedBox(height: 14),
-        for (final PaymentMethod method in kPaymentMethods)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _SelectableTile(
-              selected: method.id == selected.id,
-              onTap: () =>
-                  ref.read(selectedPaymentProvider.notifier).select(method),
-              leading: Icon(
-                method.id == 'applepay'
-                    ? Icons.account_balance_wallet_rounded
-                    : Icons.credit_card_rounded,
+        if (cards.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.45,
               ),
-              title: method.label,
-              subtitle: method.expiry == '—'
-                  ? 'Balance available'
-                  : 'Expires ${method.expiry}',
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('No cards saved', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 4),
+                Text(
+                  'Add one to continue. Only the last four digits are stored.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => showAddCardSheet(context),
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                  label: const Text('Add a card'),
+                ),
+              ],
+            ),
+          )
+        else ...<Widget>[
+          for (final PaymentCard card in cards)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _SelectableTile(
+                selected: card.id == selected?.id,
+                onTap: card.isExpired
+                    ? null
+                    : () => ref
+                          .read(selectedCardIdProvider.notifier)
+                          .select(card.id),
+                leading: Icon(card.brand.icon),
+                title: card.label,
+                subtitle: card.isExpired
+                    ? 'Expired ${card.expiryLabel}'
+                    : 'Expires ${card.expiryLabel}',
+              ),
+            ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => showAddCardSheet(context),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Add another card'),
             ),
           ),
+        ],
         const SizedBox(height: 20),
         if (ref.watch(requireBiometricsProvider))
           Padding(
@@ -421,7 +475,7 @@ class _ReviewStep extends StatelessWidget {
 
   final List<CartItem> items;
   final Address? address;
-  final PaymentMethod payment;
+  final PaymentCard? payment;
 
   @override
   Widget build(BuildContext context) {
@@ -488,7 +542,7 @@ class _ReviewStep extends StatelessWidget {
         _ReviewRow(
           icon: Icons.credit_card_rounded,
           label: 'Paying with',
-          value: payment.label,
+          value: payment?.label ?? 'No card selected',
         ),
         const SizedBox(height: 24),
         const OrderSummary(title: 'Total'),
@@ -546,7 +600,7 @@ class _SelectableTile extends StatelessWidget {
   });
 
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Widget leading;
   final String title;
   final String subtitle;

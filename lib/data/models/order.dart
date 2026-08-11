@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'cart_entry.dart';
+import 'delivery_option.dart';
 
 enum OrderStatus {
   processing('Processing'),
@@ -28,6 +29,7 @@ class Order {
     required this.total,
     required this.shippingAddress,
     required this.paymentLabel,
+    this.deliveryId = 'standard',
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -43,6 +45,7 @@ class Order {
     total: (json['total'] as num).toDouble(),
     shippingAddress: json['shippingAddress'] as String,
     paymentLabel: json['paymentLabel'] as String,
+    deliveryId: json['deliveryId'] as String? ?? 'standard',
   );
 
   final String id;
@@ -55,17 +58,26 @@ class Order {
   final String shippingAddress;
   final String paymentLabel;
 
+  /// Which [DeliveryOption] was chosen, so the tracker can use its timeline.
+  final String deliveryId;
+
+  DeliveryOption get delivery => DeliveryOption.byId(deliveryId);
+
   int get itemCount =>
       entries.fold(0, (int sum, CartEntry e) => sum + e.quantity);
 
-  DateTime get estimatedDelivery => placedAt.add(const Duration(days: 4));
+  DateTime get estimatedDelivery => delivery.estimatedArrival(placedAt);
 
   /// Progresses on its own as time passes, so the Orders tab feels live
-  /// without a backend pushing updates.
+  /// without a backend pushing updates. The pace follows the delivery method
+  /// that was chosen — express shouldn't crawl like standard.
   OrderStatus get status {
     final Duration age = DateTime.now().difference(placedAt);
-    if (age < const Duration(hours: 8)) return OrderStatus.processing;
-    if (age < const Duration(days: 4)) return OrderStatus.shipped;
+    final Duration toShipped = Duration(
+      hours: delivery == DeliveryOption.express ? 2 : 8,
+    );
+    if (age < toShipped) return OrderStatus.processing;
+    if (age < Duration(days: delivery.maxDays)) return OrderStatus.shipped;
     return OrderStatus.delivered;
   }
 
@@ -79,5 +91,6 @@ class Order {
     'total': total,
     'shippingAddress': shippingAddress,
     'paymentLabel': paymentLabel,
+    'deliveryId': deliveryId,
   };
 }

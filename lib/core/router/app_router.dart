@@ -18,6 +18,8 @@ import '../../features/shell/home_shell.dart';
 import '../../features/profile/security_settings_screen.dart';
 import '../../features/profile/notification_settings_screen.dart';
 import '../../features/auth/auth_screen.dart';
+import '../../features/profile/payment_methods_screen.dart';
+import '../../features/profile/addresses_screen.dart';
 
 /// Route paths, referenced by name everywhere else.
 abstract final class Routes {
@@ -34,6 +36,8 @@ abstract final class Routes {
   static const String haptics = '/settings/haptics';
   static const String security = '/settings/security';
   static const String notifications = '/settings/notifications';
+  static const String addresses = '/settings/addresses';
+  static const String payments = '/settings/payments';
   static const String orders = '/orders';
 
   static String product(String id) => '/product/$id';
@@ -152,6 +156,18 @@ GoRouter createRouter() => GoRouter(
           parentNavigatorKey: _rootKey,
           builder: (BuildContext context, GoRouterState state) =>
               const NotificationSettingsScreen(),
+        ),
+        GoRoute(
+          path: 'addresses',
+          parentNavigatorKey: _rootKey,
+          builder: (BuildContext context, GoRouterState state) =>
+              const AddressesScreen(),
+        ),
+        GoRoute(
+          path: 'payments',
+          parentNavigatorKey: _rootKey,
+          builder: (BuildContext context, GoRouterState state) =>
+              const PaymentMethodsScreen(),
         ),
       ],
     ),

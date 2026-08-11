@@ -210,7 +210,7 @@ void main() {
               postcode: '97205',
               country: 'US',
             ),
-            payment: kPaymentMethods.first,
+            paymentLabel: 'Visa •••• 4242',
           );
 
       expect(c.read(canReviewProvider('coat')), isTrue);

@@ -15,7 +15,7 @@ just Flutter widgets and pub plugins.
 | **Search** | Debounced live results, persisted recent searches, trending chips |
 | **Product** | Swipeable gallery with pinch-to-zoom, size and colour variants, quantity stepper, expandable description, rating histogram, reviews, related rail |
 | **Bag** | Per-variant lines, swipe to delete with undo, promo codes, free-shipping progress, live order maths |
-| **Checkout** | Shipping → payment → review stepper, saved addresses, order confirmation |
+| **Checkout** | Shipping → payment → review stepper, saved addresses and cards, three delivery speeds, order confirmation |
 | **Orders** | History with a status tracker that advances over time, reorder |
 | **Saved** | Wishlist with bulk add-to-bag |
 | **Reviews** | Verified buyers can write, edit and delete a review; it pins to the top of the list and folds into the rating average |
@@ -32,6 +32,8 @@ just Flutter widgets and pub plugins.
 | **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
 | **Personalization** | Time-aware greeting using your name, and 8 seed-colour presets that Material 3 expands into full light/dark schemes |
 | **Accounts** | Local sign-up / sign-in with PBKDF2-hashed passwords. Optional — everything works as a guest |
+| **Wallet** | Add/remove cards with Luhn validation and brand detection; only the last four digits are stored, never the CVV |
+| **Settings** | Grouped by concern: account, shopping, appearance, feedback, security, data |
 
 Everything the shopper does — bag, wishlist, orders, addresses, search history,
 recently viewed, theme — persists across restarts via `shared_preferences`.
@@ -94,7 +96,7 @@ flutter run -d linux        # desktop
 
 ```bash
 flutter analyze --fatal-infos
-flutter test                # 137 tests
+flutter test                # 164 tests
 ```
 
 Coverage spans cart maths (variant merging, stock caps, promos, shipping

@@ -11,6 +11,7 @@ import '../data/models/product.dart';
 import '../data/repositories/product_repository.dart';
 import 'app_providers.dart';
 import 'cart_provider.dart';
+import '../data/models/delivery_option.dart';
 
 /// Order history, newest first.
 class OrdersNotifier extends Notifier<List<Order>> {
@@ -37,7 +38,8 @@ class OrdersNotifier extends Notifier<List<Order>> {
   /// Returns the placed order.
   Future<Order> placeOrder({
     required Address address,
-    required PaymentMethod payment,
+    required String paymentLabel,
+    DeliveryOption delivery = DeliveryOption.standard,
   }) async {
     final CartSummary summary = ref.read(cartSummaryProvider);
     final List<CartEntry> entries = <CartEntry>[...ref.read(cartProvider)];
@@ -52,7 +54,8 @@ class OrdersNotifier extends Notifier<List<Order>> {
       discount: summary.discount,
       total: summary.total,
       shippingAddress: '${address.recipient}, ${address.oneLine}',
-      paymentLabel: payment.label,
+      paymentLabel: paymentLabel,
+      deliveryId: delivery.id,
     );
 
     final List<Order> next = <Order>[order, ...state];

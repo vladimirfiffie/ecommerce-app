@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/cart_entry.dart';
+import '../data/models/delivery_option.dart';
 import '../data/models/cart_item.dart';
 import '../data/models/product.dart';
 import '../data/repositories/product_repository.dart';
@@ -13,9 +14,33 @@ import 'app_providers.dart';
 /// Storefront pricing rules, kept in one place so cart and checkout agree.
 abstract final class Pricing {
   static const double freeShippingThreshold = 75;
+
+  /// Kept for reference; the actual charge now comes from the chosen
+  /// [DeliveryOption], whose standard rate matches this.
   static const double flatShipping = 6.95;
   static const double taxRate = 0.08;
 }
+
+/// The delivery method checkout will use. Persisted so it survives a restart.
+class DeliveryOptionNotifier extends Notifier<DeliveryOption> {
+  static const String _key = 'checkout.deliveryOption';
+
+  SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
+
+  @override
+  DeliveryOption build() => DeliveryOption.byId(_prefs.getString(_key));
+
+  Future<void> select(DeliveryOption option) async {
+    state = option;
+    await _prefs.setString(_key, option.id);
+  }
+}
+
+final NotifierProvider<DeliveryOptionNotifier, DeliveryOption>
+deliveryOptionProvider =
+    NotifierProvider<DeliveryOptionNotifier, DeliveryOption>(
+      DeliveryOptionNotifier.new,
+    );
 
 /// A promo code the shopper can apply at checkout.
 @immutable
@@ -226,6 +251,7 @@ class CartSummary {
     required this.tax,
     required this.total,
     required this.amountToFreeShipping,
+    this.delivery = DeliveryOption.standard,
   });
 
   final int itemCount;
@@ -238,6 +264,10 @@ class CartSummary {
   /// How much more to spend before shipping is free; zero once it is.
   final double amountToFreeShipping;
 
+  final DeliveryOption delivery;
+
+  DateTime get estimatedArrival => delivery.estimatedArrival(DateTime.now());
+
   bool get isEmpty => itemCount == 0;
   bool get hasFreeShipping => shipping == 0 && subtotal > 0;
 }
@@ -247,6 +277,7 @@ final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>((
 ) {
   final List<CartItem> items = ref.watch(cartItemsProvider);
   final Promo? promo = ref.watch(appliedPromoProvider);
+  final DeliveryOption delivery = ref.watch(deliveryOptionProvider);
 
   final double subtotal = items.fold(
     0,
@@ -257,11 +288,15 @@ final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>((
   final double discount = promo == null ? 0 : subtotal * promo.percentOff;
   final double discounted = subtotal - discount;
 
+  // Free-shipping perks apply to standard delivery only: expediting costs
+  // real money, so neither the threshold nor a FREESHIP code waives it.
   double shipping = 0;
-  if (subtotal > 0 &&
-      discounted < Pricing.freeShippingThreshold &&
-      !(promo?.freeShipping ?? false)) {
-    shipping = Pricing.flatShipping;
+  if (subtotal > 0) {
+    final bool waived =
+        delivery.freeOverThreshold &&
+        (discounted >= Pricing.freeShippingThreshold ||
+            (promo?.freeShipping ?? false));
+    shipping = waived ? 0 : delivery.price;
   }
 
   final double tax = discounted * Pricing.taxRate;
@@ -273,6 +308,7 @@ final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>((
     shipping: shipping,
     tax: tax,
     total: discounted + shipping + tax,
+    delivery: delivery,
     amountToFreeShipping: subtotal == 0
         ? 0
         : (Pricing.freeShippingThreshold - discounted).clamp(
