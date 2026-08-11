@@ -12,46 +12,104 @@ import '../../shared/widgets/app_image.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/pill.dart';
 import '../../state/orders_provider.dart';
+import 'order_detail_screen.dart';
+import '../../core/layout/two_pane.dart';
 
-class OrdersScreen extends ConsumerWidget {
+class OrdersScreen extends ConsumerStatefulWidget {
   const OrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OrdersScreen> createState() => _OrdersScreenState();
+}
+
+class _OrdersScreenState extends ConsumerState<OrdersScreen> {
+  String? _selectedId;
+
+  @override
+  Widget build(BuildContext context) {
     final List<Order> orders = ref.watch(ordersProvider);
+    final bool twoPane = useTwoPane(context);
+
+    // Default to the newest order so the pane is never pointlessly empty.
+    final String? selected = !twoPane || orders.isEmpty
+        ? null
+        : orders.any((Order o) => o.id == _selectedId)
+        ? _selectedId
+        : orders.first.id;
+
+    final Widget master = orders.isEmpty
+        ? EmptyState(
+            icon: Icons.receipt_long_outlined,
+            title: 'No orders yet',
+            message:
+                'When you place an order it’ll appear here with its '
+                'delivery status.',
+            actionLabel: 'Browse the shop',
+            onAction: () => context.go(Routes.catalog),
+          )
+        : ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            itemCount: orders.length,
+            separatorBuilder: (BuildContext c, int i) =>
+                const SizedBox(height: 12),
+            itemBuilder: (BuildContext context, int index) =>
+                OrderCard(
+                      order: orders[index],
+                      selected: orders[index].id == selected,
+                      onTap: twoPane
+                          ? () => setState(() => _selectedId = orders[index].id)
+                          : null,
+                    )
+                    .animate(delay: (index * 50).ms)
+                    .fadeIn(duration: 240.ms)
+                    .moveY(begin: 12, end: 0),
+          );
+
+    if (!twoPane) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Your orders')),
+        body: master,
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Your orders')),
-      body: orders.isEmpty
-          ? EmptyState(
-              icon: Icons.receipt_long_outlined,
-              title: 'No orders yet',
-              message:
-                  'When you place an order it’ll appear here with its '
-                  'delivery status.',
-              actionLabel: 'Browse the shop',
-              onAction: () => context.go(Routes.catalog),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-              itemCount: orders.length,
-              separatorBuilder: (BuildContext c, int i) =>
-                  const SizedBox(height: 12),
-              itemBuilder: (BuildContext context, int index) =>
-                  OrderCard(order: orders[index])
-                      .animate(delay: (index * 50).ms)
-                      .fadeIn(duration: 240.ms)
-                      .moveY(begin: 12, end: 0),
-            ),
+      body: TwoPane(
+        list: master,
+        detail: selected == null
+            ? null
+            : DetailPaneSurface(
+                child: OrderDetailScreen(
+                  key: ValueKey<String>(selected),
+                  orderId: selected,
+                  embedded: true,
+                ),
+              ),
+        placeholder: const TwoPanePlaceholder(
+          icon: Icons.receipt_long_outlined,
+          message: 'Choose an order to see its details.',
+        ),
+      ),
     );
   }
 }
 
 /// Summary card: status, thumbnails, total.
 class OrderCard extends ConsumerWidget {
-  const OrderCard({required this.order, super.key});
+  const OrderCard({
+    required this.order,
+    super.key,
+    this.selected = false,
+    this.onTap,
+  });
 
   final Order order;
+
+  /// Highlighted as the current order in a two-pane layout.
+  final bool selected;
+
+  /// Overrides the default push-a-route behaviour.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,8 +117,11 @@ class OrderCard extends ConsumerWidget {
     final List<CartItem> items = ref.watch(orderItemsProvider(order.id));
 
     return Card(
+      color: selected
+          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.45)
+          : null,
       child: InkWell(
-        onTap: () => context.push(Routes.order(order.id)),
+        onTap: onTap ?? () => context.push(Routes.order(order.id)),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         child: Padding(
           padding: const EdgeInsets.all(16),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show SliverConstraints;
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../core/layout/breakpoints.dart';
@@ -17,6 +18,8 @@ class ProductGrid extends StatelessWidget {
     super.key,
     this.padding,
     this.sliver = false,
+    this.selectedId,
+    this.onSelect,
   });
 
   final List<Product> products;
@@ -25,6 +28,12 @@ class ProductGrid extends StatelessWidget {
 
   /// Emit a sliver instead of a scrollable box.
   final bool sliver;
+
+  /// Highlighted card in a two-pane layout.
+  final String? selectedId;
+
+  /// When set, tapping selects instead of pushing a route.
+  final ValueChanged<String>? onSelect;
 
   /// Space the card needs below its square image: brand, name (2 lines),
   /// rating and price, with a little headroom for larger text scales.
@@ -45,31 +54,46 @@ class ProductGrid extends StatelessWidget {
     );
   }
 
-  Widget _item(BuildContext context, int index) => ProductCard(
-    product: products[index],
-    heroPrefix: heroPrefix,
-  ).animate(delay: (index % 8 * 35).ms).fadeIn(duration: 240.ms);
+  Widget _item(BuildContext context, int index) {
+    final Product product = products[index];
+    return ProductCard(
+      product: product,
+      heroPrefix: heroPrefix,
+      selected: product.id == selectedId,
+      onTap: onSelect == null ? null : () => onSelect!(product.id),
+    ).animate(delay: (index % 8 * 35).ms).fadeIn(duration: 240.ms);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.sizeOf(context).width;
     final EdgeInsets pad = padding ?? EdgeInsets.zero;
 
+    // Measure the space this grid actually gets, not the whole window: in a
+    // two-pane layout the list column is far narrower than the screen, and
+    // sizing from MediaQuery packs in columns that don't fit.
     if (sliver) {
       return SliverPadding(
         padding: pad,
-        sliver: SliverGrid.builder(
-          gridDelegate: _delegate(width),
-          itemCount: products.length,
-          itemBuilder: _item,
+        sliver: SliverLayoutBuilder(
+          builder: (BuildContext context, SliverConstraints constraints) =>
+              SliverGrid.builder(
+                gridDelegate: _delegate(
+                  constraints.crossAxisExtent + pad.horizontal,
+                ),
+                itemCount: products.length,
+                itemBuilder: _item,
+              ),
         ),
       );
     }
-    return GridView.builder(
-      padding: pad,
-      gridDelegate: _delegate(width),
-      itemCount: products.length,
-      itemBuilder: _item,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) =>
+          GridView.builder(
+            padding: pad,
+            gridDelegate: _delegate(constraints.maxWidth),
+            itemCount: products.length,
+            itemBuilder: _item,
+          ),
     );
   }
 }

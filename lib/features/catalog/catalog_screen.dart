@@ -16,74 +16,151 @@ import '../../state/settings_provider.dart';
 import 'widgets/filter_sheet.dart';
 import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
+import '../product/product_detail_screen.dart';
+import '../../core/layout/two_pane.dart';
 
 /// The full catalog: category strip, refinement bar, grid/list of results.
-class CatalogScreen extends ConsumerWidget {
+///
+/// On a wide window this becomes master–detail: the grid stays on the left
+/// and the selected product opens beside it, so browsing doesn't lose your
+/// place. Phones keep pushing a route.
+class CatalogScreen extends ConsumerStatefulWidget {
   const CatalogScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CatalogScreen> createState() => _CatalogScreenState();
+}
+
+class _CatalogScreenState extends ConsumerState<CatalogScreen> {
+  String? _selectedId;
+
+  @override
+  Widget build(BuildContext context) {
     final AsyncValue<Catalog> catalog = ref.watch(catalogProvider);
     final CatalogFilter filter = ref.watch(catalogFilterProvider);
     final List<Product> products = ref.watch(filteredProductsProvider);
     final bool gridView = ref.watch(settingsProvider).gridView;
+    final bool twoPane = useTwoPane(context);
+
+    // Drop a selection that the current filters have excluded, so the detail
+    // pane never shows something the list no longer contains.
+    final String? selected =
+        twoPane && products.any((Product p) => p.id == _selectedId)
+        ? _selectedId
+        : null;
+
+    final Widget master = SafeArea(
+      bottom: false,
+      child: Column(
+        children: <Widget>[
+          _Header(
+            onSearch: () => context.push(Routes.search),
+            query: filter.query,
+          ),
+          if (catalog.hasValue)
+            _CategoryStrip(categories: catalog.value!.categories),
+          _RefinementBar(
+            resultCount: products.length,
+            filter: filter,
+            gridView: gridView,
+            onToggleView: () =>
+                ref.read(settingsProvider.notifier).setGridView(!gridView),
+            onOpenFilters: () => showFilterSheet(context),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: switch (catalog) {
+              AsyncLoading<Catalog>() => const ProductGridSkeleton(),
+              AsyncError<Catalog>(:final Object error) => EmptyState(
+                icon: Icons.cloud_off_rounded,
+                title: 'Couldn’t load products',
+                message: '$error',
+                actionLabel: 'Retry',
+                onAction: () => ref.invalidate(catalogProvider),
+              ),
+              _ when products.isEmpty => EmptyState(
+                icon: Icons.search_off_rounded,
+                title: 'No matches',
+                message: filter.activeRefinements > 0
+                    ? 'Try loosening your filters — there’s plenty more in the shop.'
+                    : 'Nothing here yet. Try a different category.',
+                actionLabel: filter.activeRefinements > 0
+                    ? 'Clear filters'
+                    : null,
+                onAction: filter.activeRefinements > 0
+                    ? () => ref
+                          .read(catalogFilterProvider.notifier)
+                          .clearRefinements()
+                    : null,
+              ),
+              _ => _Results(
+                products: products,
+                gridView: gridView,
+                selectedId: selected,
+                onSelect: twoPane
+                    ? (String id) => setState(() => _selectedId = id)
+                    : null,
+              ),
+            },
+          ),
+        ],
+      ),
+    );
+
+    if (!twoPane) return Scaffold(body: master);
 
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: <Widget>[
-            _Header(
-              onSearch: () => context.push(Routes.search),
-              query: filter.query,
-            ),
-            if (catalog.hasValue)
-              _CategoryStrip(categories: catalog.value!.categories),
-            _RefinementBar(
-              resultCount: products.length,
-              filter: filter,
-              gridView: gridView,
-              onToggleView: () =>
-                  ref.read(settingsProvider.notifier).setGridView(!gridView),
-              onOpenFilters: () => showFilterSheet(context),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: switch (catalog) {
-                AsyncLoading<Catalog>() => const ProductGridSkeleton(),
-                AsyncError<Catalog>(:final Object error) => EmptyState(
-                  icon: Icons.cloud_off_rounded,
-                  title: 'Couldn’t load products',
-                  message: '$error',
-                  actionLabel: 'Retry',
-                  onAction: () => ref.invalidate(catalogProvider),
+      body: TwoPane(
+        list: master,
+        detail: selected == null
+            ? null
+            : DetailPaneSurface(
+                // Keyed so switching products rebuilds cleanly instead of
+                // inheriting the previous one's variant selection.
+                child: ProductDetailScreen(
+                  key: ValueKey<String>(selected),
+                  productId: selected,
+                  embedded: true,
                 ),
-                _ when products.isEmpty => EmptyState(
-                  icon: Icons.search_off_rounded,
-                  title: 'No matches',
-                  message: filter.activeRefinements > 0
-                      ? 'Try loosening your filters — there’s plenty more in the shop.'
-                      : 'Nothing here yet. Try a different category.',
-                  actionLabel: filter.activeRefinements > 0
-                      ? 'Clear filters'
-                      : null,
-                  onAction: filter.activeRefinements > 0
-                      ? () => ref
-                            .read(catalogFilterProvider.notifier)
-                            .clearRefinements()
-                      : null,
-                ),
-                _ =>
-                  gridView
-                      ? _ResultsGrid(products: products)
-                      : _ResultsList(products: products),
-              },
-            ),
-          ],
+              ),
+        placeholder: const TwoPanePlaceholder(
+          icon: Icons.touch_app_outlined,
+          message: 'Pick something on the left to see it here.',
         ),
       ),
     );
   }
+}
+
+/// Results in whichever layout is chosen, tapping through or selecting
+/// depending on whether a detail pane is present.
+class _Results extends StatelessWidget {
+  const _Results({
+    required this.products,
+    required this.gridView,
+    required this.selectedId,
+    required this.onSelect,
+  });
+
+  final List<Product> products;
+  final bool gridView;
+  final String? selectedId;
+
+  /// Null on phones, where a tap should push a route instead.
+  final ValueChanged<String>? onSelect;
+
+  @override
+  Widget build(BuildContext context) => gridView
+      ? _ResultsGrid(
+          products: products,
+          selectedId: selectedId,
+          onSelect: onSelect,
+        )
+      : _ResultsList(
+          products: products,
+          selectedId: selectedId,
+          onSelect: onSelect,
+        );
 }
 
 class _Header extends StatelessWidget {
@@ -224,9 +301,15 @@ class _RefinementBar extends StatelessWidget {
 }
 
 class _ResultsGrid extends StatelessWidget {
-  const _ResultsGrid({required this.products});
+  const _ResultsGrid({
+    required this.products,
+    required this.selectedId,
+    required this.onSelect,
+  });
 
   final List<Product> products;
+  final String? selectedId;
+  final ValueChanged<String>? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -235,14 +318,22 @@ class _ResultsGrid extends StatelessWidget {
       products: products,
       heroPrefix: 'catalog',
       padding: EdgeInsets.fromLTRB(gutter, 18, gutter, 32),
+      selectedId: selectedId,
+      onSelect: onSelect,
     );
   }
 }
 
 class _ResultsList extends StatelessWidget {
-  const _ResultsList({required this.products});
+  const _ResultsList({
+    required this.products,
+    required this.selectedId,
+    required this.onSelect,
+  });
 
   final List<Product> products;
+  final String? selectedId;
+  final ValueChanged<String>? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -254,11 +345,16 @@ class _ResultsList extends StatelessWidget {
           const SizedBox(height: 6),
       itemBuilder: (BuildContext context, int index) {
         final Product product = products[index];
+        final bool selected = product.id == selectedId;
         return Card(
+          color: selected
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.45)
+              : null,
           child: ProductRow(
             product: product,
             heroPrefix: 'catalog',
             subtitle: Text(product.subcategory),
+            onTap: onSelect == null ? null : () => onSelect!(product.id),
             trailing: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Icon(

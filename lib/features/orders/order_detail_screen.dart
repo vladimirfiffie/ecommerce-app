@@ -14,9 +14,16 @@ import '../../state/orders_provider.dart';
 import 'orders_screen.dart' show OrderStatusPill;
 
 class OrderDetailScreen extends ConsumerWidget {
-  const OrderDetailScreen({required this.orderId, super.key});
+  const OrderDetailScreen({
+    required this.orderId,
+    super.key,
+    this.embedded = false,
+  });
 
   final String orderId;
+
+  /// Shown in a two-pane layout, where a back button would be meaningless.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,7 +46,10 @@ class OrderDetailScreen extends ConsumerWidget {
     final List<CartItem> items = ref.watch(orderItemsProvider(orderId));
 
     return Scaffold(
-      appBar: AppBar(title: Text(order.id)),
+      appBar: AppBar(
+        title: Text(order.id),
+        automaticallyImplyLeading: !embedded,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: <Widget>[
@@ -274,10 +284,19 @@ class _Tracker extends StatelessWidget {
   final OrderStatus status;
   final DateTime eta;
 
+  /// Only the three stages a parcel actually passes through. Cancelled,
+  /// returned and refunded are separate outcomes, not steps on this rail —
+  /// including them made six labels that couldn't fit.
+  static const List<OrderStatus> _stages = <OrderStatus>[
+    OrderStatus.processing,
+    OrderStatus.shipped,
+    OrderStatus.delivered,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final int activeIndex = OrderStatus.values.indexOf(status);
+    final int activeIndex = _stages.indexOf(status);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -297,7 +316,7 @@ class _Tracker extends StatelessWidget {
           const SizedBox(height: 18),
           Row(
             children: <Widget>[
-              for (int i = 0; i < OrderStatus.values.length; i++) ...<Widget>[
+              for (int i = 0; i < _stages.length; i++) ...<Widget>[
                 Container(
                   width: 20,
                   height: 20,
@@ -315,7 +334,7 @@ class _Tracker extends StatelessWidget {
                         )
                       : null,
                 ),
-                if (i < OrderStatus.values.length - 1)
+                if (i < _stages.length - 1)
                   Expanded(
                     child: Container(
                       height: 3,
@@ -335,11 +354,11 @@ class _Tracker extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              for (final OrderStatus s in OrderStatus.values)
+              for (final OrderStatus s in _stages)
                 Text(
                   s.label,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: s.index <= activeIndex
+                    color: _stages.indexOf(s) <= activeIndex
                         ? theme.colorScheme.onSurface
                         : theme.colorScheme.onSurfaceVariant,
                   ),
