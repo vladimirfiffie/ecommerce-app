@@ -30,6 +30,31 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.10.0',
+    headline: 'Home knows where your parcel is',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'assignment_return_outlined',
+        'Track it from home',
+        'Your open order sits at the top of home with a progress tracker '
+            'and its arrival date — plus the days left to return a delivery, '
+            'and when a refund is due back.',
+      ),
+      ReleaseHighlight(
+        'card_giftcard_rounded',
+        'Better nudges',
+        'Home now tells you when something you saved is nearly gone, and '
+            'how much further your bag has to go for free delivery.',
+      ),
+      ReleaseHighlight(
+        'location_on_outlined',
+        'Addresses that get checked',
+        'The address form now catches typos as you save rather than after '
+            'the parcel goes astray.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.9.0',
     headline: 'Know what you’re buying',
     highlights: <ReleaseHighlight>[

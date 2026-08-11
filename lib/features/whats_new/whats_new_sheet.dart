@@ -11,6 +11,7 @@ import '../../state/whats_new_provider.dart';
 const Map<String, IconData> _icons = <String, IconData>{
   'assignment_return_outlined': Icons.assignment_return_outlined,
   'credit_card_rounded': Icons.credit_card_rounded,
+  'location_on_outlined': Icons.location_on_outlined,
   'card_giftcard_rounded': Icons.card_giftcard_rounded,
   'help_outline_rounded': Icons.help_outline_rounded,
   'notifications_active_outlined': Icons.notifications_active_outlined,
