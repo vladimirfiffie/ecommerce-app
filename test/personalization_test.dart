@@ -75,11 +75,34 @@ void main() {
       expect(c.read(firstNameProvider), 'Nova');
     });
 
-    test('blank restores the default rather than greeting nobody', () async {
+    test('blank clears the override back to the OS name', () async {
       final ProviderContainer c = await testContainer();
       await c.read(displayNameProvider.notifier).set('Sam');
+      expect(c.read(displayNameProvider), 'Sam');
+
       await c.read(displayNameProvider.notifier).set('   ');
-      expect(c.read(displayNameProvider), DisplayNameNotifier.fallback);
+      expect(c.read(displayNameProvider), systemUserName() ?? '');
+    });
+
+    test('defaults to the OS account name when nothing is stored', () async {
+      final ProviderContainer c = await testContainer();
+      // Linux/macOS/Windows expose one; mobile deliberately does not.
+      expect(c.read(displayNameProvider), systemUserName() ?? '');
+    });
+
+    test('a lowercase username is shown verbatim', () async {
+      final ProviderContainer c = await testContainer();
+      await c.read(displayNameProvider.notifier).set('bbo');
+      expect(c.read(firstNameProvider), 'bbo');
+      expect(
+        greetingLine(DateTime(2026, 8, 10, 9), c.read(firstNameProvider)),
+        'Good morning, bbo',
+      );
+    });
+
+    test('no name means no trailing comma', () {
+      expect(greetingLine(DateTime(2026, 8, 10, 9), ''), 'Good morning');
+      expect(greetingLine(DateTime(2026, 8, 10, 20), ''), 'Good evening');
     });
 
     test('persists', () async {
@@ -94,9 +117,9 @@ void main() {
     ) async {
       await pumpApp(
         tester,
-        prefs: const <String, Object>{'profile.displayName': 'Vlad'},
+        prefs: const <String, Object>{'profile.displayName': 'bbo'},
       );
-      expect(find.text('${greetingFor(DateTime.now())}, Vlad'), findsOneWidget);
+      expect(find.text('${greetingFor(DateTime.now())}, bbo'), findsOneWidget);
     });
   });
 

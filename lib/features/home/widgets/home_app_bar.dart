@@ -15,7 +15,7 @@ class HomeAppBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final int cartCount = ref.watch(cartCountProvider);
-    final String firstName = ref.watch(firstNameProvider);
+    final String greeting = ref.watch(greetingProvider);
 
     return SliverToBoxAdapter(
       child: Padding(
@@ -49,7 +49,7 @@ class HomeAppBar extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${greetingFor(DateTime.now())}, $firstName',
+                        greeting,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.headlineMedium,

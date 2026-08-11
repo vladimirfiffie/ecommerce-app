@@ -148,7 +148,8 @@ class _ProfileHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
-    final String name = ref.watch(displayNameProvider);
+    final String stored = ref.watch(displayNameProvider);
+    final String name = stored.isEmpty ? 'Add your name' : stored;
 
     return InkWell(
       onTap: () => showEditNameSheet(context),

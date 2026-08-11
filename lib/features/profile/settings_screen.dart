@@ -57,7 +57,9 @@ class SettingsScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  ref.watch(displayNameProvider),
+                  ref.watch(displayNameProvider).isEmpty
+                      ? 'Not set'
+                      : ref.watch(displayNameProvider),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
