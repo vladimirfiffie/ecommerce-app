@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,12 +7,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'state/app_providers.dart';
+import 'state/notifications_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Deliberately unrestricted: the layout adapts to landscape and to tablet
-  // widths, so locking orientation would throw that away.
+  // Orientation is deliberately unrestricted: the layout adapts to landscape
+  // and to tablet widths, so locking it would throw that away.
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -23,10 +26,16 @@ Future<void> main() async {
   // can stay synchronous.
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
+  final ProviderContainer container = ProviderContainer(
+    overrides: <Override>[sharedPreferencesProvider.overrideWithValue(prefs)],
+  );
+
+  // Register notification channels up front. Permission is only requested
+  // when the shopper opts in from Settings — prompting at first launch, before
+  // they've seen anything, is how you get denied permanently.
+  unawaited(container.read(notificationsProvider).ensureInitialized());
+
   runApp(
-    ProviderScope(
-      overrides: <Override>[sharedPreferencesProvider.overrideWithValue(prefs)],
-      child: const NovaApp(),
-    ),
+    UncontrolledProviderScope(container: container, child: const NovaApp()),
   );
 }

@@ -14,6 +14,7 @@ import '../../state/haptics_provider.dart';
 import '../../core/router/app_router.dart';
 import 'package:go_router/go_router.dart';
 import '../../state/biometrics_provider.dart';
+import '../../state/notifications_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -96,6 +97,19 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 18),
           Text('Feedback', style: theme.textTheme.titleMedium),
           const SizedBox(height: 6),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.notifications_outlined),
+            title: Text('Notifications', style: theme.textTheme.titleSmall),
+            subtitle: Text(
+              ref.watch(notificationSettingsProvider).enabled
+                  ? 'Order updates, deals and reminders'
+                  : 'Off',
+              style: theme.textTheme.bodySmall,
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(Routes.notifications),
+          ),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.fingerprint_rounded),

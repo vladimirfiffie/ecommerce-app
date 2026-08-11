@@ -21,6 +21,7 @@ import '../../state/haptics_provider.dart';
 import '../../shared/widgets/haptic_controls.dart';
 import '../../state/biometrics_provider.dart';
 import 'package:haptic_kit/haptic_kit.dart';
+import '../../state/notifications_provider.dart';
 
 /// Three-step checkout: shipping → payment → review.
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -84,6 +85,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           payment: ref.read(selectedPaymentProvider),
         );
     unawaited(ref.read(hapticsProvider).success());
+    unawaited(
+      ref
+          .read(notificationsProvider)
+          .announceOrder(
+            orderId: order.id,
+            itemCount: order.itemCount,
+            total: formatPrice(order.total),
+          ),
+    );
 
     if (!mounted) return;
     setState(() => _placing = false);
