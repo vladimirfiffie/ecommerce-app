@@ -246,7 +246,7 @@ void main() {
 
       await c.read(cartProvider.notifier).add(catalog.byId('tee')!);
       await settle(tester);
-      await tester.tap(find.text('Cart'));
+      await tester.tap(find.text('Bag'));
       await settle(tester);
       await tester.tap(find.text('Checkout'));
       await settle(tester);

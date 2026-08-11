@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../state/cart_provider.dart';
 import '../../../state/profile_provider.dart';
 
 /// Greeting + brand mark + a tap-through search field.
@@ -14,7 +13,6 @@ class HomeAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
-    final int cartCount = ref.watch(cartCountProvider);
     final String greeting = ref.watch(greetingProvider);
 
     return SliverToBoxAdapter(
@@ -55,23 +53,6 @@ class HomeAppBar extends ConsumerWidget {
                         style: theme.textTheme.headlineMedium,
                       ),
                     ],
-                  ),
-                ),
-                IconButton.filledTonal(
-                  onPressed: () => context.push(Routes.orders),
-                  tooltip: 'Your orders',
-                  icon: const Icon(Icons.receipt_long_rounded),
-                ),
-                const SizedBox(width: 8),
-                Badge.count(
-                  count: cartCount,
-                  isLabelVisible: cartCount > 0,
-                  backgroundColor: theme.colorScheme.error,
-                  textColor: theme.colorScheme.onError,
-                  child: IconButton.filledTonal(
-                    onPressed: () => context.go(Routes.cart),
-                    tooltip: 'Cart',
-                    icon: const Icon(Icons.shopping_bag_outlined),
                   ),
                 ),
               ],

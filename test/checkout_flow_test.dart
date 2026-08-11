@@ -81,7 +81,7 @@ void main() {
     // Back out of the detail page and into the bag.
     await tester.pageBack();
     await settle(tester);
-    await tester.tap(find.text('Cart'));
+    await tester.tap(find.text('Bag'));
     await settle(tester);
 
     expect(find.text('Your bag'), findsOneWidget);

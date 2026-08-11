@@ -16,6 +16,7 @@ import 'package:ecommerce_app/state/notifications_provider.dart';
 import 'package:ecommerce_app/state/haptics_provider.dart';
 import 'package:ecommerce_app/state/biometrics_provider.dart';
 import 'package:ecommerce_app/state/alerts_provider.dart';
+import 'package:ecommerce_app/shared/widgets/product_card.dart';
 
 /// End-to-end tests against the **real** app: the bundled catalog, the real
 /// plugin registrations and the real renderer.
@@ -89,7 +90,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     await settle(tester);
 
-    await tester.tap(find.text(product.name).first);
+    // By type, not by text: find.text also matches the search field's own
+    // contents, and highlighted result names are RichText rather than Text.
+    expect(find.byType(ProductCard), findsWidgets);
+    await tester.tap(find.byType(ProductCard).first);
     await settle(tester);
     await tester.tap(find.text('Add to bag'));
     await settle(tester);
@@ -117,7 +121,7 @@ void main() {
     await c.read(cartProvider.notifier).add(simpleProduct(c));
     await settle(tester);
 
-    await tester.tap(find.text('Cart').last);
+    await tester.tap(find.text('Bag').last);
     await settle(tester);
 
     // The wide (desktop/tablet) cart labels this button "Checkout · $x" in a

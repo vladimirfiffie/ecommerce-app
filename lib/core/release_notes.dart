@@ -30,6 +30,34 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.6.0',
+    headline: 'Search that finds things',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'search_rounded',
+        'Better search',
+        'Word order no longer matters, the best match comes first, and the '
+            'words you typed are picked out in the results.',
+      ),
+      ReleaseHighlight(
+        'grid_view_rounded',
+        'Grid or list, your choice',
+        'Search results follow the same view toggle as the shop.',
+      ),
+      ReleaseHighlight(
+        'photo_library_outlined',
+        'Browse by picture',
+        'Category artwork replaces the old word chips on the search screen.',
+      ),
+      ReleaseHighlight(
+        'tune_rounded',
+        'Fewer duplicates',
+        'One word for the bag, one home for each setting, and the crowded '
+            'home header is gone.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.5.0',
     headline: 'Pull for fresh stock',
     highlights: <ReleaseHighlight>[

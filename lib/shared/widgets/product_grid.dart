@@ -20,6 +20,7 @@ class ProductGrid extends StatelessWidget {
     this.sliver = false,
     this.selectedId,
     this.onSelect,
+    this.highlight = '',
   });
 
   final List<Product> products;
@@ -34,6 +35,9 @@ class ProductGrid extends StatelessWidget {
 
   /// When set, tapping selects instead of pushing a route.
   final ValueChanged<String>? onSelect;
+
+  /// Passed through to each card so search terms stand out.
+  final String highlight;
 
   /// Space the card needs below its square image: brand, name (2 lines),
   /// rating and price, with a little headroom for larger text scales.
@@ -59,6 +63,7 @@ class ProductGrid extends StatelessWidget {
     return ProductCard(
       product: product,
       heroPrefix: heroPrefix,
+      highlight: highlight,
       selected: product.id == selectedId,
       onTap: onSelect == null ? null : () => onSelect!(product.id),
     ).animate(delay: (index % 8 * 35).ms).fadeIn(duration: 240.ms);

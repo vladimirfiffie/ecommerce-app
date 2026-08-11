@@ -117,7 +117,6 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
           'It will be removed from ${widget.product.name}. You can '
           'always write another.',
       confirmLabel: 'Delete',
-      cancelLabel: 'Keep review',
     );
     if (!yes || !mounted) return;
 
@@ -178,7 +177,6 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
       title: 'Discard this review?',
       message: 'What you’ve written here won’t be saved.',
       confirmLabel: 'Discard',
-      cancelLabel: 'Keep writing',
     );
     if (discard && mounted) Navigator.of(context).pop();
   }

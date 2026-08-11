@@ -199,6 +199,58 @@ void main() {
     });
   });
 
+  group('dialog actions stay on one row', () {
+    // Every real pair used in the app. AlertDialog stacks its actions when
+    // they don't fit, which put the way out underneath the red button.
+    const List<(String, String)> pairs = <(String, String)>[
+      ('Cancel', 'Remove'),
+      ('Cancel', 'Delete'),
+      ('Cancel', 'Discard'),
+      ('Cancel', 'Sign out'),
+      ('Keep it', 'Cancel order'),
+    ];
+
+    for (final (String cancel, String confirm) in pairs) {
+      testWidgets('"$cancel" beside "$confirm"', (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(360, 800) * 3;
+        tester.view.devicePixelRatio = 3;
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.light(null),
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) => TextButton(
+                  onPressed: () => confirmDestructive(
+                    context,
+                    title: 'Are you sure?',
+                    message: 'This cannot be undone.',
+                    confirmLabel: confirm,
+                    cancelLabel: cancel,
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+
+        final Offset left = tester.getCenter(find.text(cancel));
+        final Offset right = tester.getCenter(find.text(confirm));
+
+        expect(
+          (left.dy - right.dy).abs(),
+          lessThan(4),
+          reason: 'stacked instead of sitting side by side',
+        );
+        expect(left.dx, lessThan(right.dx), reason: 'confirm goes last');
+      });
+    }
+  });
+
   group('order status colours', () {
     Future<ColorScheme> pumpPill(
       WidgetTester tester,

@@ -30,11 +30,12 @@ class DangerButton extends StatelessWidget {
         foregroundColor: theme.colorScheme.onError,
         minimumSize: dense ? const Size(64, 40) : null,
         padding: dense
-            ? const EdgeInsets.symmetric(horizontal: 18, vertical: 8)
+            ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
             : null,
+        tapTargetSize: dense ? MaterialTapTargetSize.shrinkWrap : null,
         textStyle: dense ? theme.textTheme.labelLarge : null,
       ),
-      child: Text(label),
+      child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
     );
   }
 }
@@ -55,20 +56,48 @@ Future<bool> confirmDestructive(
   required String confirmLabel,
   String cancelLabel = 'Cancel',
 }) async {
+  // Keep both labels short: AlertDialog stacks its actions when they don't
+  // fit one row, which put the way out *underneath* the destructive button.
+  final ThemeData theme = Theme.of(context);
   final bool? yes = await showDialog<bool>(
     context: context,
     builder: (BuildContext context) => AlertDialog(
       title: Text(title),
       content: Text(message),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      // One Row rather than two loose children: AlertDialog's OverflowBar
+      // stacks actions the moment they don't fit, and the app theme's button
+      // labels are wide enough that even "Cancel" + "Remove" tipped over on a
+      // 360px screen — putting the way out *underneath* the destructive
+      // button. A Row keeps the order, and the labels ellipsize instead.
       actions: <Widget>[
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(cancelLabel),
-        ),
-        DangerButton(
-          dense: true,
-          onPressed: () => Navigator.of(context).pop(true),
-          label: confirmLabel,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Flexible(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(56, 40),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  textStyle: theme.textTheme.labelLarge,
+                ),
+                child: Text(
+                  cancelLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: DangerButton(
+                dense: true,
+                onPressed: () => Navigator.of(context).pop(true),
+                label: confirmLabel,
+              ),
+            ),
+          ],
         ),
       ],
     ),

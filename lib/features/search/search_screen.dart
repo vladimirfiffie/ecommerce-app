@@ -10,12 +10,17 @@ import '../../data/models/product.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../shared/widgets/app_image.dart';
 import '../../shared/widgets/empty_state.dart';
-import '../../shared/widgets/price_text.dart';
 import '../../state/app_providers.dart';
 import '../../state/catalog_filter_provider.dart';
 import '../product/product_detail_screen.dart';
 import '../../core/layout/two_pane.dart';
 import '../../shared/widgets/nova_refresh.dart';
+import '../../state/search_provider.dart';
+import '../../shared/widgets/product_grid.dart';
+import '../../data/models/category.dart';
+import '../../shared/widgets/highlighted_text.dart';
+import '../../shared/widgets/price_text.dart';
+import '../../state/settings_provider.dart';
 
 /// Live search over the catalog with recent terms and trending suggestions.
 class SearchScreen extends ConsumerStatefulWidget {
@@ -67,16 +72,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final Catalog catalog = ref.watch(catalogDataProvider);
+    // Shares the Shop's setting, so one preference governs both.
+    final bool gridView = ref.watch(settingsProvider).gridView;
     final String q = _query.trim().toLowerCase();
 
-    final List<Product> matches = q.isEmpty
-        ? const <Product>[]
-        : catalog.products
-              .where((Product p) => p.searchIndex.contains(q))
-              .take(24)
-              .toList();
+    final List<Product> matches = searchProducts(
+      catalog.products,
+      ref.watch(searchHaystackProvider),
+      q,
+    );
 
     final bool twoPane = useTwoPane(context);
     final String? selected =
@@ -116,6 +121,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
           ),
         ),
+        actions: <Widget>[
+          if (q.isNotEmpty)
+            IconButton(
+              onPressed: () =>
+                  ref.read(settingsProvider.notifier).setGridView(!gridView),
+              tooltip: gridView ? 'Show as a list' : 'Show as a grid',
+              icon: Icon(
+                gridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+              ),
+            ),
+        ],
       ),
       body: _maybeTwoPane(
         twoPane: twoPane,
@@ -135,53 +151,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 message: 'Check the spelling, or try a broader term.',
               )
             : NovaRefresh(
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: matches.length,
-                  separatorBuilder: (BuildContext c, int i) =>
-                      const Divider(height: 1, indent: 84),
-                  itemBuilder: (BuildContext context, int index) {
-                    final Product product = matches[index];
-                    return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      leading: SizedBox(
-                        width: 52,
-                        height: 52,
-                        child: AppImage(
-                          url: product.thumbnail,
-                          fit: BoxFit.contain,
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusSm,
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        product.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      subtitle: Text(
-                        '${product.brand}  ·  ${product.subcategory}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: PriceText(product: product, compact: true),
-                      selected: product.id == selected,
-                      onTap: () {
-                        ref
-                            .read(searchHistoryProvider.notifier)
-                            .record(product.name);
-                        if (twoPane) {
-                          setState(() => _selectedId = product.id);
-                        } else {
-                          context.push(Routes.product(product.id));
-                        }
-                      },
-                    );
+                child: _Results(
+                  products: matches,
+                  gridView: gridView,
+                  query: q,
+                  selectedId: selected,
+                  onSelect: (String id) {
+                    ref
+                        .read(searchHistoryProvider.notifier)
+                        .record(
+                          matches.firstWhere((Product p) => p.id == id).name,
+                        );
+                    if (twoPane) {
+                      setState(() => _selectedId = id);
+                    } else {
+                      context.push(Routes.product(id));
+                    }
                   },
                 ),
               ),
@@ -221,15 +206,6 @@ class _Suggestions extends ConsumerWidget {
   final ValueChanged<String> onPick;
   final ValueChanged<String> onSubmit;
 
-  static const List<String> _trending = <String>[
-    'Sunglasses',
-    'Laptops',
-    'Fragrances',
-    'Dresses',
-    'Watches',
-    'Kitchen',
-  ];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
@@ -265,17 +241,165 @@ class _Suggestions extends ConsumerWidget {
             ),
           const SizedBox(height: 24),
         ],
-        Text('Trending', style: theme.textTheme.titleMedium),
+        Text('Browse', style: theme.textTheme.titleMedium),
         const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        // Real categories with their own artwork, rather than a hardcoded
+        // list of words — a picture says what "Fragrances" is faster than
+        // the chip did, and these follow the live catalogue.
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 1.6,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
           children: <Widget>[
-            for (final String term in _trending)
-              ActionChip(label: Text(term), onPressed: () => onPick(term)),
+            for (final Category category
+                in ref.watch(catalogDataProvider).categories)
+              _BrowseTile(
+                category: category,
+                onTap: () => onSubmit(category.label),
+              ),
           ],
         ),
       ],
+    );
+  }
+}
+
+/// A category as a picture you can tap into, used in place of the old
+/// trending word-chips.
+class _BrowseTile extends StatelessWidget {
+  const _BrowseTile({required this.category, required this.onTap});
+
+  final Category category;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            if (category.imageUrl.isNotEmpty)
+              AppImage(url: category.imageUrl, fit: BoxFit.cover),
+            // Keeps the label readable whatever the artwork behind it.
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: <Color>[Color(0xCC000000), Color(0x22000000)],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(category.icon, size: 16, color: Colors.white),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        category.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Search results as a grid or a list, following the Shop's view setting.
+///
+/// The list keeps brand and price on one line, which scans better for a
+/// long result set; the grid leads with the picture. Both pick out the
+/// searched-for words in the name.
+class _Results extends StatelessWidget {
+  const _Results({
+    required this.products,
+    required this.gridView,
+    required this.query,
+    required this.selectedId,
+    required this.onSelect,
+  });
+
+  final List<Product> products;
+  final bool gridView;
+  final String query;
+  final String? selectedId;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    if (gridView) {
+      return ProductGrid(
+        products: products,
+        heroPrefix: 'search',
+        highlight: query,
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+        selectedId: selectedId,
+        onSelect: onSelect,
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: products.length,
+      separatorBuilder: (BuildContext c, int i) =>
+          const Divider(height: 1, indent: 84),
+      itemBuilder: (BuildContext context, int index) {
+        final Product product = products[index];
+        return ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 6,
+          ),
+          leading: SizedBox(
+            width: 52,
+            height: 52,
+            child: AppImage(
+              url: product.thumbnail,
+              fit: BoxFit.contain,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+            ),
+          ),
+          title: HighlightedText(
+            text: product.name,
+            query: query,
+            style: theme.textTheme.titleSmall,
+          ),
+          subtitle: Text(
+            '${product.brand}  ·  ${product.subcategory}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: PriceText(product: product, compact: true),
+          selected: product.id == selectedId,
+          onTap: () => onSelect(product.id),
+        );
+      },
     );
   }
 }

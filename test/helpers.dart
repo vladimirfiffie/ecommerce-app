@@ -103,6 +103,8 @@ Product testProduct({
   int stock = 10,
   List<String> sizes = const <String>[],
   List<ProductColor> colors = const <ProductColor>[],
+  List<String> tags = const <String>[],
+  String subcategory = 'Jackets',
   bool isFeatured = false,
   bool isNew = false,
 }) => Product(
@@ -110,7 +112,8 @@ Product testProduct({
   name: name,
   brand: brand,
   categoryId: categoryId,
-  subcategory: 'Jackets',
+  subcategory: subcategory,
+  tags: tags,
   price: price,
   compareAtPrice: compareAtPrice,
   description: 'A test product.',

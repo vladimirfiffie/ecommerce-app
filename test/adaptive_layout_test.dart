@@ -95,7 +95,7 @@ void main() {
 
     testWidgets('the rail still switches tabs', (WidgetTester tester) async {
       await pumpAt(tester, const Size(1000, 800));
-      await tester.tap(find.text('Cart').last);
+      await tester.tap(find.text('Bag').last);
       await settle(tester);
       expect(find.text('Your bag'), findsOneWidget);
     });

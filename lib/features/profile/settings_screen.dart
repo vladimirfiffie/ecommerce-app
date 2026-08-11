@@ -22,14 +22,14 @@ import '../../state/settings_provider.dart';
 import 'widgets/edit_name_sheet.dart';
 import 'widgets/settings_group.dart';
 import 'widgets/theme_picker.dart';
-import '../whats_new/whats_new_sheet.dart';
-import '../../core/release_notes.dart';
 import 'security_settings_screen.dart';
 import 'payment_methods_screen.dart';
 import 'notification_settings_screen.dart';
 import 'haptics_settings_screen.dart';
 import 'addresses_screen.dart';
 import '../../core/layout/two_pane.dart';
+import '../whats_new/whats_new_sheet.dart';
+import '../../core/release_notes.dart';
 
 /// Grouped settings.
 ///
@@ -258,6 +258,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
 
         SettingsGroup(
+          title: 'What’s new',
+          caption: 'What changed in this build, and the ones before it.',
+          children: <Widget>[
+            SettingsRow(
+              icon: Icons.new_releases_outlined,
+              title: 'Release notes',
+              subtitle: 'Version $currentReleaseVersion',
+              onTap: () => showWhatsNewSheet(
+                context,
+                notes: kReleaseNotes,
+                offerMute: false,
+              ),
+            ),
+          ],
+        ),
+
+        SettingsGroup(
           title: 'Your data',
           caption:
               'Everything in this build is stored on this device only — '
@@ -313,26 +330,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => showWhatsNewSheet(
-                    context,
-                    notes: kReleaseNotes,
-                    offerMute: false,
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  icon: const Icon(Icons.new_releases_outlined, size: 18),
-                  label: const Text('What’s new'),
-                ),
-              ),
-              const SizedBox(height: 10),
               Text(
-                'Version 0.5.0 · prerelease',
+                'Version 0.6.0 · prerelease',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

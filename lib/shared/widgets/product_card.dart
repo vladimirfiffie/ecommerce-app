@@ -9,6 +9,7 @@ import 'favorite_button.dart';
 import 'pill.dart';
 import 'price_text.dart';
 import 'rating_stars.dart';
+import 'highlighted_text.dart';
 
 /// Tall card used by the home rails and the catalog grid.
 ///
@@ -23,6 +24,7 @@ class ProductCard extends StatelessWidget {
     this.heroPrefix = 'grid',
     this.selected = false,
     this.onTap,
+    this.highlight = '',
   });
 
   final Product product;
@@ -34,6 +36,9 @@ class ProductCard extends StatelessWidget {
 
   /// Overrides the default push-a-route behaviour.
   final VoidCallback? onTap;
+
+  /// Search terms to pick out in the name, so a result shows why it matched.
+  final String highlight;
 
   @override
   Widget build(BuildContext context) {
@@ -122,10 +127,10 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 3),
-              Text(
-                product.name,
+              HighlightedText(
+                text: product.name,
+                query: highlight,
                 maxLines: 2,
-                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.titleSmall,
               ),
               const SizedBox(height: 6),

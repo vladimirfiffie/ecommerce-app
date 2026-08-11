@@ -5,8 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
-import '../../state/cart_provider.dart';
-import '../../state/favorites_provider.dart';
 import '../../state/orders_provider.dart';
 import 'widgets/edit_name_sheet.dart';
 import '../../state/profile_provider.dart';
@@ -21,8 +19,6 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final int orderCount = ref.watch(ordersProvider).length;
-    final int savedCount = ref.watch(favoritesProvider).length;
-    final int bagCount = ref.watch(cartCountProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -36,36 +32,6 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 14),
             const _AccountCard(),
             const SizedBox(height: 18),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: _StatTile(
-                    label: 'Orders',
-                    value: '$orderCount',
-                    icon: Icons.receipt_long_rounded,
-                    onTap: () => context.push(Routes.orders),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _StatTile(
-                    label: 'Saved',
-                    value: '$savedCount',
-                    icon: Icons.favorite_rounded,
-                    onTap: () => context.go(Routes.favorites),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _StatTile(
-                    label: 'In bag',
-                    value: '$bagCount',
-                    icon: Icons.shopping_bag_rounded,
-                    onTap: () => context.go(Routes.cart),
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 28),
             _SectionCard(
               children: <Widget>[
@@ -218,49 +184,6 @@ class _ProfileHeader extends ConsumerWidget {
   }
 }
 
-class _StatTile extends StatelessWidget {
-  const _StatTile({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-          child: Column(
-            children: <Widget>[
-              Icon(icon, size: 21, color: theme.colorScheme.primary),
-              const SizedBox(height: 8),
-              Text(value, style: theme.textTheme.titleLarge),
-              Text(
-                label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SectionCard extends StatelessWidget {
   const _SectionCard({required this.children});
 
@@ -311,7 +234,6 @@ class _AccountCard extends ConsumerWidget {
       title: 'Sign out?',
       message: 'Your bag, wishlist and orders stay on this device.',
       confirmLabel: 'Sign out',
-      cancelLabel: 'Stay signed in',
     );
     if (yes) await ref.read(authProvider.notifier).signOut();
   }

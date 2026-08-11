@@ -241,7 +241,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       await settle(tester);
 
-      await tester.tap(find.text('Linen Tee').first);
+      // Search highlights the matched words, so the name is a RichText —
+      // plain find.text skips those unless asked.
+      await tester.tap(
+        find.textContaining('Linen Tee', findRichText: true).first,
+      );
       await settle(tester);
 
       expect(find.byType(ProductDetailScreen), findsOneWidget);
@@ -258,7 +262,7 @@ void main() {
       await c.read(cartProvider.notifier).add(catalog.byId('tee')!);
       await settle(tester);
 
-      await tester.tap(find.text('Cart').last);
+      await tester.tap(find.text('Bag').last);
       await settle(tester);
       await tester.tap(find.textContaining('Checkout').last);
       await settle(tester);
@@ -273,7 +277,7 @@ void main() {
       await c.read(cartProvider.notifier).add(catalog.byId('tee')!);
       await settle(tester);
 
-      await tester.tap(find.text('Cart').last);
+      await tester.tap(find.text('Bag').last);
       await settle(tester);
       await tester.tap(find.textContaining('Checkout').last);
       await settle(tester);

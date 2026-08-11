@@ -86,7 +86,6 @@ class AddressesScreen extends ConsumerWidget {
       title: 'Remove address?',
       message: address.oneLine,
       confirmLabel: 'Remove',
-      cancelLabel: 'Keep address',
     );
     if (yes) {
       await ref.read(addressesProvider.notifier).remove(address.id);

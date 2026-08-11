@@ -59,7 +59,7 @@ void main() {
     await tester.pumpWidget(await buildApp());
     await settle(tester);
 
-    await tester.tap(find.text('Cart'));
+    await tester.tap(find.text('Bag'));
     await settle(tester);
     expect(find.text('Your bag'), findsOneWidget);
     expect(find.text('Your bag is empty'), findsOneWidget);
@@ -101,7 +101,7 @@ void main() {
 
     expect(container.read(cartCountProvider), 2);
 
-    await tester.tap(find.text('Cart'));
+    await tester.tap(find.text('Bag'));
     await settle(tester);
 
     expect(find.text('Linen Tee'), findsOneWidget);

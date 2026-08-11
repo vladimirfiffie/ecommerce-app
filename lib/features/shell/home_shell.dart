@@ -65,7 +65,7 @@ class HomeShell extends ConsumerWidget {
         badgeCount: favoriteCount,
       ),
       _Destination(
-        label: 'Cart',
+        label: 'Bag',
         icon: Icons.shopping_bag_outlined,
         selectedIcon: Icons.shopping_bag_rounded,
         badgeCount: cartCount,

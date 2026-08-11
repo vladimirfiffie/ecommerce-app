@@ -212,37 +212,64 @@ class _CategoryStrip extends ConsumerWidget {
             const SizedBox(width: 8),
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
-            return ChoiceChip(
-              label: const Text('All'),
+            return _CategoryChip(
+              label: 'All',
               selected: selected == null,
-              onSelected: (_) =>
+              onSelected: () =>
                   ref.read(catalogFilterProvider.notifier).setCategory(null),
             );
           }
           final Category category = categories[index - 1];
           final bool isSelected = selected == category.id;
-          return ChoiceChip(
-            avatar: Icon(
-              category.icon,
-              size: 17,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            label: Text(category.label),
+          return _CategoryChip(
+            label: category.label,
+            icon: category.icon,
             selected: isSelected,
-            labelStyle: TextStyle(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-            onSelected: (_) => ref
+            onSelected: () => ref
                 .read(catalogFilterProvider.notifier)
                 .setCategory(isSelected ? null : category.id),
           );
         },
       ),
+    );
+  }
+}
+
+/// One chip in the category strip.
+///
+/// "All" and the categories are the same widget so their label styling can't
+/// drift apart — previously "All" alone fell back to the default chip label
+/// colour and weight, so it looked greyer and lighter than the rest.
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+    this.icon,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    final Color foreground = selected ? scheme.onPrimary : scheme.onSurface;
+
+    return ChoiceChip(
+      avatar: icon == null
+          ? null
+          : Icon(
+              icon,
+              size: 17,
+              color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
+            ),
+      label: Text(label),
+      selected: selected,
+      labelStyle: TextStyle(color: foreground, fontWeight: FontWeight.w600),
+      onSelected: (_) => onSelected(),
     );
   }
 }
