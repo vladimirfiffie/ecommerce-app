@@ -1,7 +1,7 @@
 name: ecommerce_app
 description: "Nova — a Material 3 storefront built entirely in Flutter."
 publish_to: 'none'
-version: 0.8.0+9
+version: 0.9.0+10
 
 environment:
   sdk: ^3.12.2

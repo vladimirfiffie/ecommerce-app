@@ -30,6 +30,30 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.9.0',
+    headline: 'Know what you’re buying',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'storefront_outlined',
+        'Brand pages',
+        'Tap the brand on any product to see everything it sells, with its '
+            'rating, cheapest price and how many are on sale.',
+      ),
+      ReleaseHighlight(
+        'tune_rounded',
+        'Specifications',
+        'Products now list their size, weight, warranty, shipping and '
+            'returns — no more guessing what turns up in the box.',
+      ),
+      ReleaseHighlight(
+        'bug_report_outlined',
+        'A fix',
+        'The deals line on a product page no longer runs off the edge of '
+            'narrow screens.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.8.0',
     headline: 'A proper front door',
     highlights: <ReleaseHighlight>[

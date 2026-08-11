@@ -123,11 +123,11 @@ builds APKs (per-ABI plus universal) and publishes them as a GitHub
 **prerelease**.
 
 ```bash
-git tag v0.8.0
-git push origin v0.8.0
+git tag v0.9.0
+git push origin v0.9.0
 ```
 
-Grab `nova-v0.8.0-arm64-v8a.apk` for most modern phones, or the `universal` APK
+Grab `nova-v0.9.0-arm64-v8a.apk` for most modern phones, or the `universal` APK
 if you're unsure. You'll need to allow installs from unknown sources.
 
 > APKs are **signed with Android's debug key**. That's fine for sideloaded
