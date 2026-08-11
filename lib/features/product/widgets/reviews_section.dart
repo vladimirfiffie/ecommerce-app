@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/product.dart';
 import '../../../data/models/review.dart';
 import '../../../shared/widgets/rating_stars.dart';
+import '../../../state/reviews_provider.dart';
+import 'write_review_sheet.dart';
 
 /// Rating summary, star histogram, and the review list.
-class ReviewsSection extends StatelessWidget {
+class ReviewsSection extends ConsumerWidget {
   const ReviewsSection({required this.product, super.key});
 
   final Product product;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
-    if (product.reviews.isEmpty) return const SizedBox.shrink();
+    final List<Review> reviews = ref.watch(productReviewsProvider(product));
+    final ({double rating, int count}) summary = ref.watch(
+      productRatingProvider(product),
+    );
+    final UserReview? mine = ref.watch(myReviewProvider(product.id));
+    final bool purchased = ref.watch(canReviewProvider(product.id));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -27,7 +35,7 @@ class ReviewsSection extends StatelessWidget {
               Text('Reviews', style: theme.textTheme.titleLarge),
               const SizedBox(width: 8),
               Text(
-                '(${formatCount(product.reviewCount)})',
+                '(${formatCount(summary.count)})',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -49,18 +57,18 @@ class ReviewsSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      product.rating.toStringAsFixed(1),
+                      summary.rating.toStringAsFixed(1),
                       style: theme.textTheme.displaySmall,
                     ),
                     const SizedBox(height: 4),
                     RatingStars(
-                      rating: product.rating,
+                      rating: summary.rating,
                       showValue: false,
                       size: 14,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${formatCount(product.reviewCount)} ratings',
+                      '${formatCount(summary.count)} ratings',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -68,13 +76,15 @@ class ReviewsSection extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 24),
-                Expanded(child: _Histogram(rating: product.rating)),
+                Expanded(child: _Histogram(rating: summary.rating)),
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          for (final Review review in product.reviews)
-            _ReviewTile(review: review),
+          const SizedBox(height: 14),
+          _WriteCta(product: product, mine: mine, purchased: purchased),
+          const SizedBox(height: 4),
+          for (int i = 0; i < reviews.length; i++)
+            _ReviewTile(review: reviews[i], isMine: mine != null && i == 0),
         ],
       ),
     );
@@ -132,9 +142,10 @@ class _Histogram extends StatelessWidget {
 }
 
 class _ReviewTile extends StatelessWidget {
-  const _ReviewTile({required this.review});
+  const _ReviewTile({required this.review, this.isMine = false});
 
   final Review review;
+  final bool isMine;
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +172,30 @@ class _ReviewTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(review.author, style: theme.textTheme.titleSmall),
+                    Row(
+                      children: <Widget>[
+                        Text(review.author, style: theme.textTheme.titleSmall),
+                        if (isMine) ...<Widget>[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              'Your review',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                     Text(
                       review.timeAgo,
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -182,6 +216,74 @@ class _ReviewTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Prompt to write, or a shortcut to edit what's already there.
+class _WriteCta extends StatelessWidget {
+  const _WriteCta({
+    required this.product,
+    required this.mine,
+    required this.purchased,
+  });
+
+  final Product product;
+  final UserReview? mine;
+
+  /// Reviews are limited to shoppers who actually bought the item.
+  final bool purchased;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    if (mine != null) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: OutlinedButton.icon(
+          onPressed: () => showWriteReviewSheet(context, product),
+          icon: const Icon(Icons.edit_outlined, size: 18),
+          label: const Text('Edit your review'),
+        ),
+      );
+    }
+    if (!purchased) {
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.35,
+          ),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        ),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              Icons.verified_outlined,
+              size: 18,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Only verified buyers can review this item.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: FilledButton.tonalIcon(
+        onPressed: () => showWriteReviewSheet(context, product),
+        icon: const Icon(Icons.rate_review_outlined, size: 18),
+        label: const Text('Write a review'),
       ),
     );
   }

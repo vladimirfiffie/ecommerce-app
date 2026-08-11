@@ -18,7 +18,18 @@ just Flutter widgets and pub plugins.
 | **Checkout** | Shipping → payment → review stepper, saved addresses, order confirmation |
 | **Orders** | History with a status tracker that advances over time, reorder |
 | **Saved** | Wishlist with bulk add-to-bag |
-| **Profile** | Light/dark/auto theme, Material You dynamic colour, data reset |
+| **Reviews** | Verified buyers can write, edit and delete a review; it pins to the top of the list and folds into the rating average |
+| **Profile** | Light/dark/auto, AMOLED black, Material You, haptics, notifications, biometrics, data reset |
+
+### Device integration
+
+| | |
+| --- | --- |
+| **Haptics** | Master switch, three intensity levels, four mutable channels, live capability report and a playground covering every `haptic_kit` primitive and widget |
+| **Notifications** | Permission flow, master switch and three categories; ordering posts a confirmation and schedules shipping/delivery notices |
+| **Biometrics** | Opt-in verification before payment, with a capability report and a test prompt |
+| **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
+| **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
 
 Everything the shopper does — bag, wishlist, orders, addresses, search history,
 recently viewed, theme — persists across restarts via `shared_preferences`.
@@ -31,6 +42,9 @@ recently viewed, theme — persists across restarts via `shared_preferences`.
 - **go_router** — `StatefulShellRoute.indexedStack`, so each tab keeps its own
   navigation stack
 - **cached_network_image** + **shimmer** — image caching and loading skeletons
+- **haptic_kit** — haptic feedback and tactile widgets
+- **local_auth** — biometric verification before payment
+- **flutter_local_notifications** + **timezone** — order-status notifications
 - **flutter_animate** — entrance choreography
 - **dynamic_color** — Material You palette on Android 12+
 - **google_fonts**, **intl**, **share_plus**, **url_launcher**
@@ -77,13 +91,21 @@ flutter run -d linux        # desktop
 
 ```bash
 flutter analyze --fatal-infos
-flutter test                # 33 tests
+flutter test                # 97 tests
 ```
 
 Coverage spans cart maths (variant merging, stock caps, promos, shipping
-thresholds), catalog filtering and sorting, catalog-asset integrity, and widget
-tests that drive the real purchase flow end to end — shop → product → bag →
-checkout → confirmation.
+thresholds), catalog filtering and sorting, catalog-asset integrity, haptic
+gating and intensity scaling, breakpoint and AMOLED behaviour, the biometric
+payment gate, notification gating, review storage and rating maths — plus
+widget tests that drive the real purchase flow end to end: shop → product →
+bag → checkout → confirmation.
+
+Three subsystems talk to plugins that only exist on Android and iOS. Each is
+wrapped in a service that is platform-guarded and non-throwing, because
+decorative feedback must never be able to break a checkout — a lesson learned
+when an unregistered notification plugin raised a `LateInitializationError`
+(an `Error`, not an `Exception`) and took order placement down in two tests.
 
 ## Releases
 
