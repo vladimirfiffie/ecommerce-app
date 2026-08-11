@@ -21,6 +21,7 @@ import '../../features/shell/home_shell.dart';
 import '../../features/profile/security_settings_screen.dart';
 import '../../features/profile/notification_settings_screen.dart';
 import '../../features/auth/auth_screen.dart';
+import '../../features/brand/brand_screen.dart';
 import '../../features/profile/payment_methods_screen.dart';
 import '../../features/profile/addresses_screen.dart';
 import '../../features/orders/return_request_screen.dart';
@@ -46,6 +47,10 @@ abstract final class Routes {
   static const String orders = '/orders';
 
   static String product(String id) => '/product/$id';
+
+  /// Brand is free text, so it has to be escaped into the path.
+  static String brand(String name) => '/brand/${Uri.encodeComponent(name)}';
+
   static String order(String id) => '/orders/$id';
   static String invoice(String id) => '/orders/$id/receipt';
   static String returnRequest(String id) => '/orders/$id/return';
@@ -177,6 +182,14 @@ GoRouter createRouter(Ref ref) {
         parentNavigatorKey: _rootKey,
         builder: (BuildContext context, GoRouterState state) =>
             ProductDetailScreen(productId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        // go_router hands back an already-decoded parameter, so the name is
+        // used as-is — decoding again would mangle any brand with a % in it.
+        path: '/brand/:name',
+        parentNavigatorKey: _rootKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            BrandScreen(brand: state.pathParameters['name']!),
       ),
       GoRoute(
         path: Routes.search,

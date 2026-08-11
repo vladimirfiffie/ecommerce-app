@@ -24,6 +24,7 @@ import '../../state/cart_provider.dart';
 import '../../state/catalog_filter_provider.dart';
 import 'widgets/image_gallery.dart';
 import 'widgets/reviews_section.dart';
+import 'widgets/specs_section.dart';
 import 'widgets/variant_selector.dart';
 import '../../state/haptics_provider.dart';
 import 'package:haptic_kit/haptic_kit.dart';
@@ -267,11 +268,36 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         children: <Widget>[
           Row(
             children: <Widget>[
-              Text(
-                product.brand.toUpperCase(),
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                  letterSpacing: 0.8,
+              // Through to everything else this brand sells.
+              Flexible(
+                child: InkWell(
+                  onTap: () => context.push(Routes.brand(product.brand)),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Flexible(
+                          child: Text(
+                            product.brand.toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.primary,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               const Spacer(),
@@ -335,17 +361,26 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   color: theme.colorScheme.error,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  'In today’s deals · ',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                    fontWeight: FontWeight.w700,
+                // Both halves flex: at 360dp with a large text scale the
+                // label plus "Ends in 12h 34m" is wider than the column, and
+                // a fixed pair overflowed the row rather than shrinking.
+                Flexible(
+                  child: Text(
+                    'In today’s deals · ',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                DealCountdown(
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: DealCountdown(
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -429,6 +464,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 child: Text(_descriptionExpanded ? 'Show less' : 'Read more'),
               ),
             ),
+          const SizedBox(height: 26),
+          SpecsSection(product: product),
           const SizedBox(height: 20),
           if (!product.inStock) ...<Widget>[
             const SizedBox(height: 16),

@@ -56,6 +56,20 @@ class Catalog {
       .where((Product p) => p.categoryId == categoryId)
       .toList(growable: false);
 
+  /// Everything carrying one brand, best-rated first.
+  ///
+  /// Matched case-insensitively: brand is free text from the source, so the
+  /// same name can arrive capitalised differently on different products.
+  List<Product> byBrand(String brand) {
+    final String needle = brand.trim().toLowerCase();
+    if (needle.isEmpty) return const <Product>[];
+    final List<Product> hits = products
+        .where((Product p) => p.brand.trim().toLowerCase() == needle)
+        .toList();
+    hits.sort((Product a, Product b) => b.rating.compareTo(a.rating));
+    return hits;
+  }
+
   /// Same category, excluding [product] itself, best-rated first.
   List<Product> related(Product product, {int limit = 8}) {
     final List<Product> pool = products

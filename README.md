@@ -14,7 +14,8 @@ just Flutter widgets and pub plugins.
 | **Home** | Auto-advancing promo carousel, category tiles, deals / new-arrivals / recently-viewed rails, popular grid, pull to refresh |
 | **Shop** | 157 products across 6 categories, category strip, grid/list toggle, filter & sort sheet (type, max price, min rating, on-sale, in-stock) |
 | **Search** | Debounced live results, persisted recent searches, trending chips |
-| **Product** | Swipeable gallery with pinch and double-tap zoom, size guide, variants, Q&A, rating histogram, reviews, related rail, back-in-stock alerts |
+| **Product** | Swipeable gallery with pinch and double-tap zoom, size guide, variants, specifications table, Q&A, rating histogram, reviews, related rail, back-in-stock alerts |
+| **Brand** | Tap the brand on any product for everything it sells, with product count, average rating, cheapest price and how many are on sale |
 | **Bag** | Per-variant lines, swipe to delete with undo, promo codes, free-shipping progress, live order maths |
 | **Checkout** | Shipping → payment → review stepper, saved addresses and cards, three delivery speeds, gift wrap and message, order confirmation |
 | **Orders** | Status tracker that advances over time, cancel before dispatch, partial returns with refund maths, shareable receipt, reorder |

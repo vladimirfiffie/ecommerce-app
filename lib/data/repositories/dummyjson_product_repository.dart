@@ -281,7 +281,37 @@ class DummyJsonProductRepository implements ProductRepository {
       sizes: _sizeRuns[slug] ?? const <String>[],
       isNew: newIds.contains(id),
       isFeatured: featuredIds.contains(id),
+      specs: _toSpecs(p),
     );
+  }
+
+  /// The small print DummyJSON carries alongside every product.
+  ///
+  /// `dimensions` is a nested object and may be missing entirely, so each
+  /// measurement is read defensively — a half-present dimension set is
+  /// dropped rather than drawn as "12 × ? × 8".
+  ProductSpecs _toSpecs(Map<String, dynamic> p) {
+    final Object? raw = p['dimensions'];
+    final Map<String, dynamic> dims = raw is Map<String, dynamic>
+        ? raw
+        : const <String, dynamic>{};
+
+    return ProductSpecs(
+      sku: _nonEmpty(p['sku']),
+      weightGrams: (p['weight'] as num?)?.toDouble(),
+      widthCm: (dims['width'] as num?)?.toDouble(),
+      heightCm: (dims['height'] as num?)?.toDouble(),
+      depthCm: (dims['depth'] as num?)?.toDouble(),
+      warranty: _nonEmpty(p['warrantyInformation']),
+      shipping: _nonEmpty(p['shippingInformation']),
+      returnPolicy: _nonEmpty(p['returnPolicy']),
+      minimumOrderQuantity: (p['minimumOrderQuantity'] as num?)?.toInt(),
+    );
+  }
+
+  static String? _nonEmpty(Object? value) {
+    final String? text = (value as String?)?.trim();
+    return (text == null || text.isEmpty) ? null : text;
   }
 
   Review _toReview(Map<String, dynamic> r, DateTime now) {

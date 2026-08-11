@@ -49,8 +49,14 @@ class _DealCountdownState extends State<DealCountdown> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Text(formatDealsRemaining(_now), style: widget.style);
+  Widget build(BuildContext context) => Text(
+    formatDealsRemaining(_now),
+    // A countdown that wraps onto a second line looks broken. Callers put
+    // this in tight rows, so it clips rather than reflows.
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: widget.style,
+  );
 }
 
 /// "Ends in 4h 12m", down to "Ends in under a minute".

@@ -132,7 +132,9 @@ Product testProduct({
   String subcategory = 'Jackets',
   bool isFeatured = false,
   bool isNew = false,
+  ProductSpecs specs = ProductSpecs.none,
 }) => Product(
+  specs: specs,
   id: id,
   name: name,
   brand: brand,

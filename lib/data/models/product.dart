@@ -24,6 +24,7 @@ class Product {
     this.stock = 25,
     this.isNew = false,
     this.isFeatured = false,
+    this.specs = ProductSpecs.none,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
@@ -60,6 +61,9 @@ class Product {
     ],
     isNew: json['isNew'] as bool? ?? false,
     isFeatured: json['isFeatured'] as bool? ?? false,
+    specs: json['specs'] == null
+        ? ProductSpecs.none
+        : ProductSpecs.fromJson(json['specs']! as Map<String, dynamic>),
   );
 
   final String id;
@@ -90,6 +94,9 @@ class Product {
   final bool isNew;
   final bool isFeatured;
 
+  /// Weight, size, warranty and the rest of the small print.
+  final ProductSpecs specs;
+
   bool get isOnSale => compareAtPrice != null && compareAtPrice! > price;
 
   bool get inStock => stock > 0;
@@ -114,6 +121,78 @@ class Product {
 
   @override
   int get hashCode => id.hashCode;
+}
+
+/// The manufacturer-ish detail a shopper checks before committing: what it
+/// weighs, how big it is, what happens if it goes wrong.
+///
+/// Every field is optional — the catalog source fills in what it has, and the
+/// spec table simply omits the rest rather than printing "Unknown".
+@immutable
+class ProductSpecs {
+  const ProductSpecs({
+    this.sku,
+    this.weightGrams,
+    this.widthCm,
+    this.heightCm,
+    this.depthCm,
+    this.warranty,
+    this.shipping,
+    this.returnPolicy,
+    this.minimumOrderQuantity,
+  });
+
+  factory ProductSpecs.fromJson(Map<String, dynamic> json) => ProductSpecs(
+    sku: json['sku'] as String?,
+    weightGrams: (json['weightGrams'] as num?)?.toDouble(),
+    widthCm: (json['widthCm'] as num?)?.toDouble(),
+    heightCm: (json['heightCm'] as num?)?.toDouble(),
+    depthCm: (json['depthCm'] as num?)?.toDouble(),
+    warranty: json['warranty'] as String?,
+    shipping: json['shipping'] as String?,
+    returnPolicy: json['returnPolicy'] as String?,
+    minimumOrderQuantity: json['minimumOrderQuantity'] as int?,
+  );
+
+  static const ProductSpecs none = ProductSpecs();
+
+  final String? sku;
+  final double? weightGrams;
+  final double? widthCm;
+  final double? heightCm;
+  final double? depthCm;
+  final String? warranty;
+  final String? shipping;
+  final String? returnPolicy;
+
+  /// Some catalogue lines only sell in bulk. Only worth showing above 1.
+  final int? minimumOrderQuantity;
+
+  bool get hasDimensions =>
+      widthCm != null && heightCm != null && depthCm != null;
+
+  /// True when there's at least one row worth drawing.
+  bool get isNotEmpty =>
+      sku != null ||
+      weightGrams != null ||
+      hasDimensions ||
+      warranty != null ||
+      shipping != null ||
+      returnPolicy != null ||
+      (minimumOrderQuantity ?? 1) > 1;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    if (sku != null) 'sku': sku,
+    if (weightGrams != null) 'weightGrams': weightGrams,
+    if (widthCm != null) 'widthCm': widthCm,
+    if (heightCm != null) 'heightCm': heightCm,
+    if (depthCm != null) 'depthCm': depthCm,
+    if (warranty != null) 'warranty': warranty,
+    if (shipping != null) 'shipping': shipping,
+    if (returnPolicy != null) 'returnPolicy': returnPolicy,
+    if (minimumOrderQuantity != null)
+      'minimumOrderQuantity': minimumOrderQuantity,
+  };
 }
 
 /// A named colourway, stored as an ARGB value so it survives serialisation.
