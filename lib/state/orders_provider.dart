@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,6 +42,7 @@ class OrdersNotifier extends Notifier<List<Order>> {
     required String paymentLabel,
     DeliveryOption delivery = DeliveryOption.standard,
   }) async {
+    final GiftOptions gift = ref.read(giftOptionsProvider);
     final CartSummary summary = ref.read(cartSummaryProvider);
     final List<CartEntry> entries = <CartEntry>[...ref.read(cartProvider)];
     final DateTime now = DateTime.now();
@@ -56,6 +58,8 @@ class OrdersNotifier extends Notifier<List<Order>> {
       shippingAddress: '${address.recipient}, ${address.oneLine}',
       paymentLabel: paymentLabel,
       deliveryId: delivery.id,
+      giftWrapped: gift.wrapped,
+      giftMessage: gift.message.trim(),
     );
 
     final List<Order> next = <Order>[order, ...state];
@@ -67,7 +71,113 @@ class OrdersNotifier extends Notifier<List<Order>> {
 
     await ref.read(cartProvider.notifier).clear();
     ref.read(appliedPromoProvider.notifier).clear();
+    ref.read(giftOptionsProvider.notifier).reset();
     return order;
+  }
+
+  Future<void> _write(List<Order> next) async {
+    state = next;
+    await _prefs.setString(
+      _key,
+      jsonEncode(next.map((Order o) => o.toJson()).toList()),
+    );
+  }
+
+  Order? _byId(String id) {
+    for (final Order o in state) {
+      if (o.id == id) return o;
+    }
+    return null;
+  }
+
+  /// Cancels an order that hasn't shipped. Returns false when it's too late,
+  /// so the caller can explain rather than silently doing nothing.
+  Future<bool> cancel(String orderId) async {
+    final Order? order = _byId(orderId);
+    if (order == null || !order.canCancel) return false;
+
+    await _write(<Order>[
+      for (final Order o in state)
+        if (o.id == orderId) o.copyWith(cancelledAt: DateTime.now()) else o,
+    ]);
+    return true;
+  }
+
+  /// What would be refunded for the given lines.
+  ///
+  /// Item value is refunded pro-rata against any discount that was applied.
+  /// Original outbound shipping only comes back on a full return, and return
+  /// postage is only covered when the fault was the shop's.
+  RefundQuote quoteRefund({
+    required Order order,
+    required Set<String> lineIds,
+    required ReturnReason reason,
+    required Map<String, double> lineTotals,
+  }) {
+    final double returningValue = lineIds.fold(
+      0,
+      (double sum, String id) => sum + (lineTotals[id] ?? 0),
+    );
+    final double allValue = lineTotals.values.fold(
+      0,
+      (double sum, double v) => sum + v,
+    );
+
+    final double share = allValue == 0 ? 0 : returningValue / allValue;
+    final double discountBack = order.discount * share;
+    final double itemsBack = returningValue - discountBack;
+
+    final bool everything = lineIds.length == lineTotals.length;
+    final double shippingBack = everything ? order.shipping : 0;
+
+    // Tax follows whatever is actually refunded.
+    final double taxBack = (itemsBack + shippingBack) * Pricing.taxRate;
+
+    return RefundQuote(
+      items: itemsBack,
+      shipping: shippingBack,
+      tax: taxBack,
+      returnPostagePaidByShop: reason.sellerAtFault,
+      total: itemsBack + shippingBack + taxBack,
+    );
+  }
+
+  /// Files a return. Returns false when the order isn't eligible.
+  Future<bool> requestReturn({
+    required String orderId,
+    required Set<String> lineIds,
+    required ReturnReason reason,
+    required double refundAmount,
+    String note = '',
+  }) async {
+    final Order? order = _byId(orderId);
+    if (order == null || !order.canReturn || lineIds.isEmpty) return false;
+
+    final ReturnRequest request = ReturnRequest(
+      requestedAt: DateTime.now(),
+      reason: reason,
+      lineIds: lineIds.toList(),
+      refundAmount: refundAmount,
+      note: note.trim(),
+    );
+    await _write(<Order>[
+      for (final Order o in state)
+        if (o.id == orderId) o.copyWith(returnRequest: request) else o,
+    ]);
+    return true;
+  }
+
+  /// Withdraws a return that hasn't been refunded yet.
+  Future<bool> cancelReturn(String orderId) async {
+    final Order? order = _byId(orderId);
+    if (order == null || order.status != OrderStatus.returnRequested) {
+      return false;
+    }
+    await _write(<Order>[
+      for (final Order o in state)
+        if (o.id == orderId) o.copyWith(clearReturn: true) else o,
+    ]);
+    return true;
   }
 
   Future<void> clear() async {
@@ -99,3 +209,26 @@ final ProviderFamily<List<CartItem>, String> orderItemsProvider =
             CartItem(entry: e, product: p),
       ];
     });
+
+/// Breakdown of what a return would put back on the card.
+@immutable
+class RefundQuote {
+  const RefundQuote({
+    required this.items,
+    required this.shipping,
+    required this.tax,
+    required this.total,
+    required this.returnPostagePaidByShop,
+  });
+
+  final double items;
+
+  /// Outbound shipping, refunded only when everything goes back.
+  final double shipping;
+
+  final double tax;
+  final double total;
+
+  /// True when the shop is at fault and covers return postage.
+  final bool returnPostagePaidByShop;
+}

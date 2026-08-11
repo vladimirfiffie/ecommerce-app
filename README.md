@@ -13,10 +13,10 @@ just Flutter widgets and pub plugins.
 | **Home** | Auto-advancing promo carousel, category tiles, deals / new-arrivals / recently-viewed rails, popular grid, pull to refresh |
 | **Shop** | 157 products across 6 categories, category strip, grid/list toggle, filter & sort sheet (type, max price, min rating, on-sale, in-stock) |
 | **Search** | Debounced live results, persisted recent searches, trending chips |
-| **Product** | Swipeable gallery with pinch-to-zoom, size and colour variants, quantity stepper, expandable description, rating histogram, reviews, related rail |
+| **Product** | Swipeable gallery with pinch and double-tap zoom, size guide, variants, Q&A, rating histogram, reviews, related rail, back-in-stock alerts |
 | **Bag** | Per-variant lines, swipe to delete with undo, promo codes, free-shipping progress, live order maths |
-| **Checkout** | Shipping → payment → review stepper, saved addresses and cards, three delivery speeds, order confirmation |
-| **Orders** | History with a status tracker that advances over time, reorder |
+| **Checkout** | Shipping → payment → review stepper, saved addresses and cards, three delivery speeds, gift wrap and message, order confirmation |
+| **Orders** | Status tracker that advances over time, cancel before dispatch, partial returns with refund maths, shareable receipt, reorder |
 | **Saved** | Wishlist with bulk add-to-bag |
 | **Reviews** | Verified buyers can write, edit and delete a review; it pins to the top of the list and folds into the rating average |
 | **Profile** | Editable name, light/dark/auto, 8 theme presets, AMOLED black, Material You, haptics, notifications, biometrics, data reset |
@@ -30,6 +30,7 @@ just Flutter widgets and pub plugins.
 | **Biometrics** | Opt-in verification before payment, with a capability report and a test prompt |
 | **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
 | **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
+| **Deep links** | `nova://product/<id>` and https App Links resolve to in-app routes |
 | **Personalization** | Time-aware greeting using your name, and 8 seed-colour presets that Material 3 expands into full light/dark schemes |
 | **Accounts** | Local sign-up / sign-in with PBKDF2-hashed passwords. Optional — everything works as a guest |
 | **Wallet** | Add/remove cards with Luhn validation and brand detection; only the last four digits are stored, never the CVV |
@@ -96,7 +97,8 @@ flutter run -d linux        # desktop
 
 ```bash
 flutter analyze --fatal-infos
-flutter test                # 164 tests
+flutter test                     # 207 tests
+flutter test integration_test -d linux   # 4 end-to-end, real plugins
 ```
 
 Coverage spans cart maths (variant merging, stock caps, promos, shipping

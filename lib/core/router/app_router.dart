@@ -20,6 +20,8 @@ import '../../features/profile/notification_settings_screen.dart';
 import '../../features/auth/auth_screen.dart';
 import '../../features/profile/payment_methods_screen.dart';
 import '../../features/profile/addresses_screen.dart';
+import '../../features/orders/return_request_screen.dart';
+import '../../features/orders/invoice_screen.dart';
 
 /// Route paths, referenced by name everywhere else.
 abstract final class Routes {
@@ -42,8 +44,32 @@ abstract final class Routes {
 
   static String product(String id) => '/product/$id';
   static String order(String id) => '/orders/$id';
+  static String invoice(String id) => '/orders/$id/receipt';
+  static String returnRequest(String id) => '/orders/$id/return';
   static const String checkout = '/checkout';
   static String confirmation(String id) => '/confirmation/$id';
+}
+
+/// Custom scheme used by shared links.
+const String kDeepLinkScheme = 'nova';
+
+/// Web host that mirrors the app's routes, for https App Links.
+const String kDeepLinkHost = 'nova.example.com';
+
+/// A shareable link to a product.
+String deepLinkForProduct(String productId) =>
+    'https://$kDeepLinkHost/product/$productId';
+
+/// Rewrites a custom-scheme link into an in-app route.
+///
+/// `nova://product/abc` parses with host `product` and path `/abc`, so the
+/// path alone never matches a route — the host has to be folded back in.
+/// https links already arrive with the full path and are left alone.
+String? normalizeDeepLink(Uri uri) {
+  if (uri.scheme != kDeepLinkScheme) return null;
+  if (uri.host.isEmpty) return null;
+  final String path = '/${uri.host}${uri.path}';
+  return uri.hasQuery ? '$path?${uri.query}' : path;
 }
 
 final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(
@@ -53,6 +79,13 @@ final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(
 GoRouter createRouter() => GoRouter(
   navigatorKey: _rootKey,
   initialLocation: Routes.home,
+  redirect: (BuildContext context, GoRouterState state) {
+    final String? rewritten = normalizeDeepLink(state.uri);
+    // Returning the same location would loop.
+    return rewritten == null || rewritten == state.matchedLocation
+        ? null
+        : rewritten;
+  },
   routes: <RouteBase>[
     StatefulShellRoute.indexedStack(
       builder:
@@ -182,6 +215,20 @@ GoRouter createRouter() => GoRouter(
           parentNavigatorKey: _rootKey,
           builder: (BuildContext context, GoRouterState state) =>
               OrderDetailScreen(orderId: state.pathParameters['id']!),
+          routes: <RouteBase>[
+            GoRoute(
+              path: 'receipt',
+              parentNavigatorKey: _rootKey,
+              builder: (BuildContext context, GoRouterState state) =>
+                  InvoiceScreen(orderId: state.pathParameters['id']!),
+            ),
+            GoRoute(
+              path: 'return',
+              parentNavigatorKey: _rootKey,
+              builder: (BuildContext context, GoRouterState state) =>
+                  ReturnRequestScreen(orderId: state.pathParameters['id']!),
+            ),
+          ],
         ),
       ],
     ),

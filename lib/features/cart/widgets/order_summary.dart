@@ -45,6 +45,8 @@ class OrderSummary extends ConsumerWidget {
                 : formatPrice(summary.shipping),
             highlight: summary.shipping == 0 ? AppTheme.success : null,
           ),
+          if (summary.giftFee > 0)
+            _Line(label: 'Gift wrap', value: formatPrice(summary.giftFee)),
           _Line(label: 'Estimated tax', value: formatPrice(summary.tax)),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),

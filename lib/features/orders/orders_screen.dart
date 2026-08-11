@@ -165,6 +165,21 @@ class OrderStatusPill extends StatelessWidget {
         AppTheme.success,
         Icons.check_circle_rounded,
       ),
+      OrderStatus.cancelled => (
+        theme.colorScheme.surfaceContainerHighest,
+        theme.colorScheme.onSurfaceVariant,
+        Icons.cancel_outlined,
+      ),
+      OrderStatus.returnRequested => (
+        theme.colorScheme.tertiaryContainer,
+        theme.colorScheme.onTertiaryContainer,
+        Icons.assignment_return_outlined,
+      ),
+      OrderStatus.refunded => (
+        theme.colorScheme.secondaryContainer,
+        theme.colorScheme.onSecondaryContainer,
+        Icons.replay_circle_filled_rounded,
+      ),
     };
 
     return Pill(

@@ -132,6 +132,20 @@ class OrderDetailScreen extends ConsumerWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+          if (order.giftWrapped || order.giftMessage.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 16),
+            Text('Gift', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(
+              <String>[
+                if (order.giftWrapped) 'Gift wrapped',
+                if (order.giftMessage.isNotEmpty) '“${order.giftMessage}”',
+              ].join('\n'),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           Text('Payment', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -142,6 +156,37 @@ class OrderDetailScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 30),
+
+          if (order.returnRequest case final ReturnRequest r) ...<Widget>[
+            _ReturnBanner(order: order, request: r),
+            const SizedBox(height: 14),
+          ],
+
+          if (order.canCancel) ...<Widget>[
+            OutlinedButton.icon(
+              onPressed: () => _cancel(context, ref, order),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: theme.colorScheme.error,
+              ),
+              icon: const Icon(Icons.cancel_outlined, size: 20),
+              label: const Text('Cancel this order'),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (order.canReturn) ...<Widget>[
+            OutlinedButton.icon(
+              onPressed: () => context.push(Routes.returnRequest(order.id)),
+              icon: const Icon(Icons.assignment_return_outlined, size: 20),
+              label: Text('Return items · ${order.returnDaysLeft} days left'),
+            ),
+            const SizedBox(height: 10),
+          ],
+          OutlinedButton.icon(
+            onPressed: () => context.push(Routes.invoice(order.id)),
+            icon: const Icon(Icons.receipt_outlined, size: 20),
+            label: const Text('View receipt'),
+          ),
+          const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: items.isEmpty
                 ? null
@@ -152,6 +197,44 @@ class OrderDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _cancel(BuildContext context, WidgetRef ref, Order order) async {
+    final bool? yes = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Cancel this order?'),
+        content: const Text(
+          'It hasn’t shipped yet, so it can still be stopped. This can’t be '
+          'undone.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Keep it'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Cancel order'),
+          ),
+        ],
+      ),
+    );
+    if (!(yes ?? false)) return;
+
+    final bool ok = await ref.read(ordersProvider.notifier).cancel(order.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? 'Order cancelled'
+                : 'Too late to cancel — it has already shipped',
+          ),
+        ),
+      );
   }
 
   Future<void> _reorder(
@@ -295,6 +378,83 @@ class _SummaryRow extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Status of an in-flight return, with a way to withdraw it.
+class _ReturnBanner extends ConsumerWidget {
+  const _ReturnBanner({required this.order, required this.request});
+
+  final Order order;
+  final ReturnRequest request;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final bool refunded = order.status == OrderStatus.refunded;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(
+                refunded
+                    ? Icons.replay_circle_filled_rounded
+                    : Icons.assignment_return_outlined,
+                size: 20,
+                color: theme.colorScheme.onTertiaryContainer,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  refunded ? 'Refunded' : 'Return in progress',
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+              Text(
+                formatPrice(request.refundAmount),
+                style: theme.textTheme.titleSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            refunded
+                ? '${request.reason.label} · refunded to ${order.paymentLabel}'
+                : '${request.reason.label} · expect your refund by '
+                      '${formatDeliveryDate(request.expectedRefundBy)}',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          if (request.note.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 6),
+            Text('“${request.note}”', style: theme.textTheme.bodySmall),
+          ],
+          if (!refunded) ...<Widget>[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () async {
+                  await ref
+                      .read(ordersProvider.notifier)
+                      .cancelReturn(order.id);
+                },
+                child: const Text('Withdraw return'),
+              ),
+            ),
+          ],
         ],
       ),
     );

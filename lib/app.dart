@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'state/alerts_provider.dart';
+import 'state/app_providers.dart';
 import 'state/settings_provider.dart';
 
 /// Router lives in a provider so hot reload and tests get a single instance.
@@ -12,11 +14,32 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>(
   (Ref ref) => createRouter(),
 );
 
-class NovaApp extends ConsumerWidget {
+class NovaApp extends ConsumerStatefulWidget {
   const NovaApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NovaApp> createState() => _NovaAppState();
+}
+
+class _NovaAppState extends ConsumerState<NovaApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Once the catalog is loaded, check anything the shopper asked to be told
+    // about. Wrapped broadly because a failed alert sweep must never be able
+    // to stop the app from starting.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await ref.read(catalogProvider.future);
+        if (mounted) await ref.read(alertSweeperProvider).sweep();
+      } on Object catch (error) {
+        debugPrint('alert sweep skipped: $error');
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final AppSettings settings = ref.watch(settingsProvider);
     final GoRouter router = ref.watch(routerProvider);
 

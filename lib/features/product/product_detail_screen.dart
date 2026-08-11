@@ -27,6 +27,9 @@ import 'widgets/reviews_section.dart';
 import 'widgets/variant_selector.dart';
 import '../../state/haptics_provider.dart';
 import 'package:haptic_kit/haptic_kit.dart';
+import 'widgets/size_guide_sheet.dart';
+import 'widgets/questions_section.dart';
+import '../../state/alerts_provider.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({required this.productId, super.key});
@@ -161,6 +164,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   slivers: <Widget>[
                     SliverToBoxAdapter(child: _details(context, product)),
                     SliverToBoxAdapter(child: ReviewsSection(product: product)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                    SliverToBoxAdapter(
+                      child: QuestionsSection(product: product),
+                    ),
                     if (related.isNotEmpty) ...<Widget>[
                       const SliverToBoxAdapter(child: SizedBox(height: 28)),
                       const SliverToBoxAdapter(
@@ -197,7 +204,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   ShareParams(
                     text:
                         'Check out ${product.name} by ${product.brand} '
-                        'on Nova — ${formatPrice(product.price)}',
+                        'on Nova — ${formatPrice(product.price)}\n'
+                        '${deepLinkForProduct(product.id)}',
                     subject: product.name,
                   ),
                 ),
@@ -218,6 +226,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           ),
           SliverToBoxAdapter(child: _details(context, product)),
           SliverToBoxAdapter(child: ReviewsSection(product: product)),
+          const SliverToBoxAdapter(child: SizedBox(height: 28)),
+          SliverToBoxAdapter(child: QuestionsSection(product: product)),
           if (related.isNotEmpty) ...<Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 28)),
             const SliverToBoxAdapter(
@@ -304,6 +314,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               selected: _size,
               onSelected: (String value) => setState(() => _size = value),
             ),
+            if (SizeChart.forProduct(product) != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => showSizeGuideSheet(context, product),
+                  icon: const Icon(Icons.straighten_rounded, size: 18),
+                  label: const Text('Size guide'),
+                ),
+              ),
             const SizedBox(height: 22),
           ],
           if (product.colors.isNotEmpty) ...<Widget>[
@@ -367,6 +386,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ),
             ),
           const SizedBox(height: 20),
+          if (!product.inStock) ...<Widget>[
+            const SizedBox(height: 16),
+            _notifyMeButton(product),
+          ],
           const _DeliveryPerks(),
           const SizedBox(height: 28),
         ],
@@ -388,6 +411,37 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       ).animate(delay: (index * 40).ms).fadeIn(duration: 240.ms),
     ),
   );
+
+  /// Sold-out products get a watch button instead of a dead "Add to bag".
+  Widget _notifyMeButton(Product product) {
+    final bool watching = ref.watch(isWatchingStockProvider(product.id));
+    return OutlinedButton.icon(
+      onPressed: () async {
+        final bool added = await ref
+            .read(stockWatchProvider.notifier)
+            .toggle(product.id);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                added
+                    ? 'We’ll let you know when it’s back'
+                    : 'Stopped watching this item',
+              ),
+            ),
+          );
+      },
+      icon: Icon(
+        watching
+            ? Icons.notifications_active_rounded
+            : Icons.notifications_none_rounded,
+        size: 20,
+      ),
+      label: Text(watching ? 'Watching for restock' : 'Notify me when back'),
+    );
+  }
 
   Widget _buyBar(WidgetRef ref, Product product) => HapticShake(
     key: _shakeKey,

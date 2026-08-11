@@ -36,6 +36,41 @@ class DeliveryOptionNotifier extends Notifier<DeliveryOption> {
   }
 }
 
+/// Gift wrapping and an optional message, chosen at checkout.
+@immutable
+class GiftOptions {
+  const GiftOptions({this.wrapped = false, this.message = ''});
+
+  /// Flat fee added to the order when wrapping is chosen.
+  static const double wrapFee = 4.5;
+
+  final bool wrapped;
+  final String message;
+
+  bool get isGift => wrapped || message.trim().isNotEmpty;
+
+  GiftOptions copyWith({bool? wrapped, String? message}) => GiftOptions(
+    wrapped: wrapped ?? this.wrapped,
+    message: message ?? this.message,
+  );
+}
+
+/// Not persisted: a gift choice belongs to the order being placed, and
+/// silently re-applying it to the next one would be a nasty surprise.
+class GiftOptionsNotifier extends Notifier<GiftOptions> {
+  @override
+  GiftOptions build() => const GiftOptions();
+
+  void setWrapped(bool value) => state = state.copyWith(wrapped: value);
+
+  void setMessage(String value) => state = state.copyWith(message: value);
+
+  void reset() => state = const GiftOptions();
+}
+
+final NotifierProvider<GiftOptionsNotifier, GiftOptions> giftOptionsProvider =
+    NotifierProvider<GiftOptionsNotifier, GiftOptions>(GiftOptionsNotifier.new);
+
 final NotifierProvider<DeliveryOptionNotifier, DeliveryOption>
 deliveryOptionProvider =
     NotifierProvider<DeliveryOptionNotifier, DeliveryOption>(
@@ -252,6 +287,7 @@ class CartSummary {
     required this.total,
     required this.amountToFreeShipping,
     this.delivery = DeliveryOption.standard,
+    this.giftFee = 0,
   });
 
   final int itemCount;
@@ -266,6 +302,9 @@ class CartSummary {
 
   final DeliveryOption delivery;
 
+  /// Gift wrapping charge, zero when not gifting.
+  final double giftFee;
+
   DateTime get estimatedArrival => delivery.estimatedArrival(DateTime.now());
 
   bool get isEmpty => itemCount == 0;
@@ -278,6 +317,7 @@ final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>((
   final List<CartItem> items = ref.watch(cartItemsProvider);
   final Promo? promo = ref.watch(appliedPromoProvider);
   final DeliveryOption delivery = ref.watch(deliveryOptionProvider);
+  final GiftOptions gift = ref.watch(giftOptionsProvider);
 
   final double subtotal = items.fold(
     0,
@@ -299,7 +339,8 @@ final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>((
     shipping = waived ? 0 : delivery.price;
   }
 
-  final double tax = discounted * Pricing.taxRate;
+  final double giftFee = gift.wrapped ? GiftOptions.wrapFee : 0;
+  final double tax = (discounted + giftFee) * Pricing.taxRate;
 
   return CartSummary(
     itemCount: count,
@@ -307,8 +348,9 @@ final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>((
     discount: discount,
     shipping: shipping,
     tax: tax,
-    total: discounted + shipping + tax,
+    total: discounted + shipping + giftFee + tax,
     delivery: delivery,
+    giftFee: giftFee,
     amountToFreeShipping: subtotal == 0
         ? 0
         : (Pricing.freeShippingThreshold - discounted).clamp(

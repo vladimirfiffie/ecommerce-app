@@ -545,6 +545,8 @@ class _ReviewStep extends StatelessWidget {
           value: payment?.label ?? 'No card selected',
         ),
         const SizedBox(height: 24),
+        const _GiftSection(),
+        const SizedBox(height: 24),
         const OrderSummary(title: 'Total'),
       ],
     );
@@ -665,6 +667,98 @@ class _SelectableTile extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Gift wrapping and a message, on the review step where the shopper is
+/// already looking at what they're sending.
+class _GiftSection extends ConsumerStatefulWidget {
+  const _GiftSection();
+
+  @override
+  ConsumerState<_GiftSection> createState() => _GiftSectionState();
+}
+
+class _GiftSectionState extends ConsumerState<_GiftSection> {
+  late final TextEditingController _message = TextEditingController(
+    text: ref.read(giftOptionsProvider).message,
+  );
+
+  @override
+  void dispose() {
+    _message.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GiftOptions gift = ref.watch(giftOptionsProvider);
+    final GiftOptionsNotifier notifier = ref.read(giftOptionsProvider.notifier);
+
+    // A Material, not a coloured Container: ListTile paints its ink on the
+    // nearest Material ancestor, and a DecoratedBox in between hides it,
+    // which Flutter asserts on.
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              secondary: Icon(
+                Icons.card_giftcard_rounded,
+                color: theme.colorScheme.primary,
+              ),
+              title: Text('Gift wrap', style: theme.textTheme.titleSmall),
+              subtitle: Text(
+                'Wrapped in tissue and ribbon · '
+                '${formatPrice(GiftOptions.wrapFee)}',
+                style: theme.textTheme.bodySmall,
+              ),
+              value: gift.wrapped,
+              onChanged: notifier.setWrapped,
+            ),
+            TextField(
+              controller: _message,
+              minLines: 2,
+              maxLines: 3,
+              maxLength: 200,
+              textCapitalization: TextCapitalization.sentences,
+              onChanged: notifier.setMessage,
+              decoration: const InputDecoration(
+                labelText: 'Gift message (optional)',
+                hintText: 'Happy birthday!',
+                alignLabelWithHint: true,
+              ),
+            ),
+            if (gift.isGift)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(
+                    Icons.visibility_off_outlined,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Prices are left off the packing slip for gifts.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          ],
         ),
       ),
     );

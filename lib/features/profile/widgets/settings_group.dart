@@ -35,11 +35,11 @@ class SettingsGroup extends StatelessWidget {
             ),
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          ),
+        // Material rather than a coloured Container: the rows are ListTiles,
+        // which paint their ink on the nearest Material ancestor.
+        Material(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           clipBehavior: Clip.antiAlias,
           child: Column(children: children),
         ),

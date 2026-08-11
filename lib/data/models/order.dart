@@ -6,11 +6,84 @@ import 'delivery_option.dart';
 enum OrderStatus {
   processing('Processing'),
   shipped('Shipped'),
-  delivered('Delivered');
+  delivered('Delivered'),
+  cancelled('Cancelled'),
+  returnRequested('Return requested'),
+  refunded('Refunded');
 
   const OrderStatus(this.label);
 
   final String label;
+
+  /// The three stages the progress tracker draws.
+  bool get isInTransit =>
+      this == processing || this == shipped || this == delivered;
+
+  bool get isClosed => this == cancelled || this == refunded;
+}
+
+/// Why an order was sent back. Some reasons are the shop's fault, which is
+/// what decides who pays return postage.
+enum ReturnReason {
+  wrongSize('Wrong size or fit', sellerAtFault: false),
+  notAsDescribed('Not as described', sellerAtFault: true),
+  damaged('Arrived damaged', sellerAtFault: true),
+  wrongItem('Wrong item sent', sellerAtFault: true),
+  changedMind('Changed my mind', sellerAtFault: false),
+  other('Something else', sellerAtFault: false);
+
+  const ReturnReason(this.label, {required this.sellerAtFault});
+
+  final String label;
+
+  /// When true the shop covers return shipping and refunds it too.
+  final bool sellerAtFault;
+}
+
+/// A requested return, covering some or all of an order's lines.
+@immutable
+class ReturnRequest {
+  const ReturnRequest({
+    required this.requestedAt,
+    required this.reason,
+    required this.lineIds,
+    required this.refundAmount,
+    this.note = '',
+  });
+
+  factory ReturnRequest.fromJson(Map<String, dynamic> json) => ReturnRequest(
+    requestedAt: DateTime.parse(json['requestedAt'] as String),
+    reason: ReturnReason.values.firstWhere(
+      (ReturnReason r) => r.name == json['reason'],
+      orElse: () => ReturnReason.other,
+    ),
+    lineIds: <String>[
+      for (final Object? id in json['lineIds'] as List<dynamic>? ?? <dynamic>[])
+        id! as String,
+    ],
+    refundAmount: (json['refundAmount'] as num).toDouble(),
+    note: json['note'] as String? ?? '',
+  );
+
+  final DateTime requestedAt;
+  final ReturnReason reason;
+
+  /// [CartEntry.lineId]s being sent back — a return can be partial.
+  final List<String> lineIds;
+
+  final double refundAmount;
+  final String note;
+
+  /// Refunds land a few days after the parcel is collected.
+  DateTime get expectedRefundBy => requestedAt.add(const Duration(days: 5));
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'requestedAt': requestedAt.toIso8601String(),
+    'reason': reason.name,
+    'lineIds': lineIds,
+    'refundAmount': refundAmount,
+    'note': note,
+  };
 }
 
 /// A placed order, persisted locally so the Orders tab survives restarts.
@@ -30,6 +103,10 @@ class Order {
     required this.shippingAddress,
     required this.paymentLabel,
     this.deliveryId = 'standard',
+    this.cancelledAt,
+    this.returnRequest,
+    this.giftMessage = '',
+    this.giftWrapped = false,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -46,7 +123,20 @@ class Order {
     shippingAddress: json['shippingAddress'] as String,
     paymentLabel: json['paymentLabel'] as String,
     deliveryId: json['deliveryId'] as String? ?? 'standard',
+    cancelledAt: json['cancelledAt'] == null
+        ? null
+        : DateTime.parse(json['cancelledAt'] as String),
+    returnRequest: json['returnRequest'] == null
+        ? null
+        : ReturnRequest.fromJson(
+            json['returnRequest']! as Map<String, dynamic>,
+          ),
+    giftMessage: json['giftMessage'] as String? ?? '',
+    giftWrapped: json['giftWrapped'] as bool? ?? false,
   );
+
+  /// How long after delivery a return can still be started.
+  static const Duration returnWindow = Duration(days: 30);
 
   final String id;
   final DateTime placedAt;
@@ -61,6 +151,11 @@ class Order {
   /// Which [DeliveryOption] was chosen, so the tracker can use its timeline.
   final String deliveryId;
 
+  final DateTime? cancelledAt;
+  final ReturnRequest? returnRequest;
+  final String giftMessage;
+  final bool giftWrapped;
+
   DeliveryOption get delivery => DeliveryOption.byId(deliveryId);
 
   int get itemCount =>
@@ -68,10 +163,21 @@ class Order {
 
   DateTime get estimatedDelivery => delivery.estimatedArrival(placedAt);
 
+  /// When the parcel actually landed, for return-window maths.
+  DateTime get deliveredAt => estimatedDelivery;
+
   /// Progresses on its own as time passes, so the Orders tab feels live
   /// without a backend pushing updates. The pace follows the delivery method
-  /// that was chosen — express shouldn't crawl like standard.
+  /// chosen — express shouldn't crawl like standard. Cancellations and
+  /// returns are explicit and override the timeline.
   OrderStatus get status {
+    if (cancelledAt != null) return OrderStatus.cancelled;
+    if (returnRequest != null) {
+      return DateTime.now().isAfter(returnRequest!.expectedRefundBy)
+          ? OrderStatus.refunded
+          : OrderStatus.returnRequested;
+    }
+
     final Duration age = DateTime.now().difference(placedAt);
     final Duration toShipped = Duration(
       hours: delivery == DeliveryOption.express ? 2 : 8,
@@ -80,6 +186,46 @@ class Order {
     if (age < Duration(days: delivery.maxDays)) return OrderStatus.shipped;
     return OrderStatus.delivered;
   }
+
+  /// Cancellable only before it ships — once it's with the courier it has to
+  /// come back as a return instead.
+  bool get canCancel => status == OrderStatus.processing;
+
+  /// Returnable once delivered, until the window closes.
+  bool get canReturn =>
+      status == OrderStatus.delivered &&
+      DateTime.now().isBefore(deliveredAt.add(returnWindow));
+
+  /// Days left to start a return; zero once closed.
+  int get returnDaysLeft {
+    if (status != OrderStatus.delivered) return 0;
+    final int days = deliveredAt
+        .add(returnWindow)
+        .difference(DateTime.now())
+        .inDays;
+    return days < 0 ? 0 : days;
+  }
+
+  Order copyWith({
+    DateTime? cancelledAt,
+    ReturnRequest? returnRequest,
+    bool clearReturn = false,
+  }) => Order(
+    id: id,
+    placedAt: placedAt,
+    entries: entries,
+    subtotal: subtotal,
+    shipping: shipping,
+    discount: discount,
+    total: total,
+    shippingAddress: shippingAddress,
+    paymentLabel: paymentLabel,
+    deliveryId: deliveryId,
+    cancelledAt: cancelledAt ?? this.cancelledAt,
+    returnRequest: clearReturn ? null : (returnRequest ?? this.returnRequest),
+    giftMessage: giftMessage,
+    giftWrapped: giftWrapped,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'id': id,
@@ -92,5 +238,9 @@ class Order {
     'shippingAddress': shippingAddress,
     'paymentLabel': paymentLabel,
     'deliveryId': deliveryId,
+    if (cancelledAt != null) 'cancelledAt': cancelledAt!.toIso8601String(),
+    if (returnRequest != null) 'returnRequest': returnRequest!.toJson(),
+    'giftMessage': giftMessage,
+    'giftWrapped': giftWrapped,
   };
 }
