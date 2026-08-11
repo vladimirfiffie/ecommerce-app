@@ -15,6 +15,7 @@ import '../../features/profile/profile_screen.dart';
 import '../../features/profile/settings_screen.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/shell/home_shell.dart';
+import '../../features/profile/security_settings_screen.dart';
 
 /// Route paths, referenced by name everywhere else.
 abstract final class Routes {
@@ -27,6 +28,7 @@ abstract final class Routes {
   static const String search = '/search';
   static const String settings = '/settings';
   static const String haptics = '/settings/haptics';
+  static const String security = '/settings/security';
   static const String orders = '/orders';
 
   static String product(String id) => '/product/$id';
@@ -121,6 +123,12 @@ GoRouter createRouter() => GoRouter(
           parentNavigatorKey: _rootKey,
           builder: (BuildContext context, GoRouterState state) =>
               const HapticsSettingsScreen(),
+        ),
+        GoRoute(
+          path: 'security',
+          parentNavigatorKey: _rootKey,
+          builder: (BuildContext context, GoRouterState state) =>
+              const SecuritySettingsScreen(),
         ),
       ],
     ),

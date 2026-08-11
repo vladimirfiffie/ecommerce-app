@@ -19,6 +19,8 @@ import '../cart/widgets/order_summary.dart';
 import 'widgets/address_sheet.dart';
 import '../../state/haptics_provider.dart';
 import '../../shared/widgets/haptic_controls.dart';
+import '../../state/biometrics_provider.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 
 /// Three-step checkout: shipping → payment → review.
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -37,6 +39,36 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (address == null) {
       setState(() => _step = 0);
       return;
+    }
+
+    // Confirm identity before charging anything, if the shopper asked for it.
+    if (ref.read(requireBiometricsProvider)) {
+      final AuthOutcome outcome = await ref
+          .read(biometricsProvider)
+          .authenticate(reason: 'Confirm your identity to place this order');
+      if (!mounted) return;
+      if (outcome == AuthOutcome.failed) {
+        unawaited(
+          ref.read(hapticsProvider).notification(HapticNotificationStyle.error),
+        );
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            const SnackBar(content: Text('Payment cancelled — not verified')),
+          );
+        return;
+      }
+      if (outcome == AuthOutcome.unavailable) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Biometrics unavailable — continuing without verification',
+              ),
+            ),
+          );
+      }
     }
 
     setState(() => _placing = true);
@@ -315,6 +347,28 @@ class _PaymentStep extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: 20),
+        if (ref.watch(requireBiometricsProvider))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.fingerprint_rounded,
+                  size: 19,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'You\u2019ll be asked to verify before this order is placed.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(

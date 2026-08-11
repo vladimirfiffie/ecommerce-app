@@ -3,6 +3,13 @@
          need this too — the debug manifest's copy doesn't apply to them. -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!-- Biometric prompt for confirming payment. -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <!-- Local notifications for order updates. POST_NOTIFICATIONS is
+         runtime-requested on Android 13+. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
     <application
         android:label="Nova"
         android:name="${applicationName}"

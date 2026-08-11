@@ -13,6 +13,7 @@ import '../../state/settings_provider.dart';
 import '../../state/haptics_provider.dart';
 import '../../core/router/app_router.dart';
 import 'package:go_router/go_router.dart';
+import '../../state/biometrics_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -95,6 +96,19 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 18),
           Text('Feedback', style: theme.textTheme.titleMedium),
           const SizedBox(height: 6),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.fingerprint_rounded),
+            title: Text('Security', style: theme.textTheme.titleSmall),
+            subtitle: Text(
+              ref.watch(requireBiometricsProvider)
+                  ? 'Verification required before paying'
+                  : 'No verification before paying',
+              style: theme.textTheme.bodySmall,
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(Routes.security),
+          ),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.vibration_rounded),
