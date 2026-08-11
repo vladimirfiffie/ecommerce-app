@@ -62,7 +62,7 @@ void main() {
     return container;
   }
 
-  testWidgets('the bundled catalog loads and Home renders', (
+  testWidgets('the live catalog loads and Home renders', (
     WidgetTester tester,
   ) async {
     final ProviderContainer c = await launch(tester);

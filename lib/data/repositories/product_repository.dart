@@ -1,14 +1,11 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart' show rootBundle;
-
 import '../models/category.dart';
 import '../models/product.dart';
 
 /// Everything the storefront knows about products.
 ///
-/// Swapping the mock for a real backend means implementing this one interface
-/// and rebinding `catalogRepositoryProvider` — no screen code changes.
+/// Implemented by `DummyJsonProductRepository` against the live API; swapping
+/// in another backend means implementing this one interface and rebinding
+/// `productRepositoryProvider` — no screen code changes.
 abstract class ProductRepository {
   Future<Catalog> loadCatalog();
 }
@@ -62,40 +59,5 @@ class Catalog {
         .toList();
     pool.sort((Product a, Product b) => b.rating.compareTo(a.rating));
     return pool.take(limit).toList(growable: false);
-  }
-}
-
-/// Loads the bundled `catalog.json`. Deliberately async and slightly delayed so
-/// the loading skeletons are exercised the way a network repository would.
-class MockProductRepository implements ProductRepository {
-  MockProductRepository({this.latency = const Duration(milliseconds: 350)});
-
-  final Duration latency;
-
-  static const String _assetPath = 'assets/data/catalog.json';
-
-  Catalog? _cache;
-
-  @override
-  Future<Catalog> loadCatalog() async {
-    final Catalog? cached = _cache;
-    if (cached != null) return cached;
-
-    final String raw = await rootBundle.loadString(_assetPath);
-    if (latency > Duration.zero) await Future<void>.delayed(latency);
-
-    final Map<String, dynamic> json = jsonDecode(raw) as Map<String, dynamic>;
-
-    final Catalog catalog = Catalog(
-      categories: <Category>[
-        for (final Object? c in json['categories'] as List<dynamic>)
-          Category.fromJson(c! as Map<String, dynamic>),
-      ],
-      products: <Product>[
-        for (final Object? p in json['products'] as List<dynamic>)
-          Product.fromJson(p! as Map<String, dynamic>),
-      ],
-    );
-    return _cache = catalog;
   }
 }
