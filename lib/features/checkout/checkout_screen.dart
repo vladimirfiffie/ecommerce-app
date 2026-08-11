@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -235,6 +236,7 @@ class _StepIndicator extends StatelessWidget {
   final int step;
 
   static const List<String> _labels = <String>['Shipping', 'Payment', 'Review'];
+  static const Duration _duration = Duration(milliseconds: 320);
 
   @override
   Widget build(BuildContext context) {
@@ -244,58 +246,151 @@ class _StepIndicator extends StatelessWidget {
       child: Row(
         children: <Widget>[
           for (int i = 0; i < _labels.length; i++) ...<Widget>[
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: i <= step
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.surfaceContainerHighest,
-              ),
-              child: Center(
-                child: i < step
-                    ? Icon(
-                        Icons.check_rounded,
-                        size: 15,
-                        color: theme.colorScheme.onPrimary,
-                      )
-                    : Text(
-                        '${i + 1}',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: i <= step
-                              ? theme.colorScheme.onPrimary
-                              : theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-              ),
-            ),
+            _StepDot(index: i, step: step),
+
             // Only the current step is labelled — three labels plus their
-            // connectors don't fit a narrow phone.
-            if (i == step) ...<Widget>[
-              const SizedBox(width: 8),
-              Text(
-                _labels[i],
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+            // connectors don't fit a narrow phone. It cross-fades and slides
+            // as the step changes rather than cutting.
+            AnimatedSize(
+              duration: _duration,
+              curve: Curves.easeOutCubic,
+              child: i == step
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child:
+                          Text(
+                                _labels[i],
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              )
+                              .animate(key: ValueKey<int>(i))
+                              .fadeIn(duration: _duration)
+                              .moveX(
+                                begin: -6,
+                                end: 0,
+                                curve: Curves.easeOutCubic,
+                              ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+
             if (i < _labels.length - 1)
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Divider(
-                    color: i < step
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.outlineVariant,
-                  ),
+                  child: _StepConnector(filled: i < step),
                 ),
               ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// One numbered dot, which fills and swaps its number for a tick as the
+/// checkout advances past it.
+class _StepDot extends StatelessWidget {
+  const _StepDot({required this.index, required this.step});
+
+  final int index;
+  final int step;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool reached = index <= step;
+    final bool done = index < step;
+
+    return AnimatedScale(
+      // The step you're on sits fractionally larger than the rest.
+      scale: index == step ? 1.12 : 1,
+      duration: _StepIndicator._duration,
+      curve: Curves.easeOutBack,
+      child: AnimatedContainer(
+        duration: _StepIndicator._duration,
+        curve: Curves.easeOutCubic,
+        width: 26,
+        height: 26,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: reached
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
+        ),
+        child: Center(
+          child: AnimatedSwitcher(
+            duration: _StepIndicator._duration,
+            transitionBuilder: (Widget child, Animation<double> animation) =>
+                ScaleTransition(
+                  scale: animation,
+                  child: FadeTransition(opacity: animation, child: child),
+                ),
+            child: done
+                ? Icon(
+                    Icons.check_rounded,
+                    key: const ValueKey<String>('done'),
+                    size: 15,
+                    color: theme.colorScheme.onPrimary,
+                  )
+                : Text(
+                    '${index + 1}',
+                    key: ValueKey<int>(index),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: reached
+                          ? theme.colorScheme.onPrimary
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The line between two dots. Fills left-to-right as the step completes,
+/// rather than switching colour in one frame.
+class _StepConnector extends StatelessWidget {
+  const _StepConnector({required this.filled});
+
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: filled ? 1 : 0),
+      duration: _StepIndicator._duration,
+      curve: Curves.easeOutCubic,
+      builder: (BuildContext context, double t, Widget? child) => SizedBox(
+        height: 2,
+        child: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: t,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

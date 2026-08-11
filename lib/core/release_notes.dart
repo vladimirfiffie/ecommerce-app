@@ -30,6 +30,36 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.4.0',
+    headline: 'A real shop, and room to breathe',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'cloud_download_outlined',
+        'Live products',
+        'The catalogue is fetched fresh instead of shipped inside the app, '
+            'so the shop needs a connection now.',
+      ),
+      ReleaseHighlight(
+        'tablet_mac_rounded',
+        'Two panes everywhere',
+        'Shop, Saved, Search, Orders, Checkout and Settings all keep the '
+            'list in place on a tablet.',
+      ),
+      ReleaseHighlight(
+        'animation_outlined',
+        'Smoother checkout',
+        'The progress bar fills as you go, and the confirmation tick draws '
+            'itself.',
+      ),
+      ReleaseHighlight(
+        'bug_report_outlined',
+        'Layout fixes',
+        'The order tracker no longer overflows, and product cards size '
+            'correctly beside a detail pane.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.3.0',
     headline: 'Orders you can actually manage',
     highlights: <ReleaseHighlight>[

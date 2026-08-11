@@ -74,10 +74,20 @@ void main() {
   group('notes since a version', () {
     test('returns everything newer, newest first', () {
       final List<ReleaseNote> notes = releaseNotesSince('0.1.0');
-      expect(notes.map((ReleaseNote n) => n.version), <String>[
-        '0.3.0',
-        '0.2.0',
-      ]);
+
+      // Asserted by shape, not by a hardcoded list — otherwise every
+      // release breaks this test.
+      expect(notes, hasLength(kReleaseNotes.length - 1));
+      expect(notes.first.version, currentReleaseVersion);
+      for (final ReleaseNote n in notes) {
+        expect(compareVersions(n.version, '0.1.0'), greaterThan(0));
+      }
+      for (int i = 1; i < notes.length; i++) {
+        expect(
+          compareVersions(notes[i - 1].version, notes[i].version),
+          greaterThan(0),
+        );
+      }
     });
 
     test('is empty when already current', () {
@@ -113,7 +123,7 @@ void main() {
       expect(n.shouldShow, isTrue);
       expect(
         n.pending.map((ReleaseNote r) => r.version),
-        <String>['0.3.0', '0.2.0'],
+        containsAllInOrder(<String>[currentReleaseVersion, '0.2.0']),
         reason: 'a skipped release must still be shown',
       );
     });

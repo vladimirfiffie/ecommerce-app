@@ -49,10 +49,21 @@ jobs:
         id: version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            TAG="${{ inputs.tag }}"
           else
-            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            TAG="${GITHUB_REF_NAME}"
           fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+          # Only hyphenated tags (v0.4.0-beta.1) are prereleases. A plain
+          # vX.Y.Z is a full release, so GitHub gives it the "Latest" badge —
+          # marking everything prerelease leaves /releases/latest a 404 and
+          # the releases page looking like a bare list of tags.
+          case "$TAG" in
+            *-*) echo "prerelease=true"  >> "$GITHUB_OUTPUT" ;;
+            *)   echo "prerelease=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+          echo "Publishing ${TAG} as prerelease=$(case "$TAG" in *-*) echo true;; *) echo false;; esac)"
 
       # Debug-signed: this is a test build, not a Play Store artifact.
       # Installing it requires "install from unknown sources".
@@ -89,8 +100,9 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          prerelease: true
+          prerelease: ${{ steps.version.outputs.prerelease }}
           generate_release_notes: true
+          make_latest: ${{ steps.version.outputs.prerelease == 'false' }}
           name: Nova ${{ steps.version.outputs.tag }}
           files: dist/*.apk
           # Same copy as the in-app "What's new" sheet, generated from

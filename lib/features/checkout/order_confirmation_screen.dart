@@ -11,6 +11,7 @@ import '../../shared/widgets/empty_state.dart';
 import '../../state/orders_provider.dart';
 import '../../state/haptics_provider.dart';
 import 'dart:async';
+import '../../shared/widgets/animated_check.dart';
 
 /// Success screen shown straight after an order is placed.
 class OrderConfirmationScreen extends ConsumerStatefulWidget {
@@ -71,32 +72,15 @@ class _OrderConfirmationScreenState
                 child: Column(
                   children: <Widget>[
                     const Spacer(),
-                    Container(
-                          width: 108,
-                          height: 108,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppTheme.success.withValues(alpha: 0.14),
-                          ),
-                          child: const Icon(
-                            Icons.check_rounded,
-                            size: 58,
-                            color: AppTheme.success,
-                          ),
-                        )
-                        .animate()
-                        .scale(
-                          duration: 460.ms,
-                          curve: Curves.easeOutBack,
-                          begin: const Offset(0.5, 0.5),
-                        )
-                        .fadeIn(),
+                    // Draws itself: ring sweeps closed, tick strokes in,
+                    // halo expands. Plays once — see AnimatedCheck.
+                    const AnimatedCheck(color: AppTheme.success),
                     const SizedBox(height: 28),
                     Text(
                       'Order confirmed',
                       style: theme.textTheme.headlineMedium,
                       textAlign: TextAlign.center,
-                    ).animate(delay: 160.ms).fadeIn().moveY(begin: 12, end: 0),
+                    ).animate(delay: 460.ms).fadeIn().moveY(begin: 12, end: 0),
                     const SizedBox(height: 10),
                     Text(
                       'Thanks! We’re getting order ${order.id} ready to ship.',
@@ -104,7 +88,7 @@ class _OrderConfirmationScreenState
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
-                    ).animate(delay: 240.ms).fadeIn(),
+                    ).animate(delay: 560.ms).fadeIn(),
                     const SizedBox(height: 32),
                     Container(
                       padding: const EdgeInsets.all(18),
@@ -131,18 +115,18 @@ class _OrderConfirmationScreenState
                           _Row(label: 'Paid with', value: order.paymentLabel),
                         ],
                       ),
-                    ).animate(delay: 320.ms).fadeIn().moveY(begin: 16, end: 0),
+                    ).animate(delay: 660.ms).fadeIn().moveY(begin: 16, end: 0),
                     const Spacer(),
                     FilledButton(
                       onPressed: () =>
                           context.pushReplacement(Routes.order(order.id)),
                       child: const Text('Track this order'),
-                    ),
+                    ).animate(delay: 780.ms).fadeIn().moveY(begin: 10, end: 0),
                     const SizedBox(height: 10),
                     OutlinedButton(
                       onPressed: () => context.go(Routes.home),
                       child: const Text('Keep shopping'),
-                    ),
+                    ).animate(delay: 860.ms).fadeIn().moveY(begin: 10, end: 0),
                   ],
                 ),
               ),
