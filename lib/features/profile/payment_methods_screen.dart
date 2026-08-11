@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../data/models/payment_card.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../state/payments_provider.dart';
+import '../../shared/widgets/confirm.dart';
 
 class PaymentMethodsScreen extends ConsumerWidget {
   const PaymentMethodsScreen({super.key, this.embedded = false});
@@ -77,24 +78,13 @@ class PaymentMethodsScreen extends ConsumerWidget {
     WidgetRef ref,
     PaymentCard card,
   ) async {
-    final bool? yes = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Remove card?'),
-        content: Text('${card.label} will be removed from this device.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
+    final bool yes = await confirmDestructive(
+      context,
+      title: 'Remove card?',
+      message: '${card.label} will be removed from this device.',
+      confirmLabel: 'Remove',
     );
-    if (yes ?? false) {
+    if (yes) {
       await ref.read(paymentCardsProvider.notifier).remove(card.id);
     }
   }

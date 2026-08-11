@@ -114,11 +114,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ? ref.watch(authProvider).account!.email
                   : 'Optional — everything works as a guest',
               onTap: signedIn ? null : () => context.push(Routes.signIn),
+              // Signing out lives on Profile, with its confirmation —
+              // having it in both places invited a stray tap here.
               trailing: signedIn
-                  ? TextButton(
-                      onPressed: () =>
-                          ref.read(authProvider.notifier).signOut(),
-                      child: const Text('Sign out'),
+                  ? Icon(
+                      Icons.check_circle_rounded,
+                      size: 18,
+                      color: theme.colorScheme.primary,
                     )
                   : null,
             ),
@@ -141,11 +143,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: cardCount == 0 ? 'No cards saved' : '$cardCount saved',
               onTap: () =>
                   _open(SettingsPane.payments, Routes.payments, twoPane),
-            ),
-            SettingsRow(
-              icon: Icons.receipt_long_outlined,
-              title: 'Your orders',
-              onTap: () => context.push(Routes.orders),
             ),
             SettingsSwitch(
               icon: Icons.grid_view_rounded,

@@ -226,9 +226,10 @@ class OrderStatusPill extends StatelessWidget {
         AppTheme.success,
         Icons.check_circle_rounded,
       ),
+      // Cancelled and refunded read as red: the order isn't coming.
       OrderStatus.cancelled => (
-        theme.colorScheme.surfaceContainerHighest,
-        theme.colorScheme.onSurfaceVariant,
+        theme.colorScheme.errorContainer,
+        theme.colorScheme.onErrorContainer,
         Icons.cancel_outlined,
       ),
       OrderStatus.returnRequested => (
@@ -237,8 +238,8 @@ class OrderStatusPill extends StatelessWidget {
         Icons.assignment_return_outlined,
       ),
       OrderStatus.refunded => (
-        theme.colorScheme.secondaryContainer,
-        theme.colorScheme.onSecondaryContainer,
+        theme.colorScheme.errorContainer,
+        theme.colorScheme.onErrorContainer,
         Icons.replay_circle_filled_rounded,
       ),
     };

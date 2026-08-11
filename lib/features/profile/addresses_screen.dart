@@ -6,6 +6,7 @@ import '../../data/models/address.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../state/addresses_provider.dart';
 import '../checkout/widgets/address_sheet.dart';
+import '../../shared/widgets/confirm.dart';
 
 class AddressesScreen extends ConsumerWidget {
   const AddressesScreen({super.key, this.embedded = false});
@@ -80,24 +81,13 @@ class AddressesScreen extends ConsumerWidget {
     WidgetRef ref,
     Address address,
   ) async {
-    final bool? yes = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Remove address?'),
-        content: Text(address.oneLine),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
+    final bool yes = await confirmDestructive(
+      context,
+      title: 'Remove address?',
+      message: address.oneLine,
+      confirmLabel: 'Remove',
     );
-    if (yes ?? false) {
+    if (yes) {
       await ref.read(addressesProvider.notifier).remove(address.id);
     }
   }

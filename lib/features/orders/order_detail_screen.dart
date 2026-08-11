@@ -12,6 +12,7 @@ import '../../shared/widgets/empty_state.dart';
 import '../../state/cart_provider.dart';
 import '../../state/orders_provider.dart';
 import 'orders_screen.dart' show OrderStatusPill;
+import '../../shared/widgets/confirm.dart';
 
 class OrderDetailScreen extends ConsumerWidget {
   const OrderDetailScreen({
@@ -55,12 +56,19 @@ class OrderDetailScreen extends ConsumerWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              OrderStatusPill(status: order.status),
-              const Spacer(),
-              Text(
-                'Placed ${formatDate(order.placedAt)}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+              // Both sides flex: "RETURN REQUESTED" is a much wider pill than
+              // "SHIPPED", and a fixed Spacer overflowed a 360px header.
+              Flexible(child: OrderStatusPill(status: order.status)),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  'Placed ${formatDate(order.placedAt)}',
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
@@ -210,27 +218,16 @@ class OrderDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _cancel(BuildContext context, WidgetRef ref, Order order) async {
-    final bool? yes = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Cancel this order?'),
-        content: const Text(
-          'It hasn’t shipped yet, so it can still be stopped. This can’t be '
-          'undone.',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep it'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Cancel order'),
-          ),
-        ],
-      ),
+    final bool yes = await confirmDestructive(
+      context,
+      title: 'Cancel this order?',
+      message:
+          'It hasn’t shipped yet, so it can still be stopped. This '
+          'can’t be undone.',
+      confirmLabel: 'Cancel order',
+      cancelLabel: 'Keep it',
     );
-    if (!(yes ?? false)) return;
+    if (!yes || !context.mounted) return;
 
     final bool ok = await ref.read(ordersProvider.notifier).cancel(order.id);
     if (!context.mounted) return;
@@ -278,6 +275,66 @@ class OrderDetailScreen extends ConsumerWidget {
 }
 
 /// Processing → Shipped → Delivered progress rail.
+/// Shown in place of the delivery rail once an order is cancelled or
+/// refunded — one clear statement rather than a progress bar going nowhere.
+class _ClosedNotice extends StatelessWidget {
+  const _ClosedNotice({required this.status});
+
+  final OrderStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool refunded = status == OrderStatus.refunded;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        border: Border.all(
+          color: theme.colorScheme.error.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            refunded
+                ? Icons.replay_circle_filled_rounded
+                : Icons.cancel_outlined,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  status.label,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.onErrorContainer,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  refunded
+                      ? 'This order was refunded. Nothing is on its way.'
+                      : 'This order was cancelled and won’t be delivered.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onErrorContainer,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Tracker extends StatelessWidget {
   const _Tracker({required this.status, required this.eta});
 
@@ -296,7 +353,15 @@ class _Tracker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final int activeIndex = _stages.indexOf(status);
+
+    // A cancelled or refunded order never travels, so drawing an empty
+    // three-stage rail under "Arriving by ..." was actively misleading.
+    if (status.isClosed) return _ClosedNotice(status: status);
+
+    // A return keeps the rail — it did arrive — with the outcome above it.
+    final int activeIndex = status == OrderStatus.returnRequested
+        ? _stages.length - 1
+        : _stages.indexOf(status);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -307,12 +372,11 @@ class _Tracker extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            status == OrderStatus.delivered
-                ? 'Delivered'
-                : 'Arriving by ${formatDeliveryDate(eta)}',
-            style: theme.textTheme.titleSmall,
-          ),
+          Text(switch (status) {
+            OrderStatus.delivered => 'Delivered',
+            OrderStatus.returnRequested => 'Delivered · return in progress',
+            _ => 'Arriving by ${formatDeliveryDate(eta)}',
+          }, style: theme.textTheme.titleSmall),
           const SizedBox(height: 18),
           Row(
             children: <Widget>[

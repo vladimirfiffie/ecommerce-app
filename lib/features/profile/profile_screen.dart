@@ -5,15 +5,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
-import '../../state/addresses_provider.dart';
 import '../../state/cart_provider.dart';
 import '../../state/favorites_provider.dart';
 import '../../state/orders_provider.dart';
-import '../checkout/widgets/address_sheet.dart';
 import 'widgets/edit_name_sheet.dart';
 import '../../state/profile_provider.dart';
 import '../../state/auth_provider.dart';
 import '../../data/models/account.dart';
+import '../../shared/widgets/confirm.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -24,7 +23,6 @@ class ProfileScreen extends ConsumerWidget {
     final int orderCount = ref.watch(ordersProvider).length;
     final int savedCount = ref.watch(favoritesProvider).length;
     final int bagCount = ref.watch(cartCountProvider);
-    final int addressCount = ref.watch(addressesProvider).length;
 
     return Scaffold(
       body: SafeArea(
@@ -78,21 +76,6 @@ class ProfileScreen extends ConsumerWidget {
                       ? 'No orders yet'
                       : '$orderCount placed',
                   onTap: () => context.push(Routes.orders),
-                ),
-                _Tile(
-                  icon: Icons.location_on_outlined,
-                  title: 'Addresses',
-                  subtitle: '$addressCount saved',
-                  onTap: () => showAddressSheet(context),
-                ),
-                _Tile(
-                  icon: Icons.credit_card_outlined,
-                  title: 'Payment methods',
-                  subtitle: 'Demo cards only',
-                  onTap: () => _snack(
-                    context,
-                    'This build ships with demo cards — no real payments.',
-                  ),
                 ),
               ],
             ),
@@ -335,9 +318,9 @@ class _AccountCard extends ConsumerWidget {
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
-          FilledButton(
+          DangerButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Sign out'),
+            label: 'Sign out',
           ),
         ],
       ),
@@ -429,6 +412,9 @@ class _AccountCard extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => _confirmSignOut(context, ref),
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
+            ),
             child: const Text('Sign out'),
           ),
         ],

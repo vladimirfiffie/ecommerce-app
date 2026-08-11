@@ -4,6 +4,8 @@ import 'package:haptic_kit/haptic_kit.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../state/haptics_provider.dart';
+import 'dart:math' as math;
+import 'dart:async';
 
 /// Adaptive wrappers around `haptic_kit`'s widgets.
 ///
@@ -85,7 +87,7 @@ class NovaSlider extends ConsumerWidget {
 }
 
 /// Star rating with a cascading fill.
-class NovaRating extends ConsumerWidget {
+class NovaRating extends ConsumerStatefulWidget {
   const NovaRating({
     required this.value,
     required this.onChanged,
@@ -100,37 +102,116 @@ class NovaRating extends ConsumerWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ThemeData theme = Theme.of(context);
-    final HapticService haptics = ref.watch(hapticsProvider);
+  ConsumerState<NovaRating> createState() => _NovaRatingState();
+}
 
-    if (!haptics.isOn(HapticChannel.selection)) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          for (int i = 1; i <= starCount; i++)
-            IconButton(
-              onPressed: () => onChanged(i),
-              iconSize: size,
-              padding: const EdgeInsets.symmetric(horizontal: 3),
-              constraints: const BoxConstraints(),
-              tooltip: '$i star${i == 1 ? '' : 's'}',
-              icon: Icon(
-                i <= value ? Icons.star_rounded : Icons.star_outline_rounded,
-                color: i <= value
-                    ? const Color(0xFFF5A623)
-                    : theme.colorScheme.outlineVariant,
-              ),
-            ),
-        ],
-      );
+/// Star rating that animates the same way whether or not haptics are on.
+///
+/// It draws its own stars rather than delegating to haptic_kit's widget: that
+/// one only appears when haptics are enabled, so the control jumped between
+/// two different animations depending on a settings toggle. Haptic feedback
+/// still goes through [HapticService], so nothing is lost with haptics on.
+class _NovaRatingState extends ConsumerState<NovaRating>
+    with SingleTickerProviderStateMixin {
+  static const Color _gold = Color(0xFFF5A623);
+
+  late final AnimationController _pop = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 460),
+  );
+
+  /// The rating before the last change, so only newly-lit stars pop.
+  int _previous = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _previous = widget.value;
+  }
+
+  @override
+  void didUpdateWidget(NovaRating old) {
+    super.didUpdateWidget(old);
+    if (old.value != widget.value) {
+      _previous = old.value;
+      _pop.forward(from: 0);
     }
-    return HapticRating(
-      value: value,
-      starCount: starCount,
-      size: size,
-      onChanged: onChanged,
-      inactiveColor: theme.colorScheme.outlineVariant,
+  }
+
+  @override
+  void dispose() {
+    _pop.dispose();
+    super.dispose();
+  }
+
+  void _set(int stars) {
+    if (stars == widget.value) return;
+    unawaited(ref.read(hapticsProvider).selection());
+    widget.onChanged(stars);
+  }
+
+  /// Which star sits under [dx], so a drag across the row rates continuously.
+  int _starAt(double dx, double width) {
+    final double each = width / widget.starCount;
+    return (dx / each).floor().clamp(0, widget.starCount - 1) + 1;
+  }
+
+  /// Scale for star [i], popping in sequence as the rating rises.
+  double _scaleFor(int i) {
+    if (i <= _previous || i > widget.value) return 1;
+    final int position = i - _previous - 1;
+    final double start = (position * 0.1).clamp(0.0, 0.6);
+    final double t = ((_pop.value - start) / 0.4).clamp(0.0, 1.0);
+    // A single sine hump: 1 → 1.3 → 1, with no overshoot past the ends.
+    return 1 + 0.3 * math.sin(math.pi * t);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final double totalWidth = widget.size * widget.starCount;
+
+    return Semantics(
+      slider: true,
+      value: '${widget.value} of ${widget.starCount} stars',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (TapDownDetails d) =>
+            _set(_starAt(d.localPosition.dx, totalWidth)),
+        onHorizontalDragUpdate: (DragUpdateDetails d) =>
+            _set(_starAt(d.localPosition.dx, totalWidth)),
+        child: SizedBox(
+          width: totalWidth,
+          height: widget.size,
+          child: AnimatedBuilder(
+            animation: _pop,
+            builder: (BuildContext context, Widget? child) => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                for (int i = 1; i <= widget.starCount; i++)
+                  SizedBox(
+                    width: widget.size,
+                    height: widget.size,
+                    child: Center(
+                      child: Transform.scale(
+                        scale: _scaleFor(i),
+                        child: Icon(
+                          i <= widget.value
+                              ? Icons.star_rounded
+                              : Icons.star_outline_rounded,
+                          size: widget.size * 0.86,
+                          color: i <= widget.value
+                              ? _gold
+                              : theme.colorScheme.outlineVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

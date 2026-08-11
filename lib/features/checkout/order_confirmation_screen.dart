@@ -12,6 +12,8 @@ import '../../state/orders_provider.dart';
 import '../../state/haptics_provider.dart';
 import 'dart:async';
 import '../../shared/widgets/animated_check.dart';
+import '../../shared/widgets/app_image.dart';
+import '../../data/models/cart_item.dart';
 
 /// Success screen shown straight after an order is placed.
 class OrderConfirmationScreen extends ConsumerStatefulWidget {
@@ -40,6 +42,7 @@ class _OrderConfirmationScreenState
     final String orderId = widget.orderId;
     final ThemeData theme = Theme.of(context);
     final Order? order = ref.watch(orderByIdProvider(orderId));
+    final List<CartItem> items = ref.watch(orderItemsProvider(orderId));
 
     if (order == null) {
       return Scaffold(
@@ -99,6 +102,16 @@ class _OrderConfirmationScreenState
                       ),
                       child: Column(
                         children: <Widget>[
+                          if (items.isNotEmpty) ...<Widget>[
+                            _OrderedItems(items: items),
+                            const SizedBox(height: 14),
+                            Divider(
+                              height: 1,
+                              color: theme.colorScheme.outlineVariant
+                                  .withValues(alpha: 0.6),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
                           _Row(
                             label: 'Items',
                             value:
@@ -133,6 +146,103 @@ class _OrderConfirmationScreenState
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Thumbnails of what was just bought — a confirmation that names a total
+/// but shows nothing makes you go and check the order to be sure.
+class _OrderedItems extends StatelessWidget {
+  const _OrderedItems({required this.items});
+
+  final List<CartItem> items;
+
+  /// Beyond this the strip stops being scannable, so the rest is a count.
+  static const int _maxShown = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final List<CartItem> shown = items.take(_maxShown).toList();
+    final int overflow = items.length - shown.length;
+
+    return Row(
+      children: <Widget>[
+        for (int i = 0; i < shown.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: _Thumb(item: shown[i])
+                .animate(delay: (700 + i * 70).ms)
+                .fadeIn(duration: 260.ms)
+                .scale(
+                  begin: const Offset(0.85, 0.85),
+                  end: const Offset(1, 1),
+                ),
+          ),
+        if (overflow > 0)
+          Container(
+            width: 52,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+            ),
+            child: Text(
+              '+$overflow',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+class _Thumb extends StatelessWidget {
+  const _Thumb({required this.item});
+
+  final CartItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return SizedBox(
+      width: 52,
+      height: 52,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          Positioned.fill(
+            child: AppImage(
+              url: item.product.thumbnail,
+              fit: BoxFit.contain,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+            ),
+          ),
+          if (item.quantity > 1)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${item.quantity}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
