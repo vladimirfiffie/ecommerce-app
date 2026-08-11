@@ -32,9 +32,17 @@ import 'widgets/questions_section.dart';
 import '../../state/alerts_provider.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
-  const ProductDetailScreen({required this.productId, super.key});
+  const ProductDetailScreen({
+    required this.productId,
+    super.key,
+    this.embedded = false,
+  });
 
   final String productId;
+
+  /// Rendered inside a two-pane layout rather than pushed as a route, so
+  /// there is nothing to go back to and the back affordance is dropped.
+  final bool embedded;
 
   @override
   ConsumerState<ProductDetailScreen> createState() =>
@@ -132,7 +140,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       limit: 8,
     );
 
-    final bool wide = Breakpoints.of(context).isWide;
+    // An embedded pane is already narrow, however wide the window is —
+    // reading the window here would nest a second two-pane layout inside the
+    // first, complete with its own back button.
+    final bool wide = !widget.embedded && Breakpoints.of(context).isWide;
 
     // On a wide window the gallery gets its own fixed pane on the left and
     // the details scroll independently on the right; the phone layout keeps
@@ -195,7 +206,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             expandedHeight: 420,
             backgroundColor: theme.colorScheme.surface,
             surfaceTintColor: Colors.transparent,
-            leading: const _CircleBackButton(),
+            leading: widget.embedded ? null : const _CircleBackButton(),
+            automaticallyImplyLeading: !widget.embedded,
             actions: <Widget>[
               _CircleAction(
                 icon: Icons.ios_share_rounded,

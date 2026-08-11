@@ -7,7 +7,11 @@ import '../../state/biometrics_provider.dart';
 /// Payment verification settings, plus a way to test the prompt before
 /// trusting it with a real order.
 class SecuritySettingsScreen extends ConsumerWidget {
-  const SecuritySettingsScreen({super.key});
+  const SecuritySettingsScreen({super.key, this.embedded = false});
+
+  /// Shown inside the settings detail pane, where a back button
+  /// would have nothing to pop.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,7 +22,10 @@ class SecuritySettingsScreen extends ConsumerWidget {
     final bool required = ref.watch(requireBiometricsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Security')),
+      appBar: AppBar(
+        title: const Text('Security'),
+        automaticallyImplyLeading: !embedded,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: <Widget>[

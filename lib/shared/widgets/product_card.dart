@@ -21,11 +21,19 @@ class ProductCard extends StatelessWidget {
     super.key,
     this.width,
     this.heroPrefix = 'grid',
+    this.selected = false,
+    this.onTap,
   });
 
   final Product product;
   final double? width;
   final String heroPrefix;
+
+  /// Marked as the current item in a two-pane layout.
+  final bool selected;
+
+  /// Overrides the default push-a-route behaviour.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +44,7 @@ class ProductCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.push(Routes.product(product.id)),
+          onTap: onTap ?? () => context.push(Routes.product(product.id)),
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,6 +63,20 @@ class ProductCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       ),
                     ),
+                    if (selected)
+                      Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusMd,
+                            ),
+                            border: Border.all(
+                              color: theme.colorScheme.primary,
+                              width: 2.5,
+                            ),
+                          ),
+                        ),
+                      ),
                     Positioned(
                       top: 8,
                       left: 8,

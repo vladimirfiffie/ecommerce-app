@@ -8,7 +8,11 @@ import '../../shared/widgets/empty_state.dart';
 import '../../state/payments_provider.dart';
 
 class PaymentMethodsScreen extends ConsumerWidget {
-  const PaymentMethodsScreen({super.key});
+  const PaymentMethodsScreen({super.key, this.embedded = false});
+
+  /// Shown inside the settings detail pane, where a back button
+  /// would have nothing to pop.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,7 +21,10 @@ class PaymentMethodsScreen extends ConsumerWidget {
     final PaymentCard? selected = ref.watch(selectedCardProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Payment methods')),
+      appBar: AppBar(
+        title: const Text('Payment methods'),
+        automaticallyImplyLeading: !embedded,
+      ),
       floatingActionButton: cards.isEmpty
           ? null
           : FloatingActionButton.extended(

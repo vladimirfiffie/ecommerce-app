@@ -10,7 +10,11 @@ import '../../state/haptics_provider.dart';
 /// capability report, and a playground that exercises every primitive and
 /// widget `haptic_kit` exposes.
 class HapticsSettingsScreen extends ConsumerStatefulWidget {
-  const HapticsSettingsScreen({super.key});
+  const HapticsSettingsScreen({super.key, this.embedded = false});
+
+  /// Shown inside the settings detail pane, where a back button
+  /// would have nothing to pop.
+  final bool embedded;
 
   @override
   ConsumerState<HapticsSettingsScreen> createState() =>
@@ -58,7 +62,10 @@ class _HapticsSettingsScreenState extends ConsumerState<HapticsSettingsScreen> {
     final HapticService haptics = ref.watch(hapticsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Haptics')),
+      appBar: AppBar(
+        title: const Text('Haptics'),
+        automaticallyImplyLeading: !widget.embedded,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: <Widget>[
