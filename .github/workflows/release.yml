@@ -79,6 +79,12 @@ jobs:
           path: dist/*.apk
           if-no-files-found: error
 
+      - name: Generate release notes
+        run: |
+          dart run tool/generate_release_notes.dart \
+            "${{ steps.version.outputs.tag }}" > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
       - name: Publish prerelease
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -87,13 +93,6 @@ jobs:
           generate_release_notes: true
           name: Nova ${{ steps.version.outputs.tag }}
           files: dist/*.apk
-          body: |
-            **Prerelease test build of Nova.**
-
-            Install `nova-${{ steps.version.outputs.tag }}-arm64-v8a.apk` on most
-            modern phones, or the `universal` APK if you're unsure of your device's
-            ABI. You'll need to allow installs from unknown sources.
-
-            These APKs are **signed with Android's debug key** — fine for testing,
-            not for distribution. Product data ships inside the app; imagery is
-            fetched from a public CDN, so the first load needs a connection.
+          # Same copy as the in-app "What's new" sheet, generated from
+          # lib/core/release_notes.dart so the two can't drift.
+          body_path: RELEASE_NOTES.md

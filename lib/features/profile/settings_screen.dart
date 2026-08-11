@@ -22,6 +22,8 @@ import '../../state/settings_provider.dart';
 import 'widgets/edit_name_sheet.dart';
 import 'widgets/settings_group.dart';
 import 'widgets/theme_picker.dart';
+import '../whats_new/whats_new_sheet.dart';
+import '../../core/release_notes.dart';
 
 /// Grouped settings.
 ///
@@ -271,6 +273,24 @@ class SettingsScreen extends ConsumerWidget {
                   'payment is ever taken.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => showWhatsNewSheet(
+                      context,
+                      notes: kReleaseNotes,
+                      offerMute: false,
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    icon: const Icon(Icons.new_releases_outlined, size: 18),
+                    label: const Text('What’s new'),
                   ),
                 ),
                 const SizedBox(height: 10),

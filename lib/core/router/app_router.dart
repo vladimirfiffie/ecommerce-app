@@ -76,6 +76,9 @@ final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
 );
 
+/// The root navigator, for showing app-level sheets outside a widget tree.
+GlobalKey<NavigatorState> get rootNavigatorKey => _rootKey;
+
 GoRouter createRouter() => GoRouter(
   navigatorKey: _rootKey,
   initialLocation: Routes.home,

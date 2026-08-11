@@ -8,6 +8,8 @@ import 'core/theme/app_theme.dart';
 import 'state/alerts_provider.dart';
 import 'state/app_providers.dart';
 import 'state/settings_provider.dart';
+import 'state/whats_new_provider.dart';
+import 'features/whats_new/whats_new_sheet.dart';
 
 /// Router lives in a provider so hot reload and tests get a single instance.
 final Provider<GoRouter> routerProvider = Provider<GoRouter>(
@@ -35,7 +37,25 @@ class _NovaAppState extends ConsumerState<NovaApp> {
       } on Object catch (error) {
         debugPrint('alert sweep skipped: $error');
       }
+      if (mounted) await _maybeShowWhatsNew();
     });
+  }
+
+  /// Shows release notes once per upgrade.
+  ///
+  /// A first install records the version silently instead — nobody needs a
+  /// changelog for a version they never ran.
+  Future<void> _maybeShowWhatsNew() async {
+    final WhatsNewNotifier notifier = ref.read(whatsNewProvider.notifier);
+    if (!notifier.shouldShow) {
+      if (ref.read(whatsNewProvider).lastSeenVersion == null) {
+        await notifier.markSeen();
+      }
+      return;
+    }
+    final BuildContext? ctx = rootNavigatorKey.currentContext;
+    if (ctx == null || !ctx.mounted) return;
+    await showWhatsNewSheet(ctx, notes: notifier.pending);
   }
 
   @override
