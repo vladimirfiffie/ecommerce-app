@@ -17,6 +17,7 @@ import 'package:ecommerce_app/state/haptics_provider.dart';
 import 'package:ecommerce_app/state/biometrics_provider.dart';
 import 'package:ecommerce_app/state/alerts_provider.dart';
 import 'package:ecommerce_app/shared/widgets/product_card.dart';
+import 'package:ecommerce_app/features/home/widgets/hero_carousel.dart';
 
 /// End-to-end tests against the **real** app: the bundled catalog, the real
 /// plugin registrations and the real renderer.
@@ -71,7 +72,7 @@ void main() {
 
     expect(catalog.products.length, greaterThan(100));
     expect(catalog.categories, isNotEmpty);
-    expect(find.text('Browse categories'), findsOneWidget);
+    expect(find.byType(HeroCarousel), findsOneWidget);
   });
 
   testWidgets('opening a product and adding it to the bag', (

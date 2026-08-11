@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers.dart';
+import 'package:ecommerce_app/features/home/widgets/hero_carousel.dart';
 
 void main() {
   setUpAll(configureTestEnvironment);
@@ -51,7 +52,9 @@ void main() {
     await settle(tester);
 
     expect(find.text('Nova'), findsOneWidget);
-    expect(find.text('Browse categories'), findsOneWidget);
+    // Categories live on Shop and Search now, not duplicated on Home.
+    expect(find.text('Browse categories'), findsNothing);
+    expect(find.byType(HeroCarousel), findsOneWidget);
     expect(find.text('Wool Coat'), findsWidgets);
   });
 

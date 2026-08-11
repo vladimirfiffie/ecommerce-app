@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
-import '../../data/models/category.dart';
 import '../../data/models/product.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -12,13 +11,13 @@ import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/skeletons.dart';
 import '../../state/app_providers.dart';
 import '../../state/catalog_filter_provider.dart';
-import 'widgets/category_chips.dart';
 import 'widgets/hero_carousel.dart';
 import 'widgets/home_app_bar.dart';
 import 'widgets/product_rail.dart';
 import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
 import '../../shared/widgets/nova_refresh.dart';
+import 'widgets/for_you_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -80,7 +79,6 @@ class HomeScreen extends ConsumerWidget {
     final List<Product> featured = catalog.featured;
     final List<Product> newArrivals = catalog.newArrivals;
     final List<Product> deals = catalog.onSale.take(10).toList();
-    final List<Product> recent = ref.watch(recentlyViewedProductsProvider);
     final List<Product> popular = _popular(catalog);
 
     void browse(String? categoryId) {
@@ -97,27 +95,18 @@ class HomeScreen extends ConsumerWidget {
               : featured.take(5).toList(),
         ),
       ),
+      const SliverToBoxAdapter(child: SizedBox(height: 22)),
+      // Everything the app already knows about you. Draws nothing when
+      // there's nothing to say.
+      const SliverToBoxAdapter(child: ForYouCard()),
       const SliverToBoxAdapter(child: SizedBox(height: 26)),
-      SliverToBoxAdapter(
-        child: SectionHeader(
-          title: 'Browse categories',
-          actionLabel: 'All',
-          onAction: () => browse(null),
-        ),
-      ),
-      const SliverToBoxAdapter(child: SizedBox(height: 12)),
-      SliverToBoxAdapter(
-        child: CategoryChips(
-          categories: catalog.categories,
-          onTap: (Category c) => browse(c.id),
-        ),
-      ),
-      const SliverToBoxAdapter(child: SizedBox(height: 30)),
       if (deals.isNotEmpty) ...<Widget>[
         SliverToBoxAdapter(
           child: SectionHeader(
             title: 'Today’s deals',
-            subtitle: 'Limited-time markdowns',
+            // No countdown exists, so don't imply one. The discount badges
+            // on the cards carry the message instead.
+            subtitle: '${deals.length} reduced right now',
             actionLabel: 'See all',
             onAction: () {
               ref.read(catalogFilterProvider.notifier).reset();
@@ -145,18 +134,15 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 14)),
-        SliverToBoxAdapter(
-          child: ProductRail(products: newArrivals, heroPrefix: 'new'),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 32)),
-      ],
-      if (recent.isNotEmpty) ...<Widget>[
-        const SliverToBoxAdapter(
-          child: SectionHeader(title: 'Recently viewed'),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 14)),
-        SliverToBoxAdapter(
-          child: ProductRail(products: recent, heroPrefix: 'recent'),
+        // A grid rather than a third side-scroller: stacked rails all read
+        // the same, and a rail hides most of what's in it.
+        ProductGrid(
+          products: newArrivals.take(4).toList(),
+          heroPrefix: 'new',
+          sliver: true,
+          padding: EdgeInsets.symmetric(
+            horizontal: Breakpoints.gutter(Breakpoints.of(context)),
+          ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
