@@ -11,13 +11,14 @@ just Flutter widgets and pub plugins.
 | Area | Details |
 | --- | --- |
 | **Welcome** | The app opens on sign in / create account, with a one-tap "browse as guest" that's remembered; signing out puts it back |
+| **For you** | Live order progress with a stage tracker, delivery and return-window countdowns, refund ETA, price drops, back-in-stock, low stock on saved items, and how much more buys free delivery |
 | **Home** | Auto-advancing promo carousel, category tiles, deals / new-arrivals / recently-viewed rails, popular grid, pull to refresh |
 | **Shop** | 157 products across 6 categories, category strip, grid/list toggle, filter & sort sheet (type, max price, min rating, on-sale, in-stock) |
 | **Search** | Debounced live results, persisted recent searches, trending chips |
 | **Product** | Swipeable gallery with pinch and double-tap zoom, size guide, variants, specifications table, Q&A, rating histogram, reviews, related rail, back-in-stock alerts |
 | **Brand** | Tap the brand on any product for everything it sells, with product count, average rating, cheapest price and how many are on sale |
 | **Bag** | Per-variant lines, swipe to delete with undo, promo codes, free-shipping progress, live order maths |
-| **Checkout** | Shipping → payment → review stepper, saved addresses and cards, three delivery speeds, gift wrap and message, order confirmation |
+| **Checkout** | Shipping → payment → review stepper, validated address and card forms (Luhn, expiry, per-brand CVV, US ZIP), saved addresses and cards, three delivery speeds, gift wrap and message, order confirmation |
 | **Orders** | Status tracker that advances over time, cancel before dispatch, partial returns with refund maths, shareable receipt, reorder |
 | **Saved** | Wishlist with bulk add-to-bag |
 | **Reviews** | Verified buyers can write, edit and delete a review; it pins to the top of the list and folds into the rating average |
@@ -99,7 +100,7 @@ flutter run -d linux        # desktop
 
 ```bash
 flutter analyze --fatal-infos
-flutter test                     # 207 tests
+flutter test                     # 363 tests
 flutter test integration_test -d linux   # 4 end-to-end, real plugins
 ```
 

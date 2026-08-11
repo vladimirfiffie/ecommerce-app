@@ -3,10 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../state/for_you_provider.dart';
 import '../../../shared/widgets/app_image.dart';
+import '../../../state/for_you_provider.dart';
 
 /// The things the app already knows about you, surfaced on home.
 ///
@@ -71,39 +70,37 @@ class _ForYouRow extends StatelessWidget {
   final ForYouItem item;
 
   IconData get _icon => switch (item.kind) {
+    ForYouKind.orderInTransit => Icons.local_shipping_outlined,
+    ForYouKind.orderDelivered => Icons.check_circle_outline_rounded,
+    ForYouKind.returnInProgress => Icons.assignment_return_outlined,
     ForYouKind.backInStock => Icons.inventory_2_outlined,
     ForYouKind.priceDrop => Icons.trending_down_rounded,
+    ForYouKind.lowStockSaved => Icons.hourglass_bottom_rounded,
     ForYouKind.inBag => Icons.shopping_bag_outlined,
     ForYouKind.pickUpWhereYouLeftOff => Icons.history_rounded,
   };
 
-  void _open(BuildContext context) {
-    switch (item.kind) {
-      case ForYouKind.inBag:
-        context.go(Routes.cart);
-      case ForYouKind.priceDrop when item.count > 1:
-        context.go(Routes.favorites);
-      case ForYouKind.backInStock:
-      case ForYouKind.priceDrop:
-      case ForYouKind.pickUpWhereYouLeftOff:
-        final String? id = item.product?.id;
-        if (id != null) context.push(Routes.product(id));
-    }
-  }
+  /// Order rows lead with the kind's icon even though no product is attached,
+  /// and a delivered parcel earns green rather than the card's usual accent.
+  Color _iconColor(ThemeData theme) => switch (item.kind) {
+    ForYouKind.orderDelivered => AppTheme.success,
+    ForYouKind.lowStockSaved => theme.colorScheme.error,
+    _ => theme.colorScheme.primary,
+  };
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
     return InkWell(
-      onTap: () => _open(context),
+      onTap: () => context.push(item.route),
       borderRadius: BorderRadius.circular(AppTheme.radiusSm),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: <Widget>[
             // The product's own picture when there is one; the kind's icon
-            // otherwise, so bag and multi-item rows still read at a glance.
+            // otherwise, so bag and order rows still read at a glance.
             if (item.product != null)
               SizedBox(
                 width: 40,
@@ -123,7 +120,7 @@ class _ForYouRow extends StatelessWidget {
                   color: theme.colorScheme.surface.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 ),
-                child: Icon(_icon, size: 19, color: theme.colorScheme.primary),
+                child: Icon(_icon, size: 19, color: _iconColor(theme)),
               ),
             const SizedBox(width: 12),
             Expanded(
@@ -132,6 +129,8 @@ class _ForYouRow extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -145,6 +144,11 @@ class _ForYouRow extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  if (item.progress
+                      case final OrderProgress progress) ...<Widget>[
+                    const SizedBox(height: 8),
+                    _ProgressTrack(progress: progress, kind: item.kind),
+                  ],
                 ],
               ),
             ),
@@ -155,6 +159,46 @@ class _ForYouRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Processing → shipped → delivered, as three segments.
+///
+/// Segments rather than a single bar: the stages are discrete, and a
+/// continuous fill would imply the app knows where the van is.
+class _ProgressTrack extends StatelessWidget {
+  const _ProgressTrack({required this.progress, required this.kind});
+
+  final OrderProgress progress;
+  final ForYouKind kind;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Color done = kind == ForYouKind.orderDelivered
+        ? AppTheme.success
+        : theme.colorScheme.primary;
+    final Color todo = theme.colorScheme.onSurfaceVariant.withValues(
+      alpha: 0.22,
+    );
+
+    return Row(
+      children: <Widget>[
+        for (int i = 0; i < progress.stageCount; i++) ...<Widget>[
+          if (i > 0) const SizedBox(width: 4),
+          Expanded(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: 4,
+              decoration: BoxDecoration(
+                color: i <= progress.stage ? done : todo,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

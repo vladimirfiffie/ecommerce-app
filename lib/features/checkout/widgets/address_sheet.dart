@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/address.dart';
@@ -79,8 +80,11 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
     if (mounted) Navigator.of(context).pop();
   }
 
-  String? _required(String? value) =>
-      (value == null || value.trim().isEmpty) ? 'Required' : null;
+  /// Caps a field at the length the model will accept, so an over-long paste
+  /// is stopped at the keyboard rather than at validation.
+  List<TextInputFormatter> _limit(int max) => <TextInputFormatter>[
+    LengthLimitingTextInputFormatter(max),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -106,8 +110,11 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                   Expanded(
                     child: TextFormField(
                       controller: _label,
-                      validator: _required,
+                      validator: (String? v) =>
+                          AddressValidator.validateLabel(v ?? ''),
                       textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
+                      inputFormatters: _limit(24),
                       decoration: const InputDecoration(labelText: 'Label'),
                     ),
                   ),
@@ -116,8 +123,12 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                     flex: 2,
                     child: TextFormField(
                       controller: _recipient,
-                      validator: _required,
+                      validator: (String? v) =>
+                          AddressValidator.validateRecipient(v ?? ''),
                       textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const <String>[AutofillHints.name],
+                      inputFormatters: _limit(AddressValidator.maxShortField),
                       decoration: const InputDecoration(labelText: 'Full name'),
                     ),
                   ),
@@ -126,8 +137,13 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _line1,
-                validator: _required,
+                validator: (String? v) =>
+                    AddressValidator.validateLine1(v ?? ''),
                 textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.streetAddress,
+                autofillHints: const <String>[AutofillHints.fullStreetAddress],
+                inputFormatters: _limit(AddressValidator.maxLine),
                 decoration: const InputDecoration(labelText: 'Street address'),
               ),
               const SizedBox(height: 12),
@@ -137,8 +153,12 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                     flex: 2,
                     child: TextFormField(
                       controller: _city,
-                      validator: _required,
+                      validator: (String? v) =>
+                          AddressValidator.validateCity(v ?? ''),
                       textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const <String>[AutofillHints.addressCity],
+                      inputFormatters: _limit(AddressValidator.maxShortField),
                       decoration: const InputDecoration(labelText: 'City'),
                     ),
                   ),
@@ -146,7 +166,17 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                   Expanded(
                     child: TextFormField(
                       controller: _postcode,
-                      validator: _required,
+                      // Country decides the rule, so the postcode has to be
+                      // re-checked whenever the country changes underneath it.
+                      validator: (String? v) =>
+                          AddressValidator.validatePostcode(
+                            v ?? '',
+                            country: _country.text,
+                          ),
+                      textCapitalization: TextCapitalization.characters,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const <String>[AutofillHints.postalCode],
+                      inputFormatters: _limit(AddressValidator.maxPostcode),
                       decoration: const InputDecoration(labelText: 'ZIP'),
                     ),
                   ),
@@ -155,8 +185,13 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _country,
-                validator: _required,
+                validator: (String? v) =>
+                    AddressValidator.validateCountry(v ?? ''),
                 textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.done,
+                autofillHints: const <String>[AutofillHints.countryName],
+                inputFormatters: _limit(AddressValidator.maxShortField),
+                onFieldSubmitted: (_) => _save(),
                 decoration: const InputDecoration(labelText: 'Country'),
               ),
               const SizedBox(height: 24),

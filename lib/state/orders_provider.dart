@@ -202,8 +202,9 @@ Duration? orderStatusTick = const Duration(minutes: 1);
 /// on screen would otherwise still claim "Processing" hours after the parcel
 /// shipped. Watching this makes those screens keep up on their own.
 ///
-/// Auto-disposed so the timer only runs while something is actually showing an
-/// order.
+/// Auto-disposed so the timer stops when nothing is listening. In practice
+/// home's "For you" keeps it alive whenever there's an open order, which is
+/// exactly when it's earning its keep.
 final AutoDisposeStreamProvider<int> orderClockProvider =
     StreamProvider.autoDispose<int>((Ref ref) {
       final Duration? tick = orderStatusTick;
