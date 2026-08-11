@@ -3,6 +3,7 @@ import 'package:ecommerce_app/data/models/payment_card.dart';
 import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
+import 'package:ecommerce_app/state/auth_provider.dart';
 import 'package:ecommerce_app/state/cart_provider.dart';
 import 'package:ecommerce_app/state/orders_provider.dart';
 import 'package:ecommerce_app/state/payments_provider.dart';
@@ -48,7 +49,11 @@ void main() {
       );
 
   Future<ProviderContainer> launch(WidgetTester tester) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
+    // Past the welcome gate: this test is about buying something, not about
+    // signing in. The gate itself has its own coverage in test/auth_test.dart.
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      GuestModeNotifier.prefsKey: true,
+    });
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[sharedPreferencesProvider.overrideWithValue(prefs)],

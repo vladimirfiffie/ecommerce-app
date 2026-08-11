@@ -37,7 +37,7 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    SharedPreferences.setMockInitialValues(<String, Object>{});
+    setMockPrefs();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       ProviderScope(
@@ -145,7 +145,7 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
-      SharedPreferences.setMockInitialValues(<String, Object>{
+      setMockPrefs(<String, Object>{
         'settings.themeMode': 'dark',
         'settings.amoled': true,
       });

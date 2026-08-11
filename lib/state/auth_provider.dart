@@ -230,8 +230,12 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   /// Ends the session. The account and everything the shopper saved stays.
+  ///
+  /// Guest mode is cleared too, so signing out lands back on the welcome
+  /// screen rather than dropping you into the shop as an anonymous browser.
   Future<void> signOut() async {
     await _prefs.remove(_sessionKey);
+    await ref.read(guestModeProvider.notifier).reset();
     state = const AuthState();
   }
 
@@ -258,6 +262,7 @@ class AuthNotifier extends Notifier<AuthState> {
         if (a.id != current.id) a,
     ]);
     await _prefs.remove(_sessionKey);
+    await ref.read(guestModeProvider.notifier).reset();
     state = const AuthState();
   }
 }
@@ -268,4 +273,38 @@ final NotifierProvider<AuthNotifier, AuthState> authProvider =
 /// Convenience for the many widgets that only care whether someone is in.
 final Provider<bool> signedInProvider = Provider<bool>(
   (Ref ref) => ref.watch(authProvider).signedIn,
+);
+
+/// Remembers that the shopper chose to skip the account and browse anyway.
+///
+/// Persisted, because asking again on every launch would make "browse as a
+/// guest" a worse deal than signing up — which isn't the offer being made.
+class GuestModeNotifier extends Notifier<bool> {
+  static const String prefsKey = 'auth.guest';
+
+  SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
+
+  @override
+  bool build() => _prefs.getBool(prefsKey) ?? false;
+
+  Future<void> browseAsGuest() async {
+    await _prefs.setBool(prefsKey, true);
+    state = true;
+  }
+
+  /// Puts the welcome screen back. Called on sign-out, not by the shopper.
+  Future<void> reset() async {
+    await _prefs.remove(prefsKey);
+    state = false;
+  }
+}
+
+final NotifierProvider<GuestModeNotifier, bool> guestModeProvider =
+    NotifierProvider<GuestModeNotifier, bool>(GuestModeNotifier.new);
+
+/// Whether the welcome screen has been dealt with — by signing in, creating an
+/// account, or explicitly choosing to browse as a guest. The router gates
+/// every other route on this.
+final Provider<bool> pastAuthGateProvider = Provider<bool>(
+  (Ref ref) => ref.watch(signedInProvider) || ref.watch(guestModeProvider),
 );

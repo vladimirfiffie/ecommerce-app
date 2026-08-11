@@ -54,7 +54,7 @@ void main() {
     required Catalog catalog,
     Map<String, Object> prefs = const <String, Object>{},
   }) async {
-    SharedPreferences.setMockInitialValues(prefs);
+    setMockPrefs(prefs);
     final SharedPreferences store = await SharedPreferences.getInstance();
 
     late final RecordingNotifications recorder;

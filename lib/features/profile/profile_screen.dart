@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/formatters.dart';
+import '../../data/models/order.dart';
 import '../../state/orders_provider.dart';
 import 'widgets/edit_name_sheet.dart';
 import '../../state/profile_provider.dart';
@@ -18,7 +20,6 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
-    final int orderCount = ref.watch(ordersProvider).length;
 
     return Scaffold(
       body: SafeArea(
@@ -33,18 +34,7 @@ class ProfileScreen extends ConsumerWidget {
             const _AccountCard(),
             const SizedBox(height: 18),
             const SizedBox(height: 28),
-            _SectionCard(
-              children: <Widget>[
-                _Tile(
-                  icon: Icons.receipt_long_outlined,
-                  title: 'Your orders',
-                  subtitle: orderCount == 0
-                      ? 'No orders yet'
-                      : '$orderCount placed',
-                  onTap: () => context.push(Routes.orders),
-                ),
-              ],
-            ),
+            const _SectionCard(children: <Widget>[_OrdersTile()]),
             const SizedBox(height: 16),
             _SectionCard(
               children: <Widget>[
@@ -217,10 +207,58 @@ class _Tile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
       title: Text(title, style: theme.textTheme.titleSmall),
-      subtitle: Text(subtitle, style: theme.textTheme.bodySmall),
+      subtitle: Text(
+        subtitle,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodySmall,
+      ),
       trailing: const Icon(Icons.chevron_right_rounded),
       onTap: onTap,
     );
+  }
+}
+
+/// Orders entry point, showing where the newest order actually is.
+///
+/// A count alone ("3 placed") is the one thing nobody opens this screen to
+/// find out. Status is derived from the clock, so this tracks it live rather
+/// than freezing at whatever it said when the tab was opened.
+class _OrdersTile extends ConsumerWidget {
+  const _OrdersTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final List<Order> orders = ref.watch(ordersProvider);
+    ref.watch(orderClockProvider);
+
+    return _Tile(
+      icon: Icons.receipt_long_outlined,
+      title: 'Your orders',
+      subtitle: _subtitle(orders),
+      onTap: () => context.push(Routes.orders),
+    );
+  }
+
+  String _subtitle(List<Order> orders) {
+    if (orders.isEmpty) return 'No orders yet';
+
+    final Order latest = orders.first;
+    final StringBuffer line = StringBuffer(
+      '${latest.id} · ${latest.status.label}',
+    );
+
+    // An arrival date is only news while the parcel is still coming.
+    if (latest.status == OrderStatus.processing ||
+        latest.status == OrderStatus.shipped) {
+      line.write(' · arriving ${formatDeliveryDate(latest.estimatedDelivery)}');
+    } else if (latest.status == OrderStatus.delivered && latest.canReturn) {
+      final int days = latest.returnDaysLeft;
+      line.write(' · ${days}d left to return');
+    }
+
+    if (orders.length > 1) line.write('\n+${orders.length - 1} more');
+    return line.toString();
   }
 }
 

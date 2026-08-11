@@ -189,6 +189,28 @@ class OrdersNotifier extends Notifier<List<Order>> {
 final NotifierProvider<OrdersNotifier, List<Order>> ordersProvider =
     NotifierProvider<OrdersNotifier, List<Order>>(OrdersNotifier.new);
 
+/// How often anything showing a live order status redraws.
+///
+/// Set to null by `configureTestEnvironment()`: a repeating stream schedules a
+/// frame per tick, which would stop `pumpAndSettle` from ever settling.
+@visibleForTesting
+Duration? orderStatusTick = const Duration(minutes: 1);
+
+/// A pulse for screens that show a time-derived order status.
+///
+/// [Order.status] is computed from the clock rather than stored, so a card left
+/// on screen would otherwise still claim "Processing" hours after the parcel
+/// shipped. Watching this makes those screens keep up on their own.
+///
+/// Auto-disposed so the timer only runs while something is actually showing an
+/// order.
+final AutoDisposeStreamProvider<int> orderClockProvider =
+    StreamProvider.autoDispose<int>((Ref ref) {
+      final Duration? tick = orderStatusTick;
+      if (tick == null) return const Stream<int>.empty();
+      return Stream<int>.periodic(tick, (int i) => i);
+    });
+
 final ProviderFamily<Order?, String> orderByIdProvider =
     Provider.family<Order?, String>((Ref ref, String id) {
       for (final Order o in ref.watch(ordersProvider)) {

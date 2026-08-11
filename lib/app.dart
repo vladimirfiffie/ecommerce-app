@@ -7,13 +7,14 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'state/alerts_provider.dart';
 import 'state/app_providers.dart';
+import 'state/auth_provider.dart';
 import 'state/settings_provider.dart';
 import 'state/whats_new_provider.dart';
 import 'features/whats_new/whats_new_sheet.dart';
 
 /// Router lives in a provider so hot reload and tests get a single instance.
 final Provider<GoRouter> routerProvider = Provider<GoRouter>(
-  (Ref ref) => createRouter(),
+  (Ref ref) => createRouter(ref),
 );
 
 class NovaApp extends ConsumerStatefulWidget {
@@ -46,6 +47,10 @@ class _NovaAppState extends ConsumerState<NovaApp> {
   /// A first install records the version silently instead — nobody needs a
   /// changelog for a version they never ran.
   Future<void> _maybeShowWhatsNew() async {
+    // Not over the welcome screen. Left unmarked so it still gets shown once
+    // the shopper is actually in the shop.
+    if (!ref.read(pastAuthGateProvider)) return;
+
     final WhatsNewNotifier notifier = ref.read(whatsNewProvider.notifier);
     if (!notifier.shouldShow) {
       if (ref.read(whatsNewProvider).lastSeenVersion == null) {

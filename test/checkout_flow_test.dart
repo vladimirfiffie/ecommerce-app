@@ -37,7 +37,7 @@ void main() {
   Future<ProviderContainer> pumpApp(WidgetTester tester) async {
     useMobileSurface(tester);
     stubHaptics();
-    SharedPreferences.setMockInitialValues(<String, Object>{});
+    setMockPrefs();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[
@@ -125,7 +125,7 @@ void main() {
   ) async {
     useMobileSurface(tester);
     stubHaptics();
-    SharedPreferences.setMockInitialValues(<String, Object>{});
+    setMockPrefs();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final Catalog sized = Catalog(
       categories: const <Category>[],

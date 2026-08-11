@@ -6,7 +6,10 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../state/profile_provider.dart';
 
-/// Greeting + brand mark + a tap-through search field.
+/// Greeting + a tap-through search field.
+///
+/// No brand mark: the shopper knows which app they opened, and the greeting
+/// already says who they are.
 class HomeAppBar extends ConsumerWidget {
   const HomeAppBar({super.key});
 
@@ -21,41 +24,11 @@ class HomeAppBar extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.auto_awesome_rounded,
-                            size: 13,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            'Nova',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        greeting,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.headlineMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            Text(
+              greeting,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.headlineMedium,
             ),
             const SizedBox(height: 18),
             _SearchBarButton(onTap: () => context.push(Routes.search)),

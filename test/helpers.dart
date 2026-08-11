@@ -8,13 +8,34 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ecommerce_app/features/home/widgets/deal_countdown.dart';
+import 'package:ecommerce_app/state/auth_provider.dart';
+import 'package:ecommerce_app/state/orders_provider.dart';
 
 /// Keeps tests hermetic: no font downloads, no HTTP.
 void configureTestEnvironment() {
   // A repeating timer schedules a frame per tick, so pumpAndSettle would
   // never settle on any screen showing the deals countdown.
   dealCountdownTick = null;
+  orderStatusTick = null;
   GoogleFonts.config.allowRuntimeFetching = false;
+}
+
+/// Clears the welcome gate, so a test that boots the app lands in the shop
+/// instead of on the sign-in screen. Auth tests override this.
+const Map<String, Object> pastAuthGatePrefs = <String, Object>{
+  GuestModeNotifier.prefsKey: true,
+};
+
+/// Seeds mock preferences with the welcome gate already cleared.
+///
+/// Use this instead of [SharedPreferences.setMockInitialValues] in any test
+/// that pumps the whole app: from a blank store the router opens on sign-in,
+/// and every test would have to browse-as-guest before it could begin.
+void setMockPrefs([Map<String, Object> initial = const <String, Object>{}]) {
+  SharedPreferences.setMockInitialValues(<String, Object>{
+    ...pastAuthGatePrefs,
+    ...initial,
+  });
 }
 
 /// haptic_kit's method channel, as declared by the package.
@@ -154,11 +175,19 @@ class FakeProductRepository implements ProductRepository {
 
 /// Builds a container wired to in-memory preferences and an optional
 /// fixed catalog.
+///
+/// The welcome gate starts cleared unless [gated] says otherwise — almost no
+/// test is about the gate, and every one of them would otherwise have to get
+/// past it before it could start.
 Future<ProviderContainer> testContainer({
   Catalog? catalog,
   Map<String, Object> initialPrefs = const <String, Object>{},
+  bool gated = false,
 }) async {
-  SharedPreferences.setMockInitialValues(initialPrefs);
+  SharedPreferences.setMockInitialValues(<String, Object>{
+    if (!gated) ...pastAuthGatePrefs,
+    ...initialPrefs,
+  });
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   final ProviderContainer container = ProviderContainer(

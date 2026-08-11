@@ -10,6 +10,7 @@ just Flutter widgets and pub plugins.
 
 | Area | Details |
 | --- | --- |
+| **Welcome** | The app opens on sign in / create account, with a one-tap "browse as guest" that's remembered; signing out puts it back |
 | **Home** | Auto-advancing promo carousel, category tiles, deals / new-arrivals / recently-viewed rails, popular grid, pull to refresh |
 | **Shop** | 157 products across 6 categories, category strip, grid/list toggle, filter & sort sheet (type, max price, min rating, on-sale, in-stock) |
 | **Search** | Debounced live results, persisted recent searches, trending chips |
@@ -19,13 +20,13 @@ just Flutter widgets and pub plugins.
 | **Orders** | Status tracker that advances over time, cancel before dispatch, partial returns with refund maths, shareable receipt, reorder |
 | **Saved** | Wishlist with bulk add-to-bag |
 | **Reviews** | Verified buyers can write, edit and delete a review; it pins to the top of the list and folds into the rating average |
-| **Profile** | Editable name, light/dark/auto, 8 theme presets, AMOLED black, Material You, haptics, notifications, biometrics, data reset |
+| **Profile** | Live "your orders" summary (newest order, its status, when it lands), editable name, light/dark/auto, 8 theme presets, AMOLED black, Material You, haptics, notifications, biometrics, data reset |
 
 ### Device integration
 
 | | |
 | --- | --- |
-| **Haptics** | Master switch, three intensity levels, four mutable channels, live capability report and a playground covering every `haptic_kit` primitive and widget |
+| **Haptics** | Master switch, three intensity levels, four mutable channels |
 | **Notifications** | Permission flow, master switch and three categories; ordering posts a confirmation and schedules shipping/delivery notices |
 | **Biometrics** | Opt-in verification before payment, with a capability report and a test prompt |
 | **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
@@ -121,13 +122,18 @@ builds APKs (per-ABI plus universal) and publishes them as a GitHub
 **prerelease**.
 
 ```bash
-git tag v0.7.0
-git push origin v0.7.0
+git tag v0.8.0
+git push origin v0.8.0
 ```
 
-Grab `nova-v0.7.0-arm64-v8a.apk` for most modern phones, or the `universal` APK
+Grab `nova-v0.8.0-arm64-v8a.apk` for most modern phones, or the `universal` APK
 if you're unsure. You'll need to allow installs from unknown sources.
 
 > APKs are **signed with Android's debug key**. That's fine for sideloaded
 > testing but not for distribution — add a real signing config in
 > `android/app/build.gradle.kts` before shipping anywhere public.
+>
+> One consequence worth knowing: the runner generates a fresh debug key on
+> every workflow run, so no two releases share a signature. Android refuses to
+> install one over another and reports **"App not installed"**. Uninstall the
+> old copy before installing a new one.

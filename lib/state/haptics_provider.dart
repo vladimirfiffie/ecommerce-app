@@ -183,16 +183,6 @@ class HapticService {
   Future<void> notification(HapticNotificationStyle style) =>
       _guard(HapticChannel.notifications, () => Haptics.notification(style));
 
-  /// Pre-warms iOS generators so the first tap isn't late. No-op elsewhere.
-  Future<bool> prepare() async {
-    if (!platformSupported || !settings.enabled) return false;
-    try {
-      return await Haptics.prepare();
-    } on VibrationException {
-      return false;
-    }
-  }
-
   Future<void> vibrate({required Duration duration, int? amplitude}) => _guard(
     HapticChannel.vibrations,
     () => Vibration.vibrate(duration: duration, amplitude: amplitude),
@@ -258,16 +248,3 @@ class HapticService {
 final Provider<HapticService> hapticsProvider = Provider<HapticService>(
   (Ref ref) => HapticService(ref.watch(hapticSettingsProvider)),
 );
-
-/// What the hardware can actually do. Null off-platform or when the query
-/// fails — the settings screen renders that as "unavailable" rather than
-/// pretending everything is supported.
-final FutureProvider<HapticCapabilities?> hapticCapabilitiesProvider =
-    FutureProvider<HapticCapabilities?>((Ref ref) async {
-      if (!HapticService.platformSupported) return null;
-      try {
-        return await HapticCapabilities.query();
-      } on VibrationException {
-        return null;
-      }
-    });

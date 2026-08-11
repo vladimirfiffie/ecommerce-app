@@ -149,7 +149,6 @@ void main() {
         service.vibrate(duration: const Duration(milliseconds: 10)),
         completes,
       );
-      expect(await service.prepare(), isFalse);
     });
 
     test('invalid arguments are contained too', () async {
@@ -175,28 +174,6 @@ void main() {
       await service.selection();
 
       expect(calls, isEmpty);
-    });
-
-    test('capabilities resolve to null off-platform', () async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-      addTearDown(() => debugDefaultTargetPlatformOverride = null);
-      installRecorder();
-
-      final ProviderContainer c = await testContainer();
-      expect(await c.read(hapticCapabilitiesProvider.future), isNull);
-    });
-
-    test('capabilities are read through on a supported platform', () async {
-      installRecorder();
-      final ProviderContainer c = await testContainer();
-
-      final HapticCapabilities? caps = await c.read(
-        hapticCapabilitiesProvider.future,
-      );
-      expect(caps, isNotNull);
-      expect(caps!.hasVibrator, isTrue);
-      expect(caps.hasAmplitudeControl, isFalse);
-      expect(caps.supportsCustomPatterns, isTrue);
     });
   });
 

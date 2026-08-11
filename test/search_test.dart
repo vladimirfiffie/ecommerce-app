@@ -202,7 +202,7 @@ Future<ProviderContainer> pumpSearch(
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
 
-  SharedPreferences.setMockInitialValues(const <String, Object>{});
+  setMockPrefs();
   final SharedPreferences store = await SharedPreferences.getInstance();
   final Catalog catalog = Catalog(
     categories: const <Category>[

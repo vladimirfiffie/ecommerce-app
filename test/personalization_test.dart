@@ -35,7 +35,7 @@ void main() {
     Map<String, Object> prefs = const <String, Object>{},
   }) async {
     useMobileSurface(tester);
-    SharedPreferences.setMockInitialValues(prefs);
+    setMockPrefs(prefs);
     final SharedPreferences store = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       ProviderScope(

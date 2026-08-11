@@ -115,6 +115,8 @@ class OrderCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final List<CartItem> items = ref.watch(orderItemsProvider(order.id));
+    // Keeps the status pill honest while the list sits open.
+    ref.watch(orderClockProvider);
 
     return Card(
       color: selected

@@ -30,6 +30,8 @@ class OrderDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final Order? order = ref.watch(orderByIdProvider(orderId));
+    // Status, tracker and the cancel/return actions all read the clock.
+    ref.watch(orderClockProvider);
 
     if (order == null) {
       return Scaffold(

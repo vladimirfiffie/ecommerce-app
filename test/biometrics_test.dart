@@ -154,7 +154,7 @@ void main() {
 
   group('status', () {
     test('reports enrolled biometrics', () async {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
+      setMockPrefs();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final ProviderContainer c = ProviderContainer(
         overrides: <Override>[
@@ -172,7 +172,7 @@ void main() {
     });
 
     test('hardware without enrolment is not usable', () async {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
+      setMockPrefs();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final ProviderContainer c = ProviderContainer(
         overrides: <Override>[
@@ -191,7 +191,7 @@ void main() {
     });
 
     test('a device without biometric support reports unsupported', () async {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
+      setMockPrefs();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final ProviderContainer c = ProviderContainer(
         overrides: <Override>[
@@ -224,7 +224,7 @@ void main() {
       required bool requireAuth,
     }) async {
       useMobileSurface(tester);
-      SharedPreferences.setMockInitialValues(<String, Object>{
+      setMockPrefs(<String, Object>{
         'biometrics.requireForPayment': requireAuth,
       });
       final SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -44,7 +44,7 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    SharedPreferences.setMockInitialValues(prefs);
+    setMockPrefs(prefs);
     final SharedPreferences store = await SharedPreferences.getInstance();
     final ProviderContainer c = ProviderContainer(
       overrides: <Override>[

@@ -79,27 +79,24 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
+  /// Takes the shopper into the shop without an account.
+  Future<void> _browseAsGuest() async {
+    await ref.read(guestModeProvider.notifier).browseAsGuest();
+    if (mounted) context.go(Routes.home);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final AuthState auth = ref.watch(authProvider);
     final bool wide = Breakpoints.of(context).isAtLeastMedium;
 
+    // This screen is the app's front door until the gate is cleared. Reached
+    // from Profile afterwards, it's an ordinary pushed page with a back arrow.
+    final bool isGate = !ref.watch(pastAuthGateProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_signUp ? 'Create account' : 'Sign in'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: auth.busy
-                ? null
-                : () => context.canPop()
-                      ? context.pop()
-                      : context.go(Routes.home),
-            child: const Text('Skip'),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+      appBar: AppBar(title: Text(_signUp ? 'Create account' : 'Sign in')),
       body: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: wide ? 460 : double.infinity),
@@ -282,6 +279,43 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       : 'New to Nova? Create an account',
                 ),
               ),
+
+              // Only on the way in. Once you're past the gate there's nothing
+              // left to skip, and Profile already offers to sign you out.
+              if (isGate) ...<Widget>[
+                const SizedBox(height: 18),
+                Row(
+                  children: <Widget>[
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'or',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                OutlinedButton.icon(
+                  onPressed: auth.busy ? null : _browseAsGuest,
+                  icon: const Icon(Icons.storefront_outlined, size: 19),
+                  label: const Text('Browse as guest'),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Everything works without an account. You can sign in later '
+                  'from Profile.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 24),
               const _LocalAccountNotice(),
             ],

@@ -32,7 +32,7 @@ void main() {
   );
 
   Future<Widget> buildApp() async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
+    setMockPrefs();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return ProviderScope(
       overrides: <Override>[
@@ -51,7 +51,9 @@ void main() {
     await tester.pumpWidget(await buildApp());
     await settle(tester);
 
-    expect(find.text('Nova'), findsOneWidget);
+    // The greeting is the header now — no brand mark above it.
+    expect(find.textContaining('Good'), findsOneWidget);
+    expect(find.text('Nova'), findsNothing);
     // Categories live on Shop and Search now, not duplicated on Home.
     expect(find.text('Browse categories'), findsNothing);
     expect(find.byType(HeroCarousel), findsOneWidget);
@@ -79,7 +81,7 @@ void main() {
   testWidgets('adding to the bag updates the cart badge and totals', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
+    setMockPrefs();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[

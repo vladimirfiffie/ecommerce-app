@@ -64,7 +64,7 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
-      SharedPreferences.setMockInitialValues(const <String, Object>{});
+      setMockPrefs();
       final SharedPreferences store = await SharedPreferences.getInstance();
       final FakeProductRepository repo = FakeProductRepository(catalog);
       final ProviderContainer c = ProviderContainer(
@@ -142,7 +142,7 @@ void main() {
     testWidgets('a failed refresh does not take the screen down', (
       WidgetTester tester,
     ) async {
-      SharedPreferences.setMockInitialValues(const <String, Object>{});
+      setMockPrefs();
       final SharedPreferences store = await SharedPreferences.getInstance();
       final ProviderContainer c = ProviderContainer(
         overrides: <Override>[

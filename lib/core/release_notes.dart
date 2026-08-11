@@ -30,6 +30,30 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.8.0',
+    headline: 'A proper front door',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'storefront_outlined',
+        'Sign in, or don’t',
+        'Nova now opens on sign in and create account, with one tap to '
+            'browse as a guest — and it remembers which you chose.',
+      ),
+      ReleaseHighlight(
+        'assignment_return_outlined',
+        'Orders that keep up',
+        'Your orders now shows the newest one, where it’s got to and when '
+            'it lands, and it updates itself while you watch.',
+      ),
+      ReleaseHighlight(
+        'vibration_rounded',
+        'A tidier Settings',
+        'The haptics screen is now just the controls — master switch, '
+            'strength and what gets feedback.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.7.0',
     headline: 'A home that knows you',
     highlights: <ReleaseHighlight>[
