@@ -19,6 +19,8 @@ const Map<String, IconData> _icons = <String, IconData>{
   'fingerprint_rounded': Icons.fingerprint_rounded,
   'tablet_mac_rounded': Icons.tablet_mac_rounded,
   'storefront_outlined': Icons.storefront_outlined,
+  'auto_awesome_rounded': Icons.auto_awesome_rounded,
+  'timer_outlined': Icons.timer_outlined,
   'search_rounded': Icons.search_rounded,
   'grid_view_rounded': Icons.grid_view_rounded,
   'refresh_rounded': Icons.refresh_rounded,

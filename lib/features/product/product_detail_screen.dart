@@ -30,6 +30,8 @@ import 'package:haptic_kit/haptic_kit.dart';
 import 'widgets/size_guide_sheet.dart';
 import 'widgets/questions_section.dart';
 import '../../state/alerts_provider.dart';
+import '../home/widgets/deal_countdown.dart';
+import '../../state/deals_provider.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({
@@ -319,6 +321,36 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ],
             ],
           ),
+
+          // Only when this product is in today's rotating selection. The
+          // countdown is about that listing ending, not the price changing —
+          // the discount itself doesn't expire at midnight.
+          if (ref.watch(dailyDealsProvider).contains(product)) ...<Widget>[
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.local_fire_department_rounded,
+                  size: 16,
+                  color: theme.colorScheme.error,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'In today’s deals · ',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                DealCountdown(
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 24),
           if (product.sizes.isNotEmpty) ...<Widget>[
             SizeSelector(

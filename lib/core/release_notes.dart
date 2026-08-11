@@ -30,6 +30,30 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.7.0',
+    headline: 'A home that knows you',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'auto_awesome_rounded',
+        'For you',
+        'Back-in-stock items you watched, price drops on things you saved, '
+            'and what’s still in your bag — all on the home screen.',
+      ),
+      ReleaseHighlight(
+        'timer_outlined',
+        'Deals that actually end',
+        'Today’s deals rotate at midnight, with a live countdown on home '
+            'and on the products in it.',
+      ),
+      ReleaseHighlight(
+        'grid_view_rounded',
+        'A calmer home',
+        'Fewer stacked carousels, and categories live in one place instead '
+            'of three.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.6.0',
     headline: 'Search that finds things',
     highlights: <ReleaseHighlight>[

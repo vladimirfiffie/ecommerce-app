@@ -18,6 +18,8 @@ import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
 import '../../shared/widgets/nova_refresh.dart';
 import 'widgets/for_you_card.dart';
+import 'widgets/deal_countdown.dart';
+import '../../state/deals_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -78,7 +80,7 @@ class HomeScreen extends ConsumerWidget {
   List<Widget> _loaded(BuildContext context, WidgetRef ref, Catalog catalog) {
     final List<Product> featured = catalog.featured;
     final List<Product> newArrivals = catalog.newArrivals;
-    final List<Product> deals = catalog.onSale.take(10).toList();
+    final List<Product> deals = ref.watch(dailyDealsProvider);
     final List<Product> popular = _popular(catalog);
 
     void browse(String? categoryId) {
@@ -104,9 +106,13 @@ class HomeScreen extends ConsumerWidget {
         SliverToBoxAdapter(
           child: SectionHeader(
             title: 'Today’s deals',
-            // No countdown exists, so don't imply one. The discount badges
-            // on the cards carry the message instead.
-            subtitle: '${deals.length} reduced right now',
+            // A real deadline: the selection rotates at local midnight.
+            subtitleWidget: DealCountdown(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             actionLabel: 'See all',
             onAction: () {
               ref.read(catalogFilterProvider.notifier).reset();

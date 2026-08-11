@@ -7,9 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ecommerce_app/features/home/widgets/deal_countdown.dart';
 
 /// Keeps tests hermetic: no font downloads, no HTTP.
 void configureTestEnvironment() {
+  // A repeating timer schedules a frame per tick, so pumpAndSettle would
+  // never settle on any screen showing the deals countdown.
+  dealCountdownTick = null;
   GoogleFonts.config.allowRuntimeFetching = false;
 }
 
