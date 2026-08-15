@@ -10,6 +10,8 @@ import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../state/auth_provider.dart';
 import '../../state/haptics_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../core/l10n/enum_labels.dart';
 
 /// Combined sign-in / create-account screen.
 ///
@@ -75,7 +77,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       unawaited(
         ref.read(hapticsProvider).notification(HapticNotificationStyle.error),
       );
-      if (mounted) setState(() => _error = e.message);
+      if (mounted) {
+        setState(() => _error = e.error.messageIn(AppL10n.of(context)));
+      }
     }
   }
 
@@ -139,7 +143,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           prefixIcon: Icon(Icons.person_outline_rounded),
                         ),
                         validator: (String? v) => (v?.trim().isEmpty ?? true)
-                            ? AuthError.nameRequired.message
+                            ? AuthError.nameRequired.messageIn(
+                                AppL10n.of(context),
+                              )
                             : null,
                       ),
                       const SizedBox(height: 12),
@@ -156,7 +162,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       validator: (String? v) =>
                           AuthNotifier.isValidEmail(v ?? '')
                           ? null
-                          : AuthError.emailInvalid.message,
+                          : AuthError.emailInvalid.messageIn(
+                              AppL10n.of(context),
+                            ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -192,7 +200,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               ? 'Enter your password'
                               : null;
                         }
-                        return AuthNotifier.validatePassword(v ?? '')?.message;
+                        return AuthNotifier.validatePassword(
+                          v ?? '',
+                        )?.messageIn(AppL10n.of(context));
                       },
                     ),
                     if (_signUp) ...<Widget>[
@@ -208,7 +218,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         ),
                         validator: (String? v) => v == _password.text
                             ? null
-                            : AuthError.passwordMismatch.message,
+                            : AuthError.passwordMismatch.messageIn(
+                                AppL10n.of(context),
+                              ),
                       ),
                       const SizedBox(height: 8),
                       Align(

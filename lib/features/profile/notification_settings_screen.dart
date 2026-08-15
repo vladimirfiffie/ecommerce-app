@@ -23,7 +23,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
     final AsyncValue<bool> permission = ref.watch(
       notificationPermissionProvider,
     );
-    final bool granted = permission.valueOrNull ?? false;
+    final bool granted = permission.value ?? false;
     final bool supported = NotificationService.platformSupported;
 
     Future<void> toast(String message) async {

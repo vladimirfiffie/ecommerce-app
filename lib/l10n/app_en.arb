@@ -1,0 +1,183 @@
+{
+  "@@locale": "en",
+
+  "orderStatusProcessing": "Processing",
+  "@orderStatusProcessing": {
+    "description": "Order is accepted but not yet handed to the courier."
+  },
+  "orderStatusShipped": "Shipped",
+  "@orderStatusShipped": {
+    "description": "Order is with the courier."
+  },
+  "orderStatusDelivered": "Delivered",
+  "@orderStatusDelivered": {
+    "description": "Order has arrived."
+  },
+  "orderStatusCancelled": "Cancelled",
+  "@orderStatusCancelled": {
+    "description": "Order was cancelled before dispatch."
+  },
+  "orderStatusReturnRequested": "Return requested",
+  "@orderStatusReturnRequested": {
+    "description": "A return has been filed but not yet refunded."
+  },
+  "orderStatusRefunded": "Refunded",
+  "@orderStatusRefunded": {
+    "description": "The refund has been paid back."
+  },
+
+  "returnReasonWrongSize": "Wrong size or fit",
+  "@returnReasonWrongSize": {
+    "description": "Return reason. The shopper does not pay return postage for reasons that are the shop's fault; this one is not."
+  },
+  "returnReasonNotAsDescribed": "Not as described",
+  "@returnReasonNotAsDescribed": {
+    "description": "Return reason, counted as the shop's fault."
+  },
+  "returnReasonDamaged": "Arrived damaged",
+  "@returnReasonDamaged": {
+    "description": "Return reason, counted as the shop's fault."
+  },
+  "returnReasonWrongItem": "Wrong item sent",
+  "@returnReasonWrongItem": {
+    "description": "Return reason, counted as the shop's fault."
+  },
+  "returnReasonChangedMind": "Changed my mind",
+  "@returnReasonChangedMind": {
+    "description": "Return reason, not the shop's fault."
+  },
+  "returnReasonOther": "Something else",
+  "@returnReasonOther": {
+    "description": "Catch-all return reason."
+  },
+
+  "authErrorEmailInvalid": "Enter a valid email address",
+  "@authErrorEmailInvalid": {},
+  "authErrorEmailTaken": "An account already uses that email",
+  "@authErrorEmailTaken": {},
+  "authErrorNameRequired": "Tell us your name",
+  "@authErrorNameRequired": {},
+  "authErrorPasswordTooShort": "Use at least 8 characters",
+  "@authErrorPasswordTooShort": {},
+  "authErrorPasswordTooCommon": "That password is too easy to guess",
+  "@authErrorPasswordTooCommon": {},
+  "authErrorPasswordMismatch": "Those passwords don’t match",
+  "@authErrorPasswordMismatch": {},
+  "authErrorCredentialsWrong": "Email or password is incorrect",
+  "@authErrorCredentialsWrong": {
+    "description": "Deliberately vague. Saying which half was wrong tells an attacker whether an email is registered, so translations must not name the field either."
+  },
+
+  "deliveryStandardLabel": "Standard",
+  "@deliveryStandardLabel": {},
+  "deliveryStandardBlurb": "3–5 business days",
+  "@deliveryStandardBlurb": {},
+  "deliveryExpressLabel": "Express",
+  "@deliveryExpressLabel": {},
+  "deliveryExpressBlurb": "Next business day",
+  "@deliveryExpressBlurb": {},
+  "deliveryPickupLabel": "Collect in store",
+  "@deliveryPickupLabel": {},
+  "deliveryPickupBlurb": "Ready in about 2 hours",
+  "@deliveryPickupBlurb": {},
+
+  "priceReducedFrom": "{price}, reduced from {was}, {percent}% off",
+  "@priceReducedFrom": {
+    "description": "Spoken form of a sale price. Drawn, the old price is struck through; read out, that formatting is gone, so the label has to say which number is which.",
+    "placeholders": {
+      "price": { "type": "String", "example": "$30.00" },
+      "was": { "type": "String", "example": "$50.00" },
+      "percent": { "type": "int", "example": "40" }
+    }
+  },
+  "ratingOutOfFive": "Rated {rating} out of 5",
+  "@ratingOutOfFive": {
+    "description": "Spoken form of a star rating with no review count.",
+    "placeholders": {
+      "rating": { "type": "String", "example": "4.5" }
+    }
+  },
+  "ratingOutOfFiveWithReviews": "Rated {rating} out of 5 from {count, plural, =1{1 review} other{{count} reviews}}",
+  "@ratingOutOfFiveWithReviews": {
+    "description": "Spoken form of a star rating together with how many reviews it came from.",
+    "placeholders": {
+      "rating": { "type": "String", "example": "4.5" },
+      "count": { "type": "int", "example": "42" }
+    }
+  },
+  "stockSoldOut": "Sold out",
+  "@stockSoldOut": {},
+  "stockOnlyLeft": "Only {count} left",
+  "@stockOnlyLeft": {
+    "placeholders": {
+      "count": { "type": "int", "example": "3" }
+    }
+  },
+  "badgeNew": "New",
+  "@badgeNew": {},
+  "quantityLabel": "Quantity",
+  "@quantityLabel": {},
+  "decreaseQuantity": "Decrease quantity",
+  "@decreaseQuantity": {},
+  "increaseQuantity": "Increase quantity",
+  "@increaseQuantity": {},
+  "removeItem": "Remove",
+  "@removeItem": {
+    "description": "Shown in place of a decrement when the line only has one left, so decrementing removes it."
+  },
+  "saveToWishlist": "Save to wishlist",
+  "@saveToWishlist": {},
+  "removeFromWishlist": "Remove from wishlist",
+  "@removeFromWishlist": {},
+  "productImage": "Product image",
+  "@productImage": {},
+  "productImageOfCount": "Product image {index} of {total}",
+  "@productImageOfCount": {
+    "placeholders": {
+      "index": { "type": "int", "example": "2" },
+      "total": { "type": "int", "example": "5" }
+    }
+  },
+  "enlargeHint": "enlarge",
+  "@enlargeHint": {
+    "description": "Screen-reader hint for what activating a gallery image does."
+  },
+
+  "itemNoLongerAvailable": "Item no longer available",
+  "@itemNoLongerAvailable": {
+    "description": "Stands in for an order line whose product left the catalog before line snapshots existed."
+  },
+  "itemsNoLongerSold": "{count, plural, =1{1 item is no longer sold} other{{count} items are no longer sold}}",
+  "@itemsNoLongerSold": {
+    "description": "Notice above the bag when some saved lines point at delisted products.",
+    "placeholders": {
+      "count": { "type": "int", "example": "2" }
+    }
+  },
+  "catalogUnreachableMessage": "Your items are safe — we just can’t reach the shop to look them up.",
+  "@catalogUnreachableMessage": {},
+  "couldNotLoadBag": "Couldn’t load your bag",
+  "@couldNotLoadBag": {},
+  "couldNotLoadSaves": "Couldn’t load your saves",
+  "@couldNotLoadSaves": {},
+  "retry": "Retry",
+  "@retry": {},
+
+  "reorderAdded": "Added back to your bag",
+  "@reorderAdded": {},
+  "reorderNoneAvailable": "{count, plural, =1{That item is no longer available} other{None of these are available any more}}",
+  "@reorderNoneAvailable": {
+    "placeholders": {
+      "count": { "type": "int", "example": "3" }
+    }
+  },
+  "reorderPartial": "{added} added back — {skipped} no longer available",
+  "@reorderPartial": {
+    "placeholders": {
+      "added": { "type": "int", "example": "2" },
+      "skipped": { "type": "int", "example": "1" }
+    }
+  },
+  "viewBag": "View bag",
+  "@viewBag": {}
+}

@@ -23,7 +23,7 @@ void main() {
   final Product mug = testProduct(id: 'mug', name: 'Mug', price: 10);
 
   final Catalog catalog = Catalog(
-    categories: const <Category>[],
+    categories: <Category>[],
     products: <Product>[jacket, mug],
   );
 
@@ -68,10 +68,7 @@ void main() {
     test('increment stops at available stock', () async {
       final Product scarce = testProduct(id: 'scarce', stock: 2, price: 5);
       final ProviderContainer c = await testContainer(
-        catalog: Catalog(
-          categories: const <Category>[],
-          products: <Product>[scarce],
-        ),
+        catalog: Catalog(categories: <Category>[], products: <Product>[scarce]),
       );
       await c.read(catalogProvider.future);
 

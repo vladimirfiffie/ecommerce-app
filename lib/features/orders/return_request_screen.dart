@@ -8,12 +8,14 @@ import 'package:haptic_kit/haptic_kit.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
-import '../../data/models/cart_item.dart';
+import '../../data/models/order_line.dart';
 import '../../data/models/order.dart';
 import '../../shared/widgets/app_image.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../state/haptics_provider.dart';
 import '../../state/orders_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../core/l10n/enum_labels.dart';
 
 /// Pick the items going back, say why, see exactly what comes back.
 class ReturnRequestScreen extends ConsumerStatefulWidget {
@@ -84,7 +86,7 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Order? order = ref.watch(orderByIdProvider(widget.orderId));
-    final List<CartItem> items = ref.watch(orderItemsProvider(widget.orderId));
+    final List<OrderLine> items = ref.watch(orderItemsProvider(widget.orderId));
 
     if (order == null || items.isEmpty) {
       return Scaffold(
@@ -100,7 +102,7 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
     }
 
     final Map<String, double> lineTotals = <String, double>{
-      for (final CartItem i in items) i.lineId: i.lineTotal,
+      for (final OrderLine i in items) i.lineId: i.lineTotal,
     };
     final RefundQuote quote = ref
         .read(ordersProvider.notifier)
@@ -129,7 +131,7 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
           ),
           const SizedBox(height: 14),
 
-          for (final CartItem item in items)
+          for (final OrderLine item in items)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: _ItemChoice(
@@ -174,7 +176,7 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
             children: <Widget>[
               for (final ReturnReason reason in ReturnReason.values)
                 ChoiceChip(
-                  label: Text(reason.label),
+                  label: Text(reason.labelIn(AppL10n.of(context))),
                   selected: _reason == reason,
                   labelStyle: TextStyle(
                     color: _reason == reason
@@ -231,7 +233,7 @@ class _ItemChoice extends StatelessWidget {
     required this.onChanged,
   });
 
-  final CartItem item;
+  final OrderLine item;
   final bool selected;
   final ValueChanged<bool> onChanged;
 
@@ -258,7 +260,7 @@ class _ItemChoice extends StatelessWidget {
                 width: 48,
                 height: 48,
                 child: AppImage(
-                  url: item.product.thumbnail,
+                  url: item.imageUrl,
                   fit: BoxFit.contain,
                   borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 ),
@@ -269,7 +271,7 @@ class _ItemChoice extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      item.product.name,
+                      item.displayNameIn(AppL10n.of(context)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall,

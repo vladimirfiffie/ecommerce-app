@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/models/cart_entry.dart';
 import '../data/models/order.dart';
+import '../data/models/order_line.dart';
 import '../data/models/product.dart';
 import '../data/models/review.dart';
 import 'app_providers.dart';
@@ -112,47 +112,49 @@ userReviewsProvider = NotifierProvider<UserReviewsNotifier, List<UserReview>>(
 );
 
 /// This device's review of a product, if there is one.
-final ProviderFamily<UserReview?, String> myReviewProvider =
-    Provider.family<UserReview?, String>((Ref ref, String productId) {
-      for (final UserReview r in ref.watch(userReviewsProvider)) {
-        if (r.productId == productId) return r;
-      }
-      return null;
-    });
+final myReviewProvider = Provider.family<UserReview?, String>((
+  Ref ref,
+  String productId,
+) {
+  for (final UserReview r in ref.watch(userReviewsProvider)) {
+    if (r.productId == productId) return r;
+  }
+  return null;
+});
 
 /// Only shoppers who bought the item may review it — the same rule real
 /// storefronts use to keep review sections honest.
-final ProviderFamily<bool, String> canReviewProvider =
-    Provider.family<bool, String>(
-      (Ref ref, String productId) => ref
-          .watch(ordersProvider)
-          .any(
-            (Order order) => order.entries.any(
-              (CartEntry entry) => entry.productId == productId,
-            ),
-          ),
-    );
+final canReviewProvider = Provider.family<bool, String>(
+  (Ref ref, String productId) => ref
+      .watch(ordersProvider)
+      .any(
+        (Order order) =>
+            order.lines.any((OrderLine l) => l.productId == productId),
+      ),
+);
 
 /// The catalog's reviews with this device's own review pinned to the top.
-final ProviderFamily<List<Review>, Product> productReviewsProvider =
-    Provider.family<List<Review>, Product>((Ref ref, Product product) {
-      final UserReview? mine = ref.watch(myReviewProvider(product.id));
-      return <Review>[if (mine != null) mine.toReview(), ...product.reviews];
-    });
-
-/// Average rating including this device's review, so the summary agrees with
-/// the list beneath it.
-final ProviderFamily<({double rating, int count}), Product>
-productRatingProvider = Provider.family<({double rating, int count}), Product>((
+final productReviewsProvider = Provider.family<List<Review>, Product>((
   Ref ref,
   Product product,
 ) {
   final UserReview? mine = ref.watch(myReviewProvider(product.id));
-  if (mine == null) {
-    return (rating: product.rating, count: product.reviewCount);
-  }
-  // Fold one new score into the published average.
-  final int count = product.reviewCount + 1;
-  final double total = product.rating * product.reviewCount + mine.rating;
-  return (rating: total / count, count: count);
+  return <Review>[if (mine != null) mine.toReview(), ...product.reviews];
 });
+
+/// Average rating including this device's review, so the summary agrees with
+/// the list beneath it.
+final productRatingProvider =
+    Provider.family<({double rating, int count}), Product>((
+      Ref ref,
+      Product product,
+    ) {
+      final UserReview? mine = ref.watch(myReviewProvider(product.id));
+      if (mine == null) {
+        return (rating: product.rating, count: product.reviewCount);
+      }
+      // Fold one new score into the published average.
+      final int count = product.reviewCount + 1;
+      final double total = product.rating * product.reviewCount + mine.rating;
+      return (rating: total / count, count: count);
+    });

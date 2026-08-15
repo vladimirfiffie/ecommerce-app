@@ -67,6 +67,7 @@ class ForYouItem {
     this.product,
     this.count = 1,
     this.progress,
+    this.orderStatus,
   });
 
   final ForYouKind kind;
@@ -82,6 +83,11 @@ class ForYouItem {
 
   /// Set only on order rows, which draw a progress bar.
   final OrderProgress? progress;
+
+  /// Set only on order rows. Kept as the enum rather than folded into
+  /// [subtitle] here: this is the state layer, which has no `BuildContext`
+  /// and so no way to say "Shipped" in the reader's language.
+  final OrderStatus? orderStatus;
 }
 
 /// A delivery stays newsworthy for a few days, then it's just history.
@@ -174,7 +180,8 @@ List<ForYouItem> _orderItems(Ref ref) {
       ForYouItem(
         kind: ForYouKind.orderInTransit,
         title: 'Arriving ${formatDeliveryDate(transit.estimatedDelivery)}',
-        subtitle: '${transit.id} · ${transit.status.label}',
+        subtitle: transit.id,
+        orderStatus: transit.status,
         route: Routes.order(transit.id),
         progress: OrderProgress(
           stage: transit.status == OrderStatus.processing ? 0 : 1,

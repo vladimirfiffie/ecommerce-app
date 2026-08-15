@@ -28,6 +28,8 @@ import '../../data/models/delivery_option.dart';
 import '../../state/payments_provider.dart';
 import '../../data/models/payment_card.dart';
 import '../../core/layout/two_pane.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../core/l10n/enum_labels.dart';
 
 /// Three-step checkout: shipping → payment → review.
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -444,11 +446,12 @@ class _ShippingStep extends ConsumerWidget {
                   ref.read(deliveryOptionProvider.notifier).select(option),
               leading: Icon(option.icon),
               title: option.price == 0
-                  ? '${option.label}  ·  Free'
-                  : '${option.label}  ·  ${formatPrice(option.price)}',
+                  ? '${option.labelIn(AppL10n.of(context))}  ·  Free'
+                  : '${option.labelIn(AppL10n.of(context))}  ·  '
+                        '${formatPrice(option.price)}',
               subtitle: option == DeliveryOption.pickup
-                  ? option.blurb
-                  : '${option.blurb} · by '
+                  ? option.blurbIn(AppL10n.of(context))
+                  : '${option.blurbIn(AppL10n.of(context))} · by '
                         '${formatDeliveryDate(option.estimatedArrival(DateTime.now()))}',
             ),
           ),

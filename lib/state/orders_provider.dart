@@ -5,10 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/address.dart';
-import '../data/models/cart_entry.dart';
 import '../data/models/cart_item.dart';
 import '../data/models/order.dart';
-import '../data/models/product.dart';
+import '../data/models/order_line.dart';
 import '../data/repositories/product_repository.dart';
 import 'app_providers.dart';
 import 'cart_provider.dart';
@@ -44,13 +43,20 @@ class OrdersNotifier extends Notifier<List<Order>> {
   }) async {
     final GiftOptions gift = ref.read(giftOptionsProvider);
     final CartSummary summary = ref.read(cartSummaryProvider);
-    final List<CartEntry> entries = <CartEntry>[...ref.read(cartProvider)];
     final DateTime now = DateTime.now();
+
+    // Built from the resolved cart items rather than the raw entries: those
+    // are what the summary was priced from, so the order's lines and its total
+    // are guaranteed to agree.
+    final List<OrderLine> lines = <OrderLine>[
+      for (final CartItem i in ref.read(cartItemsProvider))
+        OrderLine.fromProduct(i.entry, i.product),
+    ];
 
     final Order order = Order(
       id: 'NV-${now.millisecondsSinceEpoch.toRadixString(36).toUpperCase()}',
       placedAt: now,
-      entries: entries,
+      lines: lines,
       subtotal: summary.subtotal,
       shipping: summary.shipping,
       discount: summary.discount,
@@ -205,33 +211,40 @@ Duration? orderStatusTick = const Duration(minutes: 1);
 /// Auto-disposed so the timer stops when nothing is listening. In practice
 /// home's "For you" keeps it alive whenever there's an open order, which is
 /// exactly when it's earning its keep.
-final AutoDisposeStreamProvider<int> orderClockProvider =
-    StreamProvider.autoDispose<int>((Ref ref) {
-      final Duration? tick = orderStatusTick;
-      if (tick == null) return const Stream<int>.empty();
-      return Stream<int>.periodic(tick, (int i) => i);
-    });
+final orderClockProvider = StreamProvider.autoDispose<int>((Ref ref) {
+  final Duration? tick = orderStatusTick;
+  if (tick == null) return const Stream<int>.empty();
+  return Stream<int>.periodic(tick, (int i) => i);
+});
 
-final ProviderFamily<Order?, String> orderByIdProvider =
-    Provider.family<Order?, String>((Ref ref, String id) {
-      for (final Order o in ref.watch(ordersProvider)) {
-        if (o.id == id) return o;
-      }
-      return null;
-    });
+final orderByIdProvider = Provider.family<Order?, String>((Ref ref, String id) {
+  for (final Order o in ref.watch(ordersProvider)) {
+    if (o.id == id) return o;
+  }
+  return null;
+});
 
-/// An order's lines resolved against the catalog, for thumbnails and names.
-final ProviderFamily<List<CartItem>, String> orderItemsProvider =
-    Provider.family<List<CartItem>, String>((Ref ref, String orderId) {
-      final Order? order = ref.watch(orderByIdProvider(orderId));
-      if (order == null) return const <CartItem>[];
-      final Catalog catalog = ref.watch(catalogDataProvider);
-      return <CartItem>[
-        for (final CartEntry e in order.entries)
-          if (catalog.byId(e.productId) case final Product p)
-            CartItem(entry: e, product: p),
-      ];
-    });
+/// An order's lines, ready to draw.
+///
+/// Snapshotted lines need nothing else — which is what lets the Orders tab,
+/// receipts and returns work with the catalog unreachable. Only orders placed
+/// before snapshots existed fall back to it, and even then a line whose
+/// product has since been delisted is kept rather than dropped, so the lines
+/// still reconcile with the order's stored total.
+final orderItemsProvider = Provider.family<List<OrderLine>, String>((
+  Ref ref,
+  String orderId,
+) {
+  final Order? order = ref.watch(orderByIdProvider(orderId));
+  if (order == null) return const <OrderLine>[];
+  if (order.lines.every((OrderLine l) => l.hasSnapshot)) return order.lines;
+
+  final Catalog catalog = ref.watch(catalogDataProvider);
+  return <OrderLine>[
+    for (final OrderLine l in order.lines)
+      l.hasSnapshot ? l : l.resolvedAgainst(catalog.byId(l.productId)),
+  ];
+});
 
 /// Breakdown of what a return would put back on the card.
 @immutable

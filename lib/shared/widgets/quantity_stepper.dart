@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// `−  2  +` control used in the cart and on the product page.
 class QuantityStepper extends StatelessWidget {
@@ -42,14 +43,23 @@ class QuantityStepper extends StatelessWidget {
               HapticFeedback.selectionClick();
               onDecrement();
             },
-            tooltip: quantity <= min ? 'Remove' : 'Decrease quantity',
+            tooltip: quantity <= min
+                ? AppL10n.of(context).removeItem
+                : AppL10n.of(context).decreaseQuantity,
           ),
           SizedBox(
             width: dense ? 26 : 32,
-            child: Text(
-              '$quantity',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleSmall,
+            // Between two unlabelled buttons, a bare number reads as a bare
+            // number — it needs to say what it counts.
+            child: Semantics(
+              label: AppL10n.of(context).quantityLabel,
+              value: '$quantity',
+              excludeSemantics: true,
+              child: Text(
+                '$quantity',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleSmall,
+              ),
             ),
           ),
           _StepButton(
@@ -60,7 +70,7 @@ class QuantityStepper extends StatelessWidget {
               HapticFeedback.selectionClick();
               onIncrement();
             },
-            tooltip: 'Increase quantity',
+            tooltip: AppL10n.of(context).increaseQuantity,
           ),
         ],
       ),
@@ -88,18 +98,30 @@ class _StepButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return Tooltip(
       message: tooltip,
-      child: InkResponse(
+      // The tooltip and the semantic label would otherwise both be announced,
+      // giving "Decrease quantity, Decrease quantity".
+      excludeFromSemantics: true,
+      child: Semantics(
+        label: tooltip,
+        button: true,
+        enabled: enabled,
+        // Carried on this node because excluding the descendants takes the
+        // ink response's own tap action with them.
         onTap: enabled ? onTap : null,
-        radius: size / 2 + 4,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(
-            icon,
-            size: size * 0.52,
-            color: enabled
-                ? theme.colorScheme.onSurface
-                : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+        excludeSemantics: true,
+        child: InkResponse(
+          onTap: enabled ? onTap : null,
+          radius: size / 2 + 4,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(
+              icon,
+              size: size * 0.52,
+              color: enabled
+                  ? theme.colorScheme.onSurface
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
           ),
         ),
       ),

@@ -18,11 +18,11 @@ void main() {
   setUp(stubHaptics);
 
   final Catalog catalog = Catalog(
-    categories: const <Category>[
+    categories: <Category>[
       Category(
         id: 'fashion',
         label: 'Fashion',
-        icon: Icons.checkroom_rounded,
+        iconName: 'checkroom',
         imageUrl: '',
       ),
     ],
@@ -41,7 +41,7 @@ void main() {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: <Override>[
+        overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           productRepositoryProvider.overrideWithValue(
             FakeProductRepository(catalog),
@@ -152,7 +152,7 @@ void main() {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await tester.pumpWidget(
         ProviderScope(
-          overrides: <Override>[
+          overrides: [
             sharedPreferencesProvider.overrideWithValue(prefs),
             productRepositoryProvider.overrideWithValue(
               FakeProductRepository(catalog),

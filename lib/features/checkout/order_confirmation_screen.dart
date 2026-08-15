@@ -13,7 +13,7 @@ import '../../state/haptics_provider.dart';
 import 'dart:async';
 import '../../shared/widgets/animated_check.dart';
 import '../../shared/widgets/app_image.dart';
-import '../../data/models/cart_item.dart';
+import '../../data/models/order_line.dart';
 
 /// Success screen shown straight after an order is placed.
 class OrderConfirmationScreen extends ConsumerStatefulWidget {
@@ -42,7 +42,7 @@ class _OrderConfirmationScreenState
     final String orderId = widget.orderId;
     final ThemeData theme = Theme.of(context);
     final Order? order = ref.watch(orderByIdProvider(orderId));
-    final List<CartItem> items = ref.watch(orderItemsProvider(orderId));
+    final List<OrderLine> items = ref.watch(orderItemsProvider(orderId));
 
     if (order == null) {
       return Scaffold(
@@ -156,7 +156,7 @@ class _OrderConfirmationScreenState
 class _OrderedItems extends StatelessWidget {
   const _OrderedItems({required this.items});
 
-  final List<CartItem> items;
+  final List<OrderLine> items;
 
   /// Beyond this the strip stops being scannable, so the rest is a count.
   static const int _maxShown = 4;
@@ -164,7 +164,7 @@ class _OrderedItems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final List<CartItem> shown = items.take(_maxShown).toList();
+    final List<OrderLine> shown = items.take(_maxShown).toList();
     final int overflow = items.length - shown.length;
 
     return Row(
@@ -205,7 +205,7 @@ class _OrderedItems extends StatelessWidget {
 class _Thumb extends StatelessWidget {
   const _Thumb({required this.item});
 
-  final CartItem item;
+  final OrderLine item;
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +218,7 @@ class _Thumb extends StatelessWidget {
         children: <Widget>[
           Positioned.fill(
             child: AppImage(
-              url: item.product.thumbnail,
+              url: item.imageUrl,
               fit: BoxFit.contain,
               borderRadius: BorderRadius.circular(AppTheme.radiusSm),
             ),

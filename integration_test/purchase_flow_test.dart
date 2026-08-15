@@ -56,7 +56,7 @@ void main() {
     });
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProviderContainer container = ProviderContainer(
-      overrides: <Override>[sharedPreferencesProvider.overrideWithValue(prefs)],
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
     );
     addTearDown(container.dispose);
 

@@ -111,6 +111,28 @@ class Product {
 
   String get thumbnail => images.isEmpty ? '' : images.first;
 
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'name': name,
+    'brand': brand,
+    'categoryId': categoryId,
+    'subcategory': subcategory,
+    'price': price,
+    if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
+    'description': description,
+    'images': images,
+    'rating': rating,
+    'reviewCount': reviewCount,
+    'stock': stock,
+    'sizes': sizes,
+    'colors': colors.map((ProductColor c) => c.toJson()).toList(),
+    'tags': tags,
+    'reviews': reviews.map((Review r) => r.toJson()).toList(),
+    'isNew': isNew,
+    'isFeatured': isFeatured,
+    'specs': specs.toJson(),
+  };
+
   /// Free-text haystack used by the search field.
   String get searchIndex =>
       '$name $brand $subcategory ${tags.join(' ')}'.toLowerCase();
@@ -205,6 +227,11 @@ class ProductColor {
 
   final String name;
   final int argb;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'name': name,
+    'argb': argb,
+  };
 
   @override
   bool operator ==(Object other) =>

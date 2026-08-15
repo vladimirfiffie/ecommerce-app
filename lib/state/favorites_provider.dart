@@ -37,11 +37,10 @@ final NotifierProvider<FavoritesNotifier, Set<String>> favoritesProvider =
     NotifierProvider<FavoritesNotifier, Set<String>>(FavoritesNotifier.new);
 
 /// Whether a single product is favorited — cheap to watch per card.
-final ProviderFamily<bool, String> isFavoriteProvider =
-    Provider.family<bool, String>(
-      (Ref ref, String productId) =>
-          ref.watch(favoritesProvider).contains(productId),
-    );
+final isFavoriteProvider = Provider.family<bool, String>(
+  (Ref ref, String productId) =>
+      ref.watch(favoritesProvider).contains(productId),
+);
 
 /// Favorited products resolved against the catalog.
 final Provider<List<Product>> favoriteProductsProvider =

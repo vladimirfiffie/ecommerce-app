@@ -2,9 +2,12 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/utils/formatters.dart';
+import 'l10n/generated/app_localizations.dart';
 import 'state/alerts_provider.dart';
 import 'state/app_providers.dart';
 import 'state/auth_provider.dart';
@@ -74,6 +77,27 @@ class _NovaAppState extends ConsumerState<NovaApp> {
         return MaterialApp.router(
           title: 'Nova',
           debugShowCheckedModeBanner: false,
+          localizationsDelegates: AppL10n.localizationsDelegates,
+          supportedLocales: AppL10n.supportedLocales,
+          // `formatPrice` and friends are plain functions with no context to
+          // read a locale from, so the resolved locale is published to `intl`
+          // here — the one place that knows what it ended up being.
+          localeResolutionCallback:
+              (Locale? device, Iterable<Locale> supported) {
+                final Locale resolved = basicLocaleListResolution(
+                  device == null ? const <Locale>[] : <Locale>[device],
+                  supported,
+                );
+                final String tag = resolved.toLanguageTag().replaceAll(
+                  '-',
+                  '_',
+                );
+                if (Intl.defaultLocale != tag) {
+                  Intl.defaultLocale = tag;
+                  resetFormatters();
+                }
+                return resolved;
+              },
           themeMode: settings.themeMode,
           theme: AppTheme.light(
             useDynamic ? lightDynamic?.harmonized() : null,

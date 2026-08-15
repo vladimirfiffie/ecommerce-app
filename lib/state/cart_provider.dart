@@ -208,6 +208,17 @@ class CartNotifier extends Notifier<List<CartEntry>> {
     await _persist(next);
   }
 
+  /// Drops several lines at once — used to clear out products the catalog no
+  /// longer sells.
+  Future<void> removeAll(Iterable<String> lineIds) async {
+    final Set<String> drop = lineIds.toSet();
+    if (drop.isEmpty) return;
+    await _persist(<CartEntry>[
+      for (final CartEntry e in state)
+        if (!drop.contains(e.lineId)) e,
+    ]);
+  }
+
   Future<void> clear() async {
     state = const <CartEntry>[];
     await _prefs.remove(_key);
@@ -237,6 +248,21 @@ final Provider<List<CartItem>> cartItemsProvider = Provider<List<CartItem>>((
         CartItem(entry: e, product: p),
   ];
 });
+
+/// Cart lines whose product has left the catalog.
+///
+/// Only meaningful once the catalog has actually loaded. While it's missing
+/// every line is unresolved, and that's a different problem with a different
+/// answer — see [CatalogUnavailable].
+final Provider<List<CartEntry>> unavailableCartEntriesProvider =
+    Provider<List<CartEntry>>((Ref ref) {
+      final Catalog catalog = ref.watch(catalogDataProvider);
+      if (catalog.isEmpty) return const <CartEntry>[];
+      return <CartEntry>[
+        for (final CartEntry e in ref.watch(cartProvider))
+          if (catalog.byId(e.productId) == null) e,
+      ];
+    });
 
 /// Total units in the cart — drives the nav bar badge.
 final Provider<int> cartCountProvider = Provider<int>(

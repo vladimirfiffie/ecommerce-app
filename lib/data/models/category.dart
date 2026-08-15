@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Icon names used by `catalog.json`, resolved here so the asset stays
-/// free of Flutter types. Kept as a const map for tree-shaking of icons.
+/// Icon names as the repository emits them, resolved here so the data layer
+/// stays free of Flutter types. Kept as a const map for tree-shaking of icons.
 const Map<String, IconData> _icons = <String, IconData>{
   'checkroom': Icons.checkroom_rounded,
   'devices': Icons.devices_rounded,
@@ -17,21 +17,34 @@ class Category {
   const Category({
     required this.id,
     required this.label,
-    required this.icon,
+    required this.iconName,
     required this.imageUrl,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) => Category(
     id: json['id'] as String,
     label: json['label'] as String,
-    icon: _icons[json['icon'] as String] ?? Icons.category_rounded,
+    iconName: json['icon'] as String? ?? '',
     imageUrl: json['imageUrl'] as String? ?? '',
   );
 
   final String id;
   final String label;
-  final IconData icon;
+
+  /// Kept as the name rather than the resolved [IconData] so a category can be
+  /// written back out again — which is what the offline snapshot needs.
+  final String iconName;
+
   final String imageUrl;
+
+  IconData get icon => _icons[iconName] ?? Icons.category_rounded;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'label': label,
+    'icon': iconName,
+    'imageUrl': imageUrl,
+  };
 
   @override
   bool operator ==(Object other) =>

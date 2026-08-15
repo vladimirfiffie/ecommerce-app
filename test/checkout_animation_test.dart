@@ -1,12 +1,15 @@
 import 'package:ecommerce_app/core/theme/app_theme.dart';
 import 'package:ecommerce_app/shared/widgets/animated_check.dart';
 import 'package:flutter/material.dart';
+import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('animated check', () {
     Future<void> pumpCheck(WidgetTester tester) => tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        localizationsDelegates: AppL10n.localizationsDelegates,
+        supportedLocales: AppL10n.supportedLocales,
         home: Scaffold(
           body: Center(child: AnimatedCheck(color: AppTheme.success)),
         ),
@@ -82,7 +85,9 @@ void main() {
 
     testWidgets('scales with the requested size', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
+          localizationsDelegates: AppL10n.localizationsDelegates,
+          supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(
             body: Center(child: AnimatedCheck(color: Colors.green, size: 48)),
           ),
@@ -106,7 +111,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       // Leaving mid-animation must not leave a ticker running.
-      await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+      await tester.pumpWidget(MaterialApp(home: Scaffold()));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });

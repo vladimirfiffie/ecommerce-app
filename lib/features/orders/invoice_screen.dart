@@ -7,30 +7,32 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
-import '../../data/models/cart_item.dart';
+import '../../data/models/order_line.dart';
 import '../../data/models/order.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../state/orders_provider.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../core/l10n/enum_labels.dart';
 
 /// Builds the plain-text receipt that gets shared or copied.
 ///
 /// Kept separate from the widget so the format can be tested without pumping
 /// a screen.
-String buildInvoiceText(Order order, List<CartItem> items) {
+String buildInvoiceText(Order order, List<OrderLine> items, AppL10n l10n) {
   final StringBuffer out = StringBuffer()
     ..writeln('NOVA — RECEIPT')
     ..writeln('Order ${order.id}')
     ..writeln(formatDate(order.placedAt))
-    ..writeln('Status: ${order.status.label}')
+    ..writeln('Status: ${order.status.labelIn(l10n)}')
     ..writeln()
     ..writeln('ITEMS');
 
-  for (final CartItem item in items) {
+  for (final OrderLine item in items) {
     final String variant = item.variantLabel == null
         ? ''
         : ' (${item.variantLabel})';
     out.writeln(
-      '${item.quantity} x ${item.product.name}$variant  '
+      '${item.quantity} x ${item.displayNameIn(l10n)}$variant  '
       '${formatPrice(item.lineTotal)}',
     );
   }
@@ -48,7 +50,7 @@ String buildInvoiceText(Order order, List<CartItem> items) {
     )
     ..writeln('TOTAL           ${formatPrice(order.total)}')
     ..writeln()
-    ..writeln('Delivery: ${order.delivery.label}')
+    ..writeln('Delivery: ${order.delivery.labelIn(l10n)}')
     ..writeln('Ship to: ${order.shippingAddress}')
     ..writeln('Paid with: ${order.paymentLabel}');
 
@@ -64,7 +66,8 @@ String buildInvoiceText(Order order, List<CartItem> items) {
     out
       ..writeln()
       ..writeln(
-        'RETURN: ${r.reason.label} — refund ${formatPrice(r.refundAmount)}',
+        'RETURN: ${r.reason.labelIn(l10n)} — '
+        'refund ${formatPrice(r.refundAmount)}',
       );
   }
 
@@ -83,7 +86,7 @@ class InvoiceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final Order? order = ref.watch(orderByIdProvider(orderId));
-    final List<CartItem> items = ref.watch(orderItemsProvider(orderId));
+    final List<OrderLine> items = ref.watch(orderItemsProvider(orderId));
 
     if (order == null) {
       return Scaffold(
@@ -98,7 +101,7 @@ class InvoiceScreen extends ConsumerWidget {
       );
     }
 
-    final String text = buildInvoiceText(order, items);
+    final String text = buildInvoiceText(order, items, AppL10n.of(context));
 
     return Scaffold(
       appBar: AppBar(
@@ -159,11 +162,11 @@ class InvoiceScreen extends ConsumerWidget {
                 const Divider(height: 28),
                 _Row('Order', order.id),
                 _Row('Placed', formatDate(order.placedAt)),
-                _Row('Status', order.status.label),
-                _Row('Delivery', order.delivery.label),
+                _Row('Status', order.status.labelIn(AppL10n.of(context))),
+                _Row('Delivery', order.delivery.labelIn(AppL10n.of(context))),
                 const Divider(height: 28),
 
-                for (final CartItem item in items)
+                for (final OrderLine item in items)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
@@ -183,7 +186,7 @@ class InvoiceScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                item.product.name,
+                                item.displayNameIn(AppL10n.of(context)),
                                 style: theme.textTheme.bodyMedium,
                               ),
                               if (item.variantLabel != null)
@@ -228,7 +231,7 @@ class InvoiceScreen extends ConsumerWidget {
                 _Row('Paid with', order.paymentLabel),
                 if (order.returnRequest case final ReturnRequest r) ...<Widget>[
                   const Divider(height: 28),
-                  _Row('Return', r.reason.label),
+                  _Row('Return', r.reason.labelIn(AppL10n.of(context))),
                   _Row('Refund', formatPrice(r.refundAmount)),
                 ],
                 const SizedBox(height: 18),

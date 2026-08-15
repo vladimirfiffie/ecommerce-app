@@ -19,22 +19,42 @@ abstract class ProductRepository {
 
 /// The in-memory result of a catalog load.
 class Catalog {
-  const Catalog({required this.categories, required this.products});
+  Catalog({required this.categories, required this.products});
+
+  factory Catalog.fromJson(Map<String, dynamic> json) => Catalog(
+    categories: <Category>[
+      for (final Object? c
+          in json['categories'] as List<dynamic>? ?? <dynamic>[])
+        Category.fromJson(c! as Map<String, dynamic>),
+    ],
+    products: <Product>[
+      for (final Object? p in json['products'] as List<dynamic>? ?? <dynamic>[])
+        Product.fromJson(p! as Map<String, dynamic>),
+    ],
+  );
 
   final List<Category> categories;
   final List<Product> products;
 
-  static const Catalog empty = Catalog(
+  static final Catalog empty = Catalog(
     categories: <Category>[],
     products: <Product>[],
   );
 
-  Product? byId(String id) {
-    for (final Product p in products) {
-      if (p.id == id) return p;
-    }
-    return null;
-  }
+  /// Built once on first use rather than scanned per lookup: the cart, the
+  /// wishlist and every order line resolve by id on each rebuild.
+  late final Map<String, Product> _byId = <String, Product>{
+    for (final Product p in products) p.id: p,
+  };
+
+  bool get isEmpty => products.isEmpty;
+
+  Product? byId(String id) => _byId[id];
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'categories': categories.map((Category c) => c.toJson()).toList(),
+    'products': products.map((Product p) => p.toJson()).toList(),
+  };
 
   List<Product> get featured =>
       products.where((Product p) => p.isFeatured).toList(growable: false);

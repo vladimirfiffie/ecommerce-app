@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 enum DeliveryOption {
   standard(
     id: 'standard',
-    label: 'Standard',
-    blurb: '3–5 business days',
     price: 6.95,
     minDays: 3,
     maxDays: 5,
@@ -17,8 +15,6 @@ enum DeliveryOption {
   ),
   express(
     id: 'express',
-    label: 'Express',
-    blurb: 'Next business day',
     price: 14.95,
     minDays: 1,
     maxDays: 2,
@@ -26,8 +22,6 @@ enum DeliveryOption {
   ),
   pickup(
     id: 'pickup',
-    label: 'Collect in store',
-    blurb: 'Ready in about 2 hours',
     price: 0,
     minDays: 0,
     maxDays: 1,
@@ -36,8 +30,6 @@ enum DeliveryOption {
 
   const DeliveryOption({
     required this.id,
-    required this.label,
-    required this.blurb,
     required this.price,
     required this.minDays,
     required this.maxDays,
@@ -46,8 +38,6 @@ enum DeliveryOption {
   });
 
   final String id;
-  final String label;
-  final String blurb;
 
   /// Base charge before any free-shipping threshold or promo is applied.
   final double price;

@@ -22,11 +22,11 @@ void main() {
   setUp(stubHaptics);
 
   final Catalog catalog = Catalog(
-    categories: const <Category>[
+    categories: <Category>[
       Category(
         id: 'fashion',
         label: 'Fashion',
-        icon: Icons.checkroom_rounded,
+        iconName: 'checkroom',
         imageUrl: '',
       ),
     ],
@@ -58,7 +58,7 @@ void main() {
     setMockPrefs();
     final SharedPreferences store = await SharedPreferences.getInstance();
     final ProviderContainer c = ProviderContainer(
-      overrides: <Override>[
+      overrides: [
         sharedPreferencesProvider.overrideWithValue(store),
         productRepositoryProvider.overrideWithValue(
           FakeProductRepository(catalog),

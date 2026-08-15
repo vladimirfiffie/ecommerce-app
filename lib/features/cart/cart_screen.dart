@@ -9,9 +9,13 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/models/cart_entry.dart';
 import '../../data/models/cart_item.dart';
+import '../../data/repositories/product_repository.dart';
+import '../../shared/widgets/catalog_unavailable.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/product_card.dart';
 import '../../shared/widgets/quantity_stepper.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../state/app_providers.dart';
 import '../../state/cart_provider.dart';
 import 'widgets/order_summary.dart';
 import 'widgets/promo_field.dart';
@@ -25,6 +29,16 @@ class CartScreen extends ConsumerWidget {
     final List<CartItem> items = ref.watch(cartItemsProvider);
     final CartSummary summary = ref.watch(cartSummaryProvider);
     final bool wide = Breakpoints.of(context).isWide;
+
+    // Lines are stored as ids, so an unresolved bag and an empty one look
+    // identical from here. They aren't: one of them still has the shopper's
+    // things in it, and the tab badge is already counting them.
+    final List<CartEntry> stored = ref.watch(cartProvider);
+    final AsyncValue<Catalog> catalog = ref.watch(catalogProvider);
+    final bool unresolved = items.isEmpty && stored.isNotEmpty;
+    final List<CartEntry> unavailable = ref.watch(
+      unavailableCartEntriesProvider,
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -41,7 +55,7 @@ class CartScreen extends ConsumerWidget {
                       style: theme.textTheme.headlineMedium,
                     ),
                   ),
-                  if (items.isNotEmpty)
+                  if (stored.isNotEmpty)
                     TextButton(
                       onPressed: () => _confirmClear(context, ref),
                       child: const Text('Clear'),
@@ -49,7 +63,15 @@ class CartScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            if (items.isEmpty)
+            if (unresolved && catalog.isLoading)
+              const Expanded(child: Center(child: CircularProgressIndicator()))
+            else if (unresolved)
+              Expanded(
+                child: CatalogUnavailable(
+                  title: AppL10n.of(context).couldNotLoadBag,
+                ),
+              )
+            else if (items.isEmpty)
               Expanded(
                 child: EmptyState(
                   icon: Icons.shopping_bag_outlined,
@@ -60,84 +82,103 @@ class CartScreen extends ConsumerWidget {
                   onAction: () => context.go(Routes.catalog),
                 ),
               )
-            else if (wide) ...<Widget>[
-              // Wide windows put the summary in a sticky side panel so the
-              // total and checkout stay in view while the list scrolls.
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        children: <Widget>[
-                          if (!summary.hasFreeShipping)
-                            _FreeShippingBar(summary: summary),
-                          Expanded(
-                            child: ListView(
-                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
-                              children: <Widget>[
-                                for (int i = 0; i < items.length; i++)
-                                  _CartLine(item: items[i], index: i)
-                                      .animate(delay: (i * 45).ms)
-                                      .fadeIn(duration: 240.ms),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const VerticalDivider(width: 1),
-                    Expanded(
-                      flex: 2,
-                      child: ListView(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                        children: <Widget>[
-                          const PromoField(),
-                          const SizedBox(height: 20),
-                          const OrderSummary(),
-                          const SizedBox(height: 20),
-                          FilledButton.icon(
-                            onPressed: () => context.push(Routes.checkout),
-                            icon: const Icon(
-                              Icons.lock_outline_rounded,
-                              size: 18,
-                            ),
-                            label: Text(
-                              'Checkout · ${formatPrice(summary.total)}',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            else ...<Widget>[
+              if (unavailable.isNotEmpty)
+                UnavailableLinesNotice(
+                  count: unavailable.length,
+                  onRemove: () => ref
+                      .read(cartProvider.notifier)
+                      .removeAll(unavailable.map((CartEntry e) => e.lineId)),
                 ),
-              ),
-            ] else ...<Widget>[
-              if (!summary.hasFreeShipping) _FreeShippingBar(summary: summary),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
-                  children: <Widget>[
-                    for (int i = 0; i < items.length; i++)
-                      _CartLine(item: items[i], index: i)
-                          .animate(delay: (i * 45).ms)
-                          .fadeIn(duration: 240.ms)
-                          .moveX(begin: 16, end: 0, curve: Curves.easeOutCubic),
-                    const SizedBox(height: 12),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: PromoField(),
-                    ),
-                    const SizedBox(height: 20),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: OrderSummary(),
-                    ),
-                  ],
+              if (wide) ...<Widget>[
+                // Wide windows put the summary in a sticky side panel so the
+                // total and checkout stay in view while the list scrolls.
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          children: <Widget>[
+                            if (!summary.hasFreeShipping)
+                              _FreeShippingBar(summary: summary),
+                            Expanded(
+                              child: ListView(
+                                padding: const EdgeInsets.fromLTRB(
+                                  12,
+                                  8,
+                                  12,
+                                  24,
+                                ),
+                                children: <Widget>[
+                                  for (int i = 0; i < items.length; i++)
+                                    _CartLine(item: items[i], index: i)
+                                        .animate(delay: (i * 45).ms)
+                                        .fadeIn(duration: 240.ms),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const VerticalDivider(width: 1),
+                      Expanded(
+                        flex: 2,
+                        child: ListView(
+                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                          children: <Widget>[
+                            const PromoField(),
+                            const SizedBox(height: 20),
+                            const OrderSummary(),
+                            const SizedBox(height: 20),
+                            FilledButton.icon(
+                              onPressed: () => context.push(Routes.checkout),
+                              icon: const Icon(
+                                Icons.lock_outline_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                'Checkout · ${formatPrice(summary.total)}',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              _CheckoutBar(summary: summary),
+              ] else ...<Widget>[
+                if (!summary.hasFreeShipping)
+                  _FreeShippingBar(summary: summary),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+                    children: <Widget>[
+                      for (int i = 0; i < items.length; i++)
+                        _CartLine(item: items[i], index: i)
+                            .animate(delay: (i * 45).ms)
+                            .fadeIn(duration: 240.ms)
+                            .moveX(
+                              begin: 16,
+                              end: 0,
+                              curve: Curves.easeOutCubic,
+                            ),
+                      const SizedBox(height: 12),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: PromoField(),
+                      ),
+                      const SizedBox(height: 20),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: OrderSummary(),
+                      ),
+                    ],
+                  ),
+                ),
+                _CheckoutBar(summary: summary),
+              ],
             ],
           ],
         ),

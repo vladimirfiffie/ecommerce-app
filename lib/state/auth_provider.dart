@@ -9,27 +9,21 @@ import 'app_providers.dart';
 
 /// Why a sign-in or sign-up attempt was rejected.
 enum AuthError {
-  emailInvalid('Enter a valid email address'),
-  emailTaken('An account already uses that email'),
-  nameRequired('Tell us your name'),
-  passwordTooShort('Use at least 8 characters'),
-  passwordTooCommon('That password is too easy to guess'),
-  passwordMismatch('Those passwords don’t match'),
+  emailInvalid,
+  emailTaken,
+  nameRequired,
+  passwordTooShort,
+  passwordTooCommon,
+  passwordMismatch,
   // Deliberately vague: saying which half was wrong tells an attacker
-  // whether an email is registered.
-  credentialsWrong('Email or password is incorrect');
-
-  const AuthError(this.message);
-
-  final String message;
+  // whether an email is registered. See `AuthErrorL10n` for the wording.
+  credentialsWrong,
 }
 
 class AuthException implements Exception {
   const AuthException(this.error);
 
   final AuthError error;
-
-  String get message => error.message;
 
   @override
   String toString() => 'AuthException(${error.name})';

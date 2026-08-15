@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_image.dart';
 import '../../../state/for_you_provider.dart';
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../data/models/order.dart';
+import '../../../core/l10n/enum_labels.dart';
 
 /// The things the app already knows about you, surfaced on home.
 ///
@@ -137,7 +140,7 @@ class _ForYouRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 1),
                   Text(
-                    item.subtitle,
+                    _subtitle(context, item),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -160,6 +163,14 @@ class _ForYouRow extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Order rows carry their status as an enum, so the word for it gets chosen
+  /// here rather than in the provider that has no context to choose with.
+  static String _subtitle(BuildContext context, ForYouItem item) {
+    final OrderStatus? status = item.orderStatus;
+    if (status == null) return item.subtitle;
+    return '${item.subtitle} · ${status.labelIn(AppL10n.of(context))}';
   }
 }
 

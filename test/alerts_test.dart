@@ -42,7 +42,7 @@ void main() {
 
   Catalog catalogWith({required int teeStock, double coatPrice = 100}) =>
       Catalog(
-        categories: const <Category>[],
+        categories: <Category>[],
         products: <Product>[
           testProduct(id: 'tee', name: 'Linen Tee', stock: teeStock),
           testProduct(id: 'coat', name: 'Wool Coat', price: coatPrice),
@@ -59,7 +59,7 @@ void main() {
 
     late final RecordingNotifications recorder;
     final ProviderContainer container = ProviderContainer(
-      overrides: <Override>[
+      overrides: [
         sharedPreferencesProvider.overrideWithValue(store),
         productRepositoryProvider.overrideWithValue(
           FakeProductRepository(catalog),
@@ -246,7 +246,7 @@ void main() {
 
     test('an empty catalog is a no-op', () async {
       final (ProviderContainer c, RecordingNotifications _) = await setUpSweep(
-        catalog: const Catalog(categories: <Category>[], products: <Product>[]),
+        catalog: Catalog(categories: <Category>[], products: <Product>[]),
       );
       expect((await c.read(alertSweeperProvider).sweep()).isEmpty, isTrue);
     });

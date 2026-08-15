@@ -22,6 +22,13 @@ class Review {
   final String body;
   final int daysAgo;
 
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'author': author,
+    'rating': rating,
+    'body': body,
+    'daysAgo': daysAgo,
+  };
+
   String get initials => author.isEmpty ? '?' : author[0].toUpperCase();
 
   String get timeAgo {

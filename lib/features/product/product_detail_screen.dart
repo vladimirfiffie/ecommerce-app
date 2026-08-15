@@ -120,7 +120,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final AsyncValue<Catalog> catalogAsync = ref.watch(catalogProvider);
-    final Product? product = catalogAsync.valueOrNull?.byId(widget.productId);
+    final Product? product = catalogAsync.value?.byId(widget.productId);
 
     if (catalogAsync.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));

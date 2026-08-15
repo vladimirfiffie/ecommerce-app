@@ -29,6 +29,10 @@ const Map<String, IconData> _icons = <String, IconData>{
   'photo_library_outlined': Icons.photo_library_outlined,
   'tune_rounded': Icons.tune_rounded,
   'cloud_download_outlined': Icons.cloud_download_outlined,
+  'cloud_off_rounded': Icons.cloud_off_rounded,
+  'accessibility_new_rounded': Icons.accessibility_new_rounded,
+  'translate_rounded': Icons.translate_rounded,
+  'receipt_long_outlined': Icons.receipt_long_outlined,
   'animation_outlined': Icons.animation_outlined,
   'bug_report_outlined': Icons.bug_report_outlined,
 };

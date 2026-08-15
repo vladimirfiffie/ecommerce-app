@@ -1,6 +1,6 @@
 import 'package:ecommerce_app/core/router/app_router.dart';
 import 'package:ecommerce_app/data/models/address.dart';
-import 'package:ecommerce_app/data/models/cart_item.dart';
+import 'package:ecommerce_app/data/models/order_line.dart';
 import 'package:ecommerce_app/data/models/category.dart';
 import 'package:ecommerce_app/data/models/delivery_option.dart';
 import 'package:ecommerce_app/data/models/order.dart';
@@ -33,7 +33,7 @@ void main() {
   final Product tee = testProduct(id: 'tee', name: 'Linen Tee', price: 25);
   final Product coat = testProduct(id: 'coat', name: 'Wool Coat', price: 100);
   final Catalog catalog = Catalog(
-    categories: const <Category>[],
+    categories: <Category>[],
     products: <Product>[tee, coat],
   );
 
@@ -64,7 +64,7 @@ void main() {
     Order orderAgedBy(Duration age, {String deliveryId = 'standard'}) => Order(
       id: 'NV-1',
       placedAt: DateTime.now().subtract(age),
-      entries: const <Never>[],
+      lines: const <OrderLine>[],
       subtotal: 100,
       shipping: 0,
       discount: 0,
@@ -149,9 +149,9 @@ void main() {
     test('a full return gives back items, shipping and tax', () async {
       final ProviderContainer c = await withOrder(teeQty: 2);
       final Order order = c.read(ordersProvider).single;
-      final List<CartItem> items = c.read(orderItemsProvider(order.id));
+      final List<OrderLine> items = c.read(orderItemsProvider(order.id));
       final Map<String, double> totals = <String, double>{
-        for (final CartItem i in items) i.lineId: i.lineTotal,
+        for (final OrderLine i in items) i.lineId: i.lineTotal,
       };
 
       final RefundQuote quote = c
@@ -175,12 +175,12 @@ void main() {
     test('a partial return withholds the original shipping', () async {
       final ProviderContainer c = await withOrder(teeQty: 1, coatQty: 1);
       final Order order = c.read(ordersProvider).single;
-      final List<CartItem> items = c.read(orderItemsProvider(order.id));
+      final List<OrderLine> items = c.read(orderItemsProvider(order.id));
       final Map<String, double> totals = <String, double>{
-        for (final CartItem i in items) i.lineId: i.lineTotal,
+        for (final OrderLine i in items) i.lineId: i.lineTotal,
       };
       final String teeLine = items
-          .firstWhere((CartItem i) => i.product.id == 'tee')
+          .firstWhere((OrderLine i) => i.productId == 'tee')
           .lineId;
 
       final RefundQuote quote = c
@@ -209,12 +209,12 @@ void main() {
       final Order order = c.read(ordersProvider).single;
       expect(order.discount, closeTo(12.5, 0.001));
 
-      final List<CartItem> items = c.read(orderItemsProvider(order.id));
+      final List<OrderLine> items = c.read(orderItemsProvider(order.id));
       final Map<String, double> totals = <String, double>{
-        for (final CartItem i in items) i.lineId: i.lineTotal,
+        for (final OrderLine i in items) i.lineId: i.lineTotal,
       };
       final String teeLine = items
-          .firstWhere((CartItem i) => i.product.id == 'tee')
+          .firstWhere((OrderLine i) => i.productId == 'tee')
           .lineId;
 
       final RefundQuote quote = c
@@ -233,9 +233,9 @@ void main() {
     test('the shop pays postage only when it was at fault', () async {
       final ProviderContainer c = await withOrder();
       final Order order = c.read(ordersProvider).single;
-      final List<CartItem> items = c.read(orderItemsProvider(order.id));
+      final List<OrderLine> items = c.read(orderItemsProvider(order.id));
       final Map<String, double> totals = <String, double>{
-        for (final CartItem i in items) i.lineId: i.lineTotal,
+        for (final OrderLine i in items) i.lineId: i.lineTotal,
       };
 
       RefundQuote quote(ReturnReason reason) => c
@@ -332,7 +332,7 @@ void main() {
       final Order order = Order(
         id: 'NV-R',
         placedAt: DateTime.now().subtract(const Duration(days: 40)),
-        entries: const <Never>[],
+        lines: const <OrderLine>[],
         subtotal: 10,
         shipping: 0,
         discount: 0,
@@ -370,6 +370,7 @@ void main() {
       final String text = buildInvoiceText(
         order,
         c.read(orderItemsProvider(order.id)),
+        testL10n,
       );
 
       expect(text, contains('NOVA'));
@@ -393,7 +394,11 @@ void main() {
               refundAmount: 12.34,
             ),
           );
-      final String text = buildInvoiceText(order, const <CartItem>[]);
+      final String text = buildInvoiceText(
+        order,
+        const <OrderLine>[],
+        testL10n,
+      );
       expect(text, contains('RETURN'));
       expect(text, contains('Arrived damaged'));
     });

@@ -5,14 +5,19 @@ import 'package:go_router/go_router.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
-import '../../data/models/cart_item.dart';
 import '../../data/models/order.dart';
+import '../../data/models/order_line.dart';
+import '../../data/models/product.dart';
+import '../../data/repositories/product_repository.dart';
 import '../../shared/widgets/app_image.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../state/app_providers.dart';
 import '../../state/cart_provider.dart';
 import '../../state/orders_provider.dart';
 import 'orders_screen.dart' show OrderStatusPill;
 import '../../shared/widgets/confirm.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../core/l10n/enum_labels.dart';
 
 class OrderDetailScreen extends ConsumerWidget {
   const OrderDetailScreen({
@@ -46,7 +51,7 @@ class OrderDetailScreen extends ConsumerWidget {
       );
     }
 
-    final List<CartItem> items = ref.watch(orderItemsProvider(orderId));
+    final List<OrderLine> items = ref.watch(orderItemsProvider(orderId));
 
     return Scaffold(
       appBar: AppBar(
@@ -80,7 +85,7 @@ class OrderDetailScreen extends ConsumerWidget {
           const SizedBox(height: 28),
           Text('Items', style: theme.textTheme.titleMedium),
           const SizedBox(height: 12),
-          for (final CartItem item in items)
+          for (final OrderLine item in items)
             Padding(
               padding: const EdgeInsets.only(bottom: 14),
               child: Row(
@@ -89,7 +94,7 @@ class OrderDetailScreen extends ConsumerWidget {
                     width: 56,
                     height: 56,
                     child: AppImage(
-                      url: item.product.thumbnail,
+                      url: item.imageUrl,
                       fit: BoxFit.contain,
                       borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     ),
@@ -100,7 +105,7 @@ class OrderDetailScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          item.product.name,
+                          item.displayNameIn(AppL10n.of(context)),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleSmall,
@@ -246,33 +251,78 @@ class OrderDetailScreen extends ConsumerWidget {
       );
   }
 
+  /// Puts the order back in the bag.
+  ///
+  /// Unlike the rest of this screen, reorder goes to the live catalog on
+  /// purpose: it's a new purchase, so it has to use today's price and stock
+  /// rather than the snapshot of what this order cost. Anything since delisted
+  /// can't be bought again, and the count of what was skipped is reported
+  /// instead of quietly dropping it.
   Future<void> _reorder(
     BuildContext context,
     WidgetRef ref,
-    List<CartItem> items,
+    List<OrderLine> items,
   ) async {
-    for (final CartItem item in items) {
+    final Catalog catalog = ref.read(catalogDataProvider);
+    int unavailable = 0;
+
+    for (final OrderLine item in items) {
+      final Product? product = catalog.byId(item.productId);
+      if (product == null || !product.inStock) {
+        unavailable++;
+        continue;
+      }
       await ref
           .read(cartProvider.notifier)
           .add(
-            item.product,
+            product,
             size: item.size,
-            color: item.color,
+            color: _colorOn(product, item.colorName),
             quantity: item.quantity,
           );
     }
     if (!context.mounted) return;
+
+    final int added = items.length - unavailable;
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          content: const Text('Added back to your bag'),
-          action: SnackBarAction(
-            label: 'View bag',
-            onPressed: () => context.go(Routes.cart),
+          content: Text(
+            _reorderMessage(
+              AppL10n.of(context),
+              added: added,
+              skipped: unavailable,
+            ),
           ),
+          action: added == 0
+              ? null
+              : SnackBarAction(
+                  label: AppL10n.of(context).viewBag,
+                  onPressed: () => context.go(Routes.cart),
+                ),
         ),
       );
+  }
+
+  static String _reorderMessage(
+    AppL10n l10n, {
+    required int added,
+    required int skipped,
+  }) {
+    if (added == 0) return l10n.reorderNoneAvailable(skipped);
+    if (skipped == 0) return l10n.reorderAdded;
+    return l10n.reorderPartial(added, skipped);
+  }
+
+  /// The variant colour as the live product spells it, or null if that
+  /// colourway has gone.
+  static ProductColor? _colorOn(Product product, String? name) {
+    if (name == null) return null;
+    for (final ProductColor c in product.colors) {
+      if (c.name == name) return c;
+    }
+    return null;
   }
 }
 
@@ -313,7 +363,7 @@ class _ClosedNotice extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  status.label,
+                  status.labelIn(AppL10n.of(context)),
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.onErrorContainer,
                     fontWeight: FontWeight.w700,
@@ -422,7 +472,7 @@ class _Tracker extends StatelessWidget {
             children: <Widget>[
               for (final OrderStatus s in _stages)
                 Text(
-                  s.label,
+                  s.labelIn(AppL10n.of(context)),
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: _stages.indexOf(s) <= activeIndex
                         ? theme.colorScheme.onSurface
@@ -515,8 +565,10 @@ class _ReturnBanner extends ConsumerWidget {
           const SizedBox(height: 6),
           Text(
             refunded
-                ? '${request.reason.label} · refunded to ${order.paymentLabel}'
-                : '${request.reason.label} · expect your refund by '
+                ? '${request.reason.labelIn(AppL10n.of(context))} · '
+                      'refunded to ${order.paymentLabel}'
+                : '${request.reason.labelIn(AppL10n.of(context))} · '
+                      'expect your refund by '
                       '${formatDeliveryDate(request.expectedRefundBy)}',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,

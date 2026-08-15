@@ -219,7 +219,7 @@ void main() {
   group('delivery options', () {
     final Product mug = testProduct(id: 'mug', price: 10);
     final Catalog catalog = Catalog(
-      categories: const <Category>[],
+      categories: <Category>[],
       products: <Product>[mug],
     );
 

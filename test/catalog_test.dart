@@ -39,7 +39,7 @@ void main() {
   );
 
   final Catalog catalog = Catalog(
-    categories: const <Category>[],
+    categories: <Category>[],
     products: <Product>[cheap, mid, pricey],
   );
 

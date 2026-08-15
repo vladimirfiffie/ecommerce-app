@@ -13,6 +13,8 @@ import '../../state/profile_provider.dart';
 import '../../state/auth_provider.dart';
 import '../../data/models/account.dart';
 import '../../shared/widgets/confirm.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../core/l10n/enum_labels.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -235,17 +237,17 @@ class _OrdersTile extends ConsumerWidget {
     return _Tile(
       icon: Icons.receipt_long_outlined,
       title: 'Your orders',
-      subtitle: _subtitle(orders),
+      subtitle: _subtitle(orders, AppL10n.of(context)),
       onTap: () => context.push(Routes.orders),
     );
   }
 
-  String _subtitle(List<Order> orders) {
+  String _subtitle(List<Order> orders, AppL10n l10n) {
     if (orders.isEmpty) return 'No orders yet';
 
     final Order latest = orders.first;
     final StringBuffer line = StringBuffer(
-      '${latest.id} · ${latest.status.label}',
+      '${latest.id} · ${latest.status.labelIn(l10n)}',
     );
 
     // An arrival date is only news while the parcel is still coming.

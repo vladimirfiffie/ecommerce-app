@@ -192,11 +192,12 @@ questionsProvider = NotifierProvider<QuestionsNotifier, List<ProductQuestion>>(
 
 /// Seeded plus asked questions for a product, newest first with this device's
 /// own questions pinned to the top.
-final ProviderFamily<List<ProductQuestion>, String> productQuestionsProvider =
-    Provider.family<List<ProductQuestion>, String>((Ref ref, String productId) {
-      final List<ProductQuestion> mine = <ProductQuestion>[
-        for (final ProductQuestion q in ref.watch(questionsProvider))
-          if (q.productId == productId) q,
-      ];
-      return <ProductQuestion>[...mine, ..._seedFor(productId)];
-    });
+final productQuestionsProvider = Provider.family<List<ProductQuestion>, String>(
+  (Ref ref, String productId) {
+    final List<ProductQuestion> mine = <ProductQuestion>[
+      for (final ProductQuestion q in ref.watch(questionsProvider))
+        if (q.productId == productId) q,
+    ];
+    return <ProductQuestion>[...mine, ..._seedFor(productId)];
+  },
+);

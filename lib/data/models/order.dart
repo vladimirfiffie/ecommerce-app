@@ -1,19 +1,15 @@
 import 'package:flutter/foundation.dart';
 
-import 'cart_entry.dart';
 import 'delivery_option.dart';
+import 'order_line.dart';
 
 enum OrderStatus {
-  processing('Processing'),
-  shipped('Shipped'),
-  delivered('Delivered'),
-  cancelled('Cancelled'),
-  returnRequested('Return requested'),
-  refunded('Refunded');
-
-  const OrderStatus(this.label);
-
-  final String label;
+  processing,
+  shipped,
+  delivered,
+  cancelled,
+  returnRequested,
+  refunded;
 
   /// The three stages the progress tracker draws.
   bool get isInTransit =>
@@ -25,16 +21,14 @@ enum OrderStatus {
 /// Why an order was sent back. Some reasons are the shop's fault, which is
 /// what decides who pays return postage.
 enum ReturnReason {
-  wrongSize('Wrong size or fit', sellerAtFault: false),
-  notAsDescribed('Not as described', sellerAtFault: true),
-  damaged('Arrived damaged', sellerAtFault: true),
-  wrongItem('Wrong item sent', sellerAtFault: true),
-  changedMind('Changed my mind', sellerAtFault: false),
-  other('Something else', sellerAtFault: false);
+  wrongSize(sellerAtFault: false),
+  notAsDescribed(sellerAtFault: true),
+  damaged(sellerAtFault: true),
+  wrongItem(sellerAtFault: true),
+  changedMind(sellerAtFault: false),
+  other(sellerAtFault: false);
 
-  const ReturnReason(this.label, {required this.sellerAtFault});
-
-  final String label;
+  const ReturnReason({required this.sellerAtFault});
 
   /// When true the shop covers return shipping and refunds it too.
   final bool sellerAtFault;
@@ -88,14 +82,14 @@ class ReturnRequest {
 
 /// A placed order, persisted locally so the Orders tab survives restarts.
 ///
-/// Lines are stored as [CartEntry] and rehydrated against the catalog, the same
-/// way the cart works.
+/// Each line carries its own snapshot of what was bought — see [OrderLine] for
+/// why an order can't be a join against the live catalog.
 @immutable
 class Order {
   const Order({
     required this.id,
     required this.placedAt,
-    required this.entries,
+    required this.lines,
     required this.subtotal,
     required this.shipping,
     required this.discount,
@@ -112,9 +106,11 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) => Order(
     id: json['id'] as String,
     placedAt: DateTime.parse(json['placedAt'] as String),
-    entries: <CartEntry>[
+    // Key kept as `entries` so orders written by earlier versions still load;
+    // those decode with no snapshot and are resolved against the catalog.
+    lines: <OrderLine>[
       for (final Object? e in json['entries'] as List<dynamic>? ?? <dynamic>[])
-        CartEntry.fromJson(e! as Map<String, dynamic>),
+        OrderLine.fromJson(e! as Map<String, dynamic>),
     ],
     subtotal: (json['subtotal'] as num).toDouble(),
     shipping: (json['shipping'] as num).toDouble(),
@@ -140,7 +136,7 @@ class Order {
 
   final String id;
   final DateTime placedAt;
-  final List<CartEntry> entries;
+  final List<OrderLine> lines;
   final double subtotal;
   final double shipping;
   final double discount;
@@ -159,7 +155,7 @@ class Order {
   DeliveryOption get delivery => DeliveryOption.byId(deliveryId);
 
   int get itemCount =>
-      entries.fold(0, (int sum, CartEntry e) => sum + e.quantity);
+      lines.fold(0, (int sum, OrderLine l) => sum + l.quantity);
 
   DateTime get estimatedDelivery => delivery.estimatedArrival(placedAt);
 
@@ -213,7 +209,7 @@ class Order {
   }) => Order(
     id: id,
     placedAt: placedAt,
-    entries: entries,
+    lines: lines,
     subtotal: subtotal,
     shipping: shipping,
     discount: discount,
@@ -230,7 +226,7 @@ class Order {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'id': id,
     'placedAt': placedAt.toIso8601String(),
-    'entries': entries.map((CartEntry e) => e.toJson()).toList(),
+    'entries': lines.map((OrderLine l) => l.toJson()).toList(),
     'subtotal': subtotal,
     'shipping': shipping,
     'discount': discount,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/formatters.dart';
+import '../../core/utils/semantic_labels.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// Five-star display with an optional `4.6 (1.2k)` label.
 class RatingStars extends StatelessWidget {
@@ -24,9 +26,19 @@ class RatingStars extends StatelessWidget {
         ? const Color(0xFFFFC53D)
         : const Color(0xFFF5A623);
 
-    // Five stars plus labels don't fit a narrow card (two-pane lists, small
-    // phones). Below a threshold, collapse to a single star and the number —
-    // still legible, never clipped.
+    // Five icons and a bare number say nothing out loud, and the compact form
+    // says even less. One label covers every variant.
+    return Semantics(
+      label: ratingLabel(rating, AppL10n.of(context), reviewCount),
+      excludeSemantics: true,
+      child: _stars(theme, starColor),
+    );
+  }
+
+  /// Five stars plus labels don't fit a narrow card (two-pane lists, small
+  /// phones). Below a threshold, collapse to a single star and the number —
+  /// still legible, never clipped.
+  Widget _stars(ThemeData theme, Color starColor) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double needed =

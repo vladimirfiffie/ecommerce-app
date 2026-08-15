@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ecommerce_app/data/models/account.dart';
+import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/state/auth_provider.dart';
 import 'package:ecommerce_app/state/profile_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -261,7 +262,7 @@ void main() {
       // Same backing store, fresh container.
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final ProviderContainer second = ProviderContainer(
-        overrides: <Override>[sharedPreferencesProviderOverride(prefs)],
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
       );
       addTearDown(second.dispose);
 

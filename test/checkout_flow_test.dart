@@ -20,11 +20,11 @@ void main() {
   setUpAll(configureTestEnvironment);
 
   final Catalog catalog = Catalog(
-    categories: const <Category>[
+    categories: <Category>[
       Category(
         id: 'fashion',
         label: 'Fashion',
-        icon: Icons.checkroom_rounded,
+        iconName: 'checkroom',
         imageUrl: '',
       ),
     ],
@@ -40,7 +40,7 @@ void main() {
     setMockPrefs();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProviderContainer container = ProviderContainer(
-      overrides: <Override>[
+      overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         productRepositoryProvider.overrideWithValue(
           FakeProductRepository(catalog),
@@ -128,7 +128,7 @@ void main() {
     setMockPrefs();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final Catalog sized = Catalog(
-      categories: const <Category>[],
+      categories: <Category>[],
       products: <Product>[
         testProduct(
           id: 'shirt',
@@ -138,7 +138,7 @@ void main() {
       ],
     );
     final ProviderContainer container = ProviderContainer(
-      overrides: <Override>[
+      overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         productRepositoryProvider.overrideWithValue(
           FakeProductRepository(sized),

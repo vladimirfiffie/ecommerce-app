@@ -49,11 +49,10 @@ class StockWatchNotifier extends Notifier<Set<String>> {
 final NotifierProvider<StockWatchNotifier, Set<String>> stockWatchProvider =
     NotifierProvider<StockWatchNotifier, Set<String>>(StockWatchNotifier.new);
 
-final ProviderFamily<bool, String> isWatchingStockProvider =
-    Provider.family<bool, String>(
-      (Ref ref, String productId) =>
-          ref.watch(stockWatchProvider).contains(productId),
-    );
+final isWatchingStockProvider = Provider.family<bool, String>(
+  (Ref ref, String productId) =>
+      ref.watch(stockWatchProvider).contains(productId),
+);
 
 /// Last price seen for each favourited product, so a drop can be detected.
 class PriceWatchNotifier extends Notifier<Map<String, double>> {

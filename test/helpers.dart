@@ -1,6 +1,7 @@
 import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
+import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -193,7 +194,7 @@ Future<ProviderContainer> testContainer({
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   final ProviderContainer container = ProviderContainer(
-    overrides: <Override>[
+    overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
       if (catalog != null)
         productRepositoryProvider.overrideWithValue(
@@ -205,6 +206,6 @@ Future<ProviderContainer> testContainer({
   return container;
 }
 
-/// Override for tests that build a second container over the same store.
-Override sharedPreferencesProviderOverride(SharedPreferences prefs) =>
-    sharedPreferencesProvider.overrideWithValue(prefs);
+/// The English strings, for tests that call a copy-building function directly
+/// rather than pumping a widget that could look them up from context.
+AppL10n get testL10n => lookupAppL10n(const Locale('en'));

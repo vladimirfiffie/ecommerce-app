@@ -6,7 +6,6 @@ import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/features/product/widgets/specs_section.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/state/brand_provider.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,11 +17,11 @@ void main() {
   setUp(stubHaptics);
 
   final Catalog catalog = Catalog(
-    categories: const <Category>[
+    categories: <Category>[
       Category(
         id: 'fashion',
         label: 'Fashion',
-        icon: Icons.checkroom_rounded,
+        iconName: 'checkroom',
         imageUrl: '',
       ),
     ],
@@ -74,7 +73,7 @@ void main() {
     Future<ProviderContainer> container() async {
       SharedPreferences.setMockInitialValues(const <String, Object>{});
       return ProviderContainer(
-        overrides: <Override>[
+        overrides: [
           sharedPreferencesProvider.overrideWithValue(
             await SharedPreferences.getInstance(),
           ),
@@ -132,7 +131,7 @@ void main() {
       setMockPrefs();
       final SharedPreferences store = await SharedPreferences.getInstance();
       final ProviderContainer c = ProviderContainer(
-        overrides: <Override>[
+        overrides: [
           sharedPreferencesProvider.overrideWithValue(store),
           productRepositoryProvider.overrideWithValue(
             FakeProductRepository(catalog),

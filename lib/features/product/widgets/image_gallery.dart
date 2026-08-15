@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/app_image.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 /// Swipeable product photos with page dots, plus a tap-to-zoom full screen view.
 class ImageGallery extends StatefulWidget {
@@ -67,11 +68,24 @@ class _ImageGalleryState extends State<ImageGallery> {
                   backgroundColor: Colors.transparent,
                 ),
               );
-              return GestureDetector(
+              // Without this the gallery is a silent stack of unlabelled
+              // pictures with no clue that tapping enlarges them.
+              return Semantics(
+                label: images.length == 1
+                    ? AppL10n.of(context).productImage
+                    : AppL10n.of(
+                        context,
+                      ).productImageOfCount(index + 1, images.length),
+                image: true,
+                button: true,
+                onTapHint: AppL10n.of(context).enlargeHint,
                 onTap: () => _openViewer(index),
-                child: index == 0 && widget.heroTag != null
-                    ? Hero(tag: widget.heroTag!, child: image)
-                    : image,
+                child: GestureDetector(
+                  onTap: () => _openViewer(index),
+                  child: index == 0 && widget.heroTag != null
+                      ? Hero(tag: widget.heroTag!, child: image)
+                      : image,
+                ),
               );
             },
           ),

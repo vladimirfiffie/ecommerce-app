@@ -42,9 +42,15 @@ void main(List<String> args) {
     ..writeln()
     ..writeln(
       'These APKs are **signed with Android debug keys** — fine for testing, '
-      'not for distribution. Product data ships inside the app; imagery is '
-      'fetched from a public CDN, so the first load needs a connection. '
-      'No real payment is ever taken.',
+      'not for distribution. Every build uses a freshly generated key, so no '
+      'two releases share a signature: uninstall the old copy before '
+      'installing this one, or Android reports "App not installed".',
+    )
+    ..writeln()
+    ..writeln(
+      'Products come from a public demo API and are cached on the device '
+      'after the first load, so the first run needs a connection. No real '
+      'payment is ever taken.',
     );
 
   stdout.write(out.toString());

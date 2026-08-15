@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/formatters.dart';
+import '../../core/utils/semantic_labels.dart';
 import '../../data/models/product.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// Price, with the struck-through original when the product is discounted.
 class PriceText extends StatelessWidget {
@@ -28,20 +30,27 @@ class PriceText extends StatelessWidget {
       return Text(formatPrice(product.price), style: priceStyle);
     }
 
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 6,
-      children: <Widget>[
-        Text(formatPrice(product.price), style: priceStyle),
-        Text(
-          formatPrice(product.compareAtPrice!),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            decoration: TextDecoration.lineThrough,
-            decorationColor: theme.colorScheme.onSurfaceVariant,
+    // Read out, the two prices are indistinguishable — the strikethrough is
+    // the only thing marking one as the old one, and that doesn't survive
+    // being spoken.
+    return Semantics(
+      label: priceLabel(product, AppL10n.of(context)),
+      excludeSemantics: true,
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 6,
+        children: <Widget>[
+          Text(formatPrice(product.price), style: priceStyle),
+          Text(
+            formatPrice(product.compareAtPrice!),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              decoration: TextDecoration.lineThrough,
+              decorationColor: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:ecommerce_app/data/models/address.dart';
 import 'package:ecommerce_app/data/models/cart_entry.dart';
 import 'package:ecommerce_app/data/models/category.dart';
 import 'package:ecommerce_app/data/models/order.dart';
+import 'package:ecommerce_app/data/models/order_line.dart';
 import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
@@ -11,7 +12,6 @@ import 'package:ecommerce_app/state/cart_provider.dart';
 import 'package:ecommerce_app/state/catalog_filter_provider.dart';
 import 'package:ecommerce_app/state/for_you_provider.dart';
 import 'package:ecommerce_app/state/orders_provider.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,11 +21,11 @@ void main() {
   setUpAll(configureTestEnvironment);
 
   final Catalog catalog = Catalog(
-    categories: const <Category>[
+    categories: <Category>[
       Category(
         id: 'fashion',
         label: 'Fashion',
-        icon: Icons.checkroom_rounded,
+        iconName: 'checkroom',
         imageUrl: '',
       ),
     ],
@@ -184,7 +184,15 @@ void main() {
       final Order order = Order(
         id: 'NV-TEST',
         placedAt: DateTime.now().subtract(placedAgo),
-        entries: const <CartEntry>[CartEntry(productId: 'tee', quantity: 1)],
+        lines: const <OrderLine>[
+          OrderLine(
+            entry: CartEntry(productId: 'tee', quantity: 1),
+            name: 'Linen Tee',
+            brand: 'Nova',
+            imageUrl: '',
+            unitPrice: 25,
+          ),
+        ],
         subtotal: 25,
         shipping: 0,
         discount: 0,
@@ -204,7 +212,7 @@ void main() {
             .read(ordersProvider.notifier)
             .requestReturn(
               orderId: order.id,
-              lineIds: <String>{order.entries.first.lineId},
+              lineIds: <String>{order.lines.first.lineId},
               reason: ReturnReason.changedMind,
               refundAmount: 25,
             );
@@ -218,7 +226,9 @@ void main() {
 
       expect(item.kind, ForYouKind.orderInTransit);
       expect(item.title, startsWith('Arriving '));
-      expect(item.subtitle, contains('Processing'));
+      // The status is carried as an enum now; the word for it is chosen by
+      // the widget, which is the only layer that knows the language.
+      expect(item.orderStatus, OrderStatus.processing);
       expect(item.progress?.stage, 0);
     });
 
@@ -228,7 +238,7 @@ void main() {
       );
       final ForYouItem item = c.read(forYouProvider).first;
 
-      expect(item.subtitle, contains('Shipped'));
+      expect(item.orderStatus, OrderStatus.shipped);
       expect(item.progress?.stage, 1);
     });
 

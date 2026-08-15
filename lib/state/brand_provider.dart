@@ -50,13 +50,15 @@ class BrandPage {
 
 /// A brand's page, keyed by name. Empty when nothing matches — a stale share
 /// link or a brand that has left the catalog.
-final ProviderFamily<BrandPage, String> brandProvider =
-    Provider.family<BrandPage, String>((Ref ref, String brand) {
-      final Catalog catalog = ref.watch(catalogDataProvider);
-      final List<Product> products = catalog.byBrand(brand);
-      return BrandPage(
-        // Prefer the catalog's own capitalisation over whatever the link said.
-        name: products.isEmpty ? brand.trim() : products.first.brand,
-        products: products,
-      );
-    });
+final brandProvider = Provider.family<BrandPage, String>((
+  Ref ref,
+  String brand,
+) {
+  final Catalog catalog = ref.watch(catalogDataProvider);
+  final List<Product> products = catalog.byBrand(brand);
+  return BrandPage(
+    // Prefer the catalog's own capitalisation over whatever the link said.
+    name: products.isEmpty ? brand.trim() : products.first.brand,
+    products: products,
+  );
+});

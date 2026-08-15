@@ -20,11 +20,11 @@ void main() {
   setUp(stubHaptics);
 
   final Catalog catalog = Catalog(
-    categories: const <Category>[
+    categories: <Category>[
       Category(
         id: 'fashion',
         label: 'Fashion',
-        icon: Icons.checkroom_rounded,
+        iconName: 'checkroom',
         imageUrl: '',
       ),
     ],
@@ -40,7 +40,7 @@ void main() {
   ) async {
     useMobileSurface(tester);
     final ProviderContainer c = ProviderContainer(
-      overrides: <Override>[
+      overrides: [
         sharedPreferencesProvider.overrideWithValue(store),
         productRepositoryProvider.overrideWithValue(
           FakeProductRepository(catalog),

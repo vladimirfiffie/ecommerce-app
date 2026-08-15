@@ -4,7 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
 import '../../data/models/product.dart';
+import '../../data/repositories/product_repository.dart';
+import '../../shared/widgets/catalog_unavailable.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../state/app_providers.dart';
 import '../../state/cart_provider.dart';
 import '../../state/favorites_provider.dart';
 import '../../shared/widgets/product_grid.dart';
@@ -28,6 +32,12 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     final ThemeData theme = Theme.of(context);
     final List<Product> products = ref.watch(favoriteProductsProvider);
     final double gutter = Breakpoints.gutter(Breakpoints.of(context));
+
+    // Saved items are ids resolved against the catalog, so "nothing saved" and
+    // "couldn't look up what you saved" render identically unless asked apart.
+    final AsyncValue<Catalog> catalog = ref.watch(catalogProvider);
+    final bool unresolved =
+        products.isEmpty && ref.watch(favoritesProvider).isNotEmpty;
     final bool twoPane = useTwoPane(context);
     final String? selected =
         twoPane && products.any((Product p) => p.id == _selectedId)
@@ -77,7 +87,13 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
               ),
             ),
           Expanded(
-            child: products.isEmpty
+            child: unresolved && catalog.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : unresolved
+                ? CatalogUnavailable(
+                    title: AppL10n.of(context).couldNotLoadSaves,
+                  )
+                : products.isEmpty
                 ? EmptyState(
                     icon: Icons.favorite_border_rounded,
                     title: 'Nothing saved yet',

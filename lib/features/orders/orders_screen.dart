@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
-import '../../data/models/cart_item.dart';
+import '../../data/models/order_line.dart';
 import '../../data/models/order.dart';
 import '../../shared/widgets/app_image.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -14,6 +14,8 @@ import '../../shared/widgets/pill.dart';
 import '../../state/orders_provider.dart';
 import 'order_detail_screen.dart';
 import '../../core/layout/two_pane.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../core/l10n/enum_labels.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
   const OrdersScreen({super.key});
@@ -114,7 +116,7 @@ class OrderCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
-    final List<CartItem> items = ref.watch(orderItemsProvider(order.id));
+    final List<OrderLine> items = ref.watch(orderItemsProvider(order.id));
     // Keeps the status pill honest while the list sits open.
     ref.watch(orderClockProvider);
 
@@ -155,13 +157,13 @@ class OrderCard extends ConsumerWidget {
                 height: 52,
                 child: Row(
                   children: <Widget>[
-                    for (final CartItem item in items.take(4))
+                    for (final OrderLine item in items.take(4))
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: SizedBox(
                           width: 52,
                           child: AppImage(
-                            url: item.product.thumbnail,
+                            url: item.imageUrl,
                             fit: BoxFit.contain,
                             borderRadius: BorderRadius.circular(
                               AppTheme.radiusSm,
@@ -247,7 +249,7 @@ class OrderStatusPill extends StatelessWidget {
     };
 
     return Pill(
-      label: status.label.toUpperCase(),
+      label: status.labelIn(AppL10n.of(context)).toUpperCase(),
       background: bg,
       foreground: fg,
       icon: icon,

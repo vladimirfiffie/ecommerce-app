@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
@@ -22,12 +23,16 @@ Future<void> main() async {
   );
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
+  // Month and weekday names for every locale `intl` knows. Without this,
+  // formatting a date in anything but the default locale throws.
+  await initializeDateFormatting();
+
   // Read preferences once up front so the whole settings/cart/favorites layer
   // can stay synchronous.
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   final ProviderContainer container = ProviderContainer(
-    overrides: <Override>[sharedPreferencesProvider.overrideWithValue(prefs)],
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
   );
 
   // Register notification channels up front. Permission is only requested
