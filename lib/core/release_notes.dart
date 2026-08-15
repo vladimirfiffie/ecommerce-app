@@ -30,6 +30,40 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.11.0',
+    headline: 'Works offline, and reads out loud',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'cloud_off_rounded',
+        'The shop opens without a signal',
+        'Nova now keeps the catalogue on your device, so your bag, your '
+            'saved items and your orders still open with no connection. When '
+            'something genuinely can’t be reached it says so, instead of '
+            'looking like you own nothing.',
+      ),
+      ReleaseHighlight(
+        'receipt_long_outlined',
+        'Receipts that stay true',
+        'An order now remembers what you actually paid. A price change in '
+            'the shop can no longer rewrite an old receipt, and an item that '
+            'stops being sold can no longer vanish from one.',
+      ),
+      ReleaseHighlight(
+        'accessibility_new_rounded',
+        'Built for screen readers',
+        'A product now reads as one sentence rather than six fragments, sale '
+            'prices say which figure is the old one, and the stars, steppers '
+            'and photos all have names. Buttons meet the minimum tap size.',
+      ),
+      ReleaseHighlight(
+        'translate_rounded',
+        'Your format for money and dates',
+        'Prices and dates now follow your device’s region instead of always '
+            'being written the American way.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.10.0',
     headline: 'Home knows where your parcel is',
     highlights: <ReleaseHighlight>[
