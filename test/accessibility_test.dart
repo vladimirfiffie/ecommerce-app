@@ -9,6 +9,7 @@ import 'package:ecommerce_app/shared/widgets/quantity_stepper.dart';
 import 'package:ecommerce_app/shared/widgets/rating_stars.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -126,14 +127,72 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('says "Remove" when a decrement would empty the line', (
+    testWidgets('says "Remove" where a decrement really would remove', (
       WidgetTester tester,
     ) async {
       await pumpBare(
         tester,
-        QuantityStepper(quantity: 1, onDecrement: () {}, onIncrement: () {}),
+        QuantityStepper(
+          quantity: 1,
+          removeAtMin: true,
+          onDecrement: () {},
+          onIncrement: () {},
+        ),
       );
       expect(find.bySemanticsLabel('Remove'), findsOneWidget);
+    });
+
+    testWidgets('offers no bin where there is nothing to remove', (
+      WidgetTester tester,
+    ) async {
+      // The product page clamps at one, so a bin there would promise a
+      // destructive action and then do nothing.
+      await pumpBare(
+        tester,
+        QuantityStepper(quantity: 1, onDecrement: () {}, onIncrement: () {}),
+      );
+
+      expect(find.bySemanticsLabel('Remove'), findsNothing);
+      expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
+
+      // Present but switched off, rather than live and inert.
+      final SemanticsNode minus = tester.getSemantics(
+        find.bySemanticsLabel('Decrease quantity'),
+      );
+      expect(minus.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
+    });
+
+    testWidgets('the minus comes back once there is something to take away', (
+      WidgetTester tester,
+    ) async {
+      await pumpBare(
+        tester,
+        QuantityStepper(quantity: 2, onDecrement: () {}, onIncrement: () {}),
+      );
+
+      final SemanticsNode minus = tester.getSemantics(
+        find.bySemanticsLabel('Decrease quantity'),
+      );
+      expect(minus.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    });
+
+    testWidgets('the plus switches off at the stock ceiling', (
+      WidgetTester tester,
+    ) async {
+      await pumpBare(
+        tester,
+        QuantityStepper(
+          quantity: 3,
+          max: 3,
+          onDecrement: () {},
+          onIncrement: () {},
+        ),
+      );
+
+      final SemanticsNode plus = tester.getSemantics(
+        find.bySemanticsLabel('Increase quantity'),
+      );
+      expect(plus.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
     });
   });
 

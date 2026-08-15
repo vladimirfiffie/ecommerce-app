@@ -331,6 +331,9 @@ class _CartLine extends ConsumerWidget {
                   quantity: item.quantity,
                   dense: true,
                   max: item.product.stock.clamp(1, 99),
+                  // Here the bin is honest: decrementing the last one takes
+                  // the line out of the bag.
+                  removeAtMin: true,
                   onDecrement: () => cart.decrement(item.lineId),
                   onIncrement: () => cart.increment(item.lineId),
                 ),
