@@ -30,6 +30,27 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.11.1',
+    headline: 'A quantity control that behaves',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'bug_report_outlined',
+        'No more bin that deletes nothing',
+        'On a product page the minus used to turn into a bin at one and '
+            'then do nothing at all when you tapped it. The bin now appears '
+            'only in your bag, where it really does take the item out.',
+      ),
+      ReleaseHighlight(
+        'animation_outlined',
+        'It moves now',
+        'The number rolls the way you are counting, the buttons press in '
+            'and spring back under your thumb, and one that has nothing left '
+            'to do fades out instead of blinking. All of it holds still if '
+            'you have asked your phone to reduce motion.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.11.0',
     headline: 'Works offline, and reads out loud',
     highlights: <ReleaseHighlight>[
