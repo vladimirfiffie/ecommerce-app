@@ -87,8 +87,8 @@ void main() {
     });
   });
 
-  group('zooming a photo in place', () {
-    testWidgets('a pinch zooms without leaving the product page', (
+  group('zooming a photo', () {
+    testWidgets('a pinch opens the full screen viewer', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -101,31 +101,41 @@ void main() {
       await tester.pump();
 
       expect(find.text('Pinch or tap to zoom'), findsOneWidget);
-      expect(find.text('Reset'), findsNothing);
 
-      final Offset centre = tester.getCenter(find.byType(InteractiveViewer));
+      final Offset middle = tester.getCenter(find.byType(ImageGallery));
       final TestGesture a = await tester.startGesture(
-        centre - const Offset(20, 0),
+        middle - const Offset(20, 0),
       );
       final TestGesture b = await tester.startGesture(
-        centre + const Offset(20, 0),
+        middle + const Offset(20, 0),
       );
       await tester.pump();
-      await a.moveTo(centre - const Offset(90, 0));
-      await b.moveTo(centre + const Offset(90, 0));
+      await a.moveTo(middle - const Offset(90, 0));
+      await b.moveTo(middle + const Offset(90, 0));
       await tester.pump();
       await a.up();
       await b.up();
       await settle(tester);
 
-      // Still on the product page, and now offering the way back out.
-      expect(find.byType(ImageGallery), findsOneWidget);
-      expect(find.text('Reset'), findsOneWidget);
-      expect(find.text('Pinch or tap to zoom'), findsNothing);
+      // The viewer is up: zooming happens there, where nothing scrolls
+      // underneath it. Its close button is the tell.
+      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+    });
 
-      await tester.tap(find.text('Reset'));
+    testWidgets('a tap opens the same viewer', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const ImageGallery(
+            images: <String>['https://example.invalid/1.webp'],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byType(ImageGallery));
       await settle(tester);
-      expect(find.text('Pinch or tap to zoom'), findsOneWidget);
+
+      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     });
   });
 

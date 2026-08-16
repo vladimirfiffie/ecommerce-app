@@ -225,7 +225,6 @@ class _StepButtonState extends State<_StepButton> {
   /// dropped once it gets going.
   static const int _hapticEveryNSteps = 4;
 
-  bool _pressed = false;
   Timer? _timer;
   int _steps = 0;
 
@@ -253,10 +252,6 @@ class _StepButtonState extends State<_StepButton> {
     super.dispose();
   }
 
-  void _setPressed(bool value) {
-    if (_pressed != value) setState(() => _pressed = value);
-  }
-
   /// One step, with the haptic that belongs to it.
   void _step({required bool repeated}) {
     if (!widget.enabled) {
@@ -270,7 +265,6 @@ class _StepButtonState extends State<_StepButton> {
   }
 
   void _beginHold() {
-    _setPressed(true);
     _timer = Timer(_holdDelay, _repeat);
   }
 
@@ -295,16 +289,12 @@ class _StepButtonState extends State<_StepButton> {
       _steps = 0;
       widget.onRepeatingChanged(false);
     }
-    _setPressed(false);
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool still = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final Duration press = still
-        ? Duration.zero
-        : const Duration(milliseconds: 110);
     final Duration settle = still
         ? Duration.zero
         : const Duration(milliseconds: 200);
@@ -337,30 +327,19 @@ class _StepButtonState extends State<_StepButton> {
                 }
               : null,
           onTapDown: widget.enabled ? (TapDownDetails _) => _beginHold() : null,
-          onTapUp: widget.enabled
-              ? (TapUpDetails _) => _setPressed(false)
-              : null,
           onTapCancel: widget.enabled ? _endHold : null,
           radius: widget.size / 2 + 4,
-          child: AnimatedContainer(
-            // The press used to squash the glyph and spring it back, which
-            // on a button you tap over and over — or hold — reads as a pulse.
-            // Nothing moves now: the button fills in under your thumb and
-            // stays filled for as long as you keep it there.
-            duration: _pressed ? press : settle,
-            curve: Curves.easeOut,
+          child: SizedBox(
+            // No press animation of its own: the ink ripple spreading from
+            // the touch is the feedback. Scaling the glyph and fading a
+            // circle behind it were both read as a pulse, which is the
+            // wrong note for a button you tap repeatedly or lean on.
             width: widget.size,
             height: widget.size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _pressed
-                  ? theme.colorScheme.primary.withValues(alpha: 0.16)
-                  : Colors.transparent,
-            ),
             child: Center(
               child: AnimatedOpacity(
                 // A button that switches off at the stock ceiling should
-                // fade out of reach rather than blink into a paler colour.
+                // fade out of reach rather than blink into a paler color.
                 opacity: widget.enabled ? 1 : 0.3,
                 duration: settle,
                 child: _SwappingIcon(
