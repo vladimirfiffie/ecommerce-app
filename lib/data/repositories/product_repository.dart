@@ -91,6 +91,39 @@ class Catalog {
   }
 
   /// Same category, excluding [product] itself, best-rated first.
+  /// Which storefront group is worn or used alongside another.
+  ///
+  /// The shop's own opinion, not a claim about anyone's behaviour: a coat
+  /// goes with a bag, a phone goes with a case. Groups with no natural
+  /// partner pair with themselves and rely on the subcategory rule below.
+  static const Map<String, String> _goesWith = <String, String>{
+    'fashion': 'accessories',
+    'accessories': 'fashion',
+    'tech': 'tech',
+    'beauty': 'beauty',
+    'home': 'home',
+    'sports': 'sports',
+  };
+
+  /// Things that go with [product] rather than compete with it.
+  ///
+  /// Always a different subcategory: another five coats is what "you might
+  /// also like" is for, and putting them under "complete the look" would be
+  /// the same rail twice.
+  List<Product> completeTheLook(Product product, {int limit = 8}) {
+    final String group = _goesWith[product.categoryId] ?? product.categoryId;
+    final List<Product> pool = products
+        .where(
+          (Product p) =>
+              p.id != product.id &&
+              p.categoryId == group &&
+              p.subcategory != product.subcategory,
+        )
+        .toList();
+    pool.sort((Product a, Product b) => b.rating.compareTo(a.rating));
+    return pool.take(limit).toList(growable: false);
+  }
+
   List<Product> related(Product product, {int limit = 8}) {
     final List<Product> pool = products
         .where(

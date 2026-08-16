@@ -33,6 +33,7 @@ import 'widgets/questions_section.dart';
 import '../../state/alerts_provider.dart';
 import '../home/widgets/deal_countdown.dart';
 import '../../state/deals_provider.dart';
+import '../../state/pairings_provider.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({
@@ -142,6 +143,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       product,
       limit: 8,
     );
+    final List<Product> goesWith = catalogAsync.value!.completeTheLook(
+      product,
+      limit: 8,
+    );
+    final List<Product> paired = ref.watch(pairedWithProvider(product.id));
 
     // An embedded pane is already narrow, however wide the window is —
     // reading the window here would nest a second two-pane layout inside the
@@ -183,6 +189,28 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     SliverToBoxAdapter(
                       child: QuestionsSection(product: product),
                     ),
+                    if (paired.isNotEmpty) ...<Widget>[
+                      const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                      const SliverToBoxAdapter(
+                        child: SectionHeader(
+                          title: 'Bought together',
+                          subtitle: 'From your own past orders',
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                      SliverToBoxAdapter(child: _relatedRail(paired)),
+                    ],
+                    if (goesWith.isNotEmpty) ...<Widget>[
+                      const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                      const SliverToBoxAdapter(
+                        child: SectionHeader(
+                          title: 'Complete the look',
+                          subtitle: 'Things that go with it, not instead of it',
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                      SliverToBoxAdapter(child: _relatedRail(goesWith)),
+                    ],
                     if (related.isNotEmpty) ...<Widget>[
                       const SliverToBoxAdapter(child: SizedBox(height: 28)),
                       const SliverToBoxAdapter(
@@ -245,6 +273,28 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           SliverToBoxAdapter(child: ReviewsSection(product: product)),
           const SliverToBoxAdapter(child: SizedBox(height: 28)),
           SliverToBoxAdapter(child: QuestionsSection(product: product)),
+          if (paired.isNotEmpty) ...<Widget>[
+            const SliverToBoxAdapter(child: SizedBox(height: 28)),
+            const SliverToBoxAdapter(
+              child: SectionHeader(
+                title: 'Bought together',
+                subtitle: 'From your own past orders',
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 14)),
+            SliverToBoxAdapter(child: _relatedRail(paired)),
+          ],
+          if (goesWith.isNotEmpty) ...<Widget>[
+            const SliverToBoxAdapter(child: SizedBox(height: 28)),
+            const SliverToBoxAdapter(
+              child: SectionHeader(
+                title: 'Complete the look',
+                subtitle: 'Things that go with it, not instead of it',
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 14)),
+            SliverToBoxAdapter(child: _relatedRail(goesWith)),
+          ],
           if (related.isNotEmpty) ...<Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 28)),
             const SliverToBoxAdapter(
