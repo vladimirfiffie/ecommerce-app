@@ -30,6 +30,40 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.12.0',
+    headline: 'The shop is called Aster now',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'auto_awesome_rounded',
+        'New name, new mark',
+        'Nova is Aster, from the sign-in screen to the icon on your home '
+            'screen — a twelve-rayed flower on the same purple the rest of '
+            'the app is built from, with a launch screen to match.',
+      ),
+      ReleaseHighlight(
+        'help_outline_rounded',
+        'A help centre that exists',
+        'Profile → Help centre used to promise itself for later. It now '
+            'opens on answers about orders, returns, payment and what we '
+            'keep on your device — written against what the app really does.',
+      ),
+      ReleaseHighlight(
+        'grid_view_rounded',
+        'Tabs without the words',
+        'Settings → Appearance can drop the labels under the bottom bar for '
+            'icons alone, and the side rail on a tablet collapses with them. '
+            'Screen readers still announce every tab by name.',
+      ),
+      ReleaseHighlight(
+        'warning_amber_rounded',
+        'Worth knowing before you update',
+        'The rename reaches the package name and the aster:// links, so '
+            'Android sees a new app: uninstall the old Nova build first, and '
+            'any nova:// link you had saved stops opening the shop.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.11.1',
     headline: 'A quantity control that behaves',
     highlights: <ReleaseHighlight>[
@@ -57,7 +91,7 @@ const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
       ReleaseHighlight(
         'cloud_off_rounded',
         'The shop opens without a signal',
-        'Nova now keeps the catalogue on your device, so your bag, your '
+        'Aster now keeps the catalogue on your device, so your bag, your '
             'saved items and your orders still open with no connection. When '
             'something genuinely can’t be reached it says so, instead of '
             'looking like you own nothing.',
@@ -140,7 +174,7 @@ const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
       ReleaseHighlight(
         'storefront_outlined',
         'Sign in, or don’t',
-        'Nova now opens on sign in and create account, with one tap to '
+        'Aster now opens on sign in and create account, with one tap to '
             'browse as a guest — and it remembers which you chose.',
       ),
       ReleaseHighlight(
@@ -338,7 +372,7 @@ const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ),
   ReleaseNote(
     version: '0.1.0',
-    headline: 'Welcome to Nova',
+    headline: 'Welcome to Aster',
     highlights: <ReleaseHighlight>[
       ReleaseHighlight(
         'storefront_outlined',
