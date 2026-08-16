@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_image.dart';
+import 'product_video.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
 /// Swipeable product photos with page dots, plus a tap-to-zoom full screen view.
+///
+/// Any [videos] lead, on the platforms that can play them — a clip is the
+/// thing worth seeing first, and the photos are one swipe behind it.
 class ImageGallery extends StatefulWidget {
-  const ImageGallery({required this.images, super.key, this.heroTag});
+  const ImageGallery({
+    required this.images,
+    super.key,
+    this.videos = const <String>[],
+    this.heroTag,
+  });
 
   final List<String> images;
+  final List<String> videos;
 
   /// Applied to the first page only, so the transition from a product card
   /// lands on the image the shopper tapped.
@@ -50,6 +61,12 @@ class _ImageGalleryState extends State<ImageGallery> {
     final List<String> images = widget.images.isEmpty
         ? const <String>['']
         : widget.images;
+    // Desktop has no player behind video_player, so there is nothing to put
+    // on a video page there — the photos stand in for it.
+    final List<String> videos = videoPlaybackSupported
+        ? widget.videos
+        : const <String>[];
+    final int pages = videos.length + images.length;
 
     return ColoredBox(
       color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
@@ -58,8 +75,21 @@ class _ImageGalleryState extends State<ImageGallery> {
           PageView.builder(
             controller: _controller,
             onPageChanged: (int i) => setState(() => _index = i),
-            itemCount: images.length,
-            itemBuilder: (BuildContext context, int index) {
+            itemCount: pages,
+            itemBuilder: (BuildContext context, int page) {
+              if (page < videos.length) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 84, 24, 44),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    child: ProductVideo(url: videos[page]),
+                  ),
+                );
+              }
+
+              // Photos start where the clips leave off, so the hero still
+              // belongs to the first picture rather than the first page.
+              final int index = page - videos.length;
               final Widget image = Padding(
                 padding: const EdgeInsets.fromLTRB(24, 84, 24, 44),
                 child: AppImage(
@@ -89,7 +119,7 @@ class _ImageGalleryState extends State<ImageGallery> {
               );
             },
           ),
-          if (images.length > 1)
+          if (pages > 1)
             Positioned(
               bottom: 18,
               left: 0,
@@ -97,7 +127,7 @@ class _ImageGalleryState extends State<ImageGallery> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  for (int i = 0; i < images.length; i++)
+                  for (int i = 0; i < pages; i++)
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 240),
                       margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -113,30 +143,32 @@ class _ImageGalleryState extends State<ImageGallery> {
                 ],
               ),
             ),
-          Positioned(
-            bottom: 14,
-            right: 16,
-            child: IgnorePointer(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const Icon(Icons.zoom_out_map_rounded, size: 13),
-                    const SizedBox(width: 5),
-                    Text('Tap to zoom', style: theme.textTheme.labelSmall),
-                  ],
+          // Nothing to zoom on a video page — that tap plays and pauses.
+          if (_index >= videos.length)
+            Positioned(
+              bottom: 14,
+              right: 16,
+              child: IgnorePointer(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Icon(Icons.zoom_out_map_rounded, size: 13),
+                      const SizedBox(width: 5),
+                      Text('Tap to zoom', style: theme.textTheme.labelSmall),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -17,6 +17,7 @@ class Product {
     required this.rating,
     required this.reviewCount,
     this.compareAtPrice,
+    this.videos = const <String>[],
     this.colors = const <ProductColor>[],
     this.sizes = const <String>[],
     this.tags = const <String>[],
@@ -39,6 +40,10 @@ class Product {
     images: <String>[
       for (final Object? i in json['images'] as List<dynamic>? ?? <dynamic>[])
         i as String,
+    ],
+    videos: <String>[
+      for (final Object? v in json['videos'] as List<dynamic>? ?? <dynamic>[])
+        v as String,
     ],
     rating: (json['rating'] as num).toDouble(),
     reviewCount: json['reviewCount'] as int? ?? 0,
@@ -84,6 +89,11 @@ class Product {
 
   final String description;
   final List<String> images;
+
+  /// Clip URLs, shown in the gallery ahead of the photos. Usually empty: the
+  /// live catalogue has no video, so these are seeded for a few items.
+  final List<String> videos;
+
   final double rating;
   final int reviewCount;
   final List<ProductColor> colors;
@@ -121,6 +131,7 @@ class Product {
     if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
     'description': description,
     'images': images,
+    if (videos.isNotEmpty) 'videos': videos,
     'rating': rating,
     'reviewCount': reviewCount,
     'stock': stock,

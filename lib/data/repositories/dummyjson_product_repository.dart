@@ -231,6 +231,22 @@ class DummyJsonProductRepository implements ProductRepository {
     return '';
   }
 
+  /// Stand-in clips, because DummyJSON serves no video of its own.
+  ///
+  /// Flutter's own documentation assets: small, stable, and already public.
+  /// Real catalogue video would arrive in the same `videos` field and need
+  /// none of this.
+  static const List<String> _sampleVideos = <String>[
+    'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',
+    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
+  ];
+
+  /// Every seventh item gets one, so a browse turns a few up without every
+  /// product claiming to have a film made about it.
+  List<String> _sampleVideosFor(int id) => id % 7 == 0
+      ? <String>[_sampleVideos[(id ~/ 7) % _sampleVideos.length]]
+      : const <String>[];
+
   Product _toProduct(
     Map<String, dynamic> p, {
     required DateTime now,
@@ -267,6 +283,7 @@ class DummyJsonProductRepository implements ProductRepository {
           : null,
       description: (p['description'] as String?) ?? '',
       images: images.isNotEmpty ? images : <String>[?thumbnail],
+      videos: _sampleVideosFor(id),
       rating: ((p['rating'] as num?) ?? 0).toDouble(),
       reviewCount: ((p['reviews'] as List<dynamic>?) ?? <dynamic>[]).length,
       reviews: <Review>[

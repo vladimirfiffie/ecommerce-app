@@ -164,6 +164,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     Positioned.fill(
                       child: ImageGallery(
                         images: product.images,
+                        videos: product.videos,
                         heroTag: 'product-${product.id}-catalog',
                       ),
                     ),
@@ -235,6 +236,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             flexibleSpace: FlexibleSpaceBar(
               background: ImageGallery(
                 images: product.images,
+                videos: product.videos,
                 heroTag: 'product-${product.id}-catalog',
               ),
             ),
