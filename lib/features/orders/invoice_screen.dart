@@ -12,7 +12,10 @@ import '../../data/models/order.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../state/orders_provider.dart';
 import '../../l10n/generated/app_localizations.dart';
+import 'package:printing/printing.dart';
+
 import '../../core/l10n/enum_labels.dart';
+import 'invoice_pdf.dart';
 
 /// Builds the plain-text receipt that gets shared or copied.
 ///
@@ -124,6 +127,25 @@ class InvoiceScreen extends ConsumerWidget {
             onPressed: () => SharePlus.instance.share(
               ShareParams(text: text, subject: 'Aster receipt ${order.id}'),
             ),
+          ),
+          IconButton(
+            tooltip: 'Export PDF',
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            // Handed to the platform's own share and print sheet, which is
+            // where a receipt actually needs to go: a mail app, a cloud
+            // folder, a printer. Building the document is cheap; deciding
+            // where it lands is not this app's business.
+            onPressed: () async {
+              final Uint8List bytes = await buildInvoicePdf(
+                order,
+                items,
+                AppL10n.of(context),
+              );
+              await Printing.sharePdf(
+                bytes: bytes,
+                filename: 'aster-receipt-${order.id}.pdf',
+              );
+            },
           ),
           const SizedBox(width: 4),
         ],
