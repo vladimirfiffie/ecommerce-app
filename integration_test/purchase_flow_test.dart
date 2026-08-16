@@ -4,6 +4,7 @@ import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/state/auth_provider.dart';
+import 'package:ecommerce_app/state/onboarding_provider.dart';
 import 'package:ecommerce_app/state/cart_provider.dart';
 import 'package:ecommerce_app/state/orders_provider.dart';
 import 'package:ecommerce_app/state/payments_provider.dart';
@@ -49,10 +50,12 @@ void main() {
       );
 
   Future<ProviderContainer> launch(WidgetTester tester) async {
-    // Past the welcome gate: this test is about buying something, not about
-    // signing in. The gate itself has its own coverage in test/auth_test.dart.
+    // Past the intro and the welcome gate: this test is about buying
+    // something, not about arriving. Both have their own coverage — the gate
+    // in test/auth_gate_test.dart, the intro below.
     SharedPreferences.setMockInitialValues(<String, Object>{
       GuestModeNotifier.prefsKey: true,
+      OnboardingNotifier.prefsKey: true,
     });
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProviderContainer container = ProviderContainer(
@@ -183,5 +186,37 @@ void main() {
 
     // And the alert sweep, which fans out across several of them.
     await expectLater(c.read(alertSweeperProvider).sweep(), completes);
+  });
+
+  testWidgets('a genuinely first launch arrives at the shop', (
+    WidgetTester tester,
+  ) async {
+    // Nothing seeded at all: what a freshly installed copy meets. Every other
+    // test here starts past this, which is how the intro managed to break
+    // this suite without a single unit test noticing.
+    SharedPreferences.setMockInitialValues(const <String, Object>{});
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final ProviderContainer container = ProviderContainer(
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const AsterApp()),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await settle(tester);
+
+    // The intro, then the gate, then the shop — each one reached by doing
+    // the thing it offers.
+    expect(find.text('Welcome to Aster'), findsOneWidget);
+    await tester.tap(find.text('Skip'));
+    await settle(tester);
+
+    expect(find.text('Browse as guest'), findsOneWidget);
+    await tester.tap(find.text('Browse as guest'));
+    await settle(tester);
+
+    expect(find.byType(HeroCarousel), findsOneWidget);
   });
 }
