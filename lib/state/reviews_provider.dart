@@ -51,6 +51,11 @@ class UserReview {
     rating: rating,
     body: title.isEmpty ? body : '$title\n$body',
     daysAgo: DateTime.now().difference(writtenAt).inDays,
+    // Only buyers can write one, so it is verified by definition. Tags are
+    // read out of the words used, the same as any other review — nobody
+    // should have to file their own review under a heading.
+    verified: true,
+    tags: Review.tagsIn(title.isEmpty ? body : '$title $body'),
   );
 }
 

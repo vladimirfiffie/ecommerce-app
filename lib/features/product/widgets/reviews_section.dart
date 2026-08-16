@@ -5,18 +5,37 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/product.dart';
 import '../../../data/models/review.dart';
+import '../../../shared/widgets/app_image.dart';
 import '../../../shared/widgets/rating_stars.dart';
 import '../../../state/reviews_provider.dart';
 import 'write_review_sheet.dart';
 
 /// Rating summary, star histogram, and the review list.
-class ReviewsSection extends ConsumerWidget {
+class ReviewsSection extends ConsumerStatefulWidget {
   const ReviewsSection({required this.product, super.key});
 
   final Product product;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReviewsSection> createState() => _ReviewsSectionState();
+}
+
+class _ReviewsSectionState extends ConsumerState<ReviewsSection> {
+  /// Null means everything. Otherwise a tag, or [_photosFilter].
+  String? _filter;
+
+  /// Not a tag: "show me the ones with pictures".
+  static const String _photosFilter = 'With photos';
+
+  bool _matches(Review review) => switch (_filter) {
+    null => true,
+    _photosFilter => review.photos.isNotEmpty,
+    final String tag => review.tags.contains(tag),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final Product product = widget.product;
     final ThemeData theme = Theme.of(context);
     final List<Review> reviews = ref.watch(productReviewsProvider(product));
     final ({double rating, int count}) summary = ref.watch(
@@ -24,6 +43,7 @@ class ReviewsSection extends ConsumerWidget {
     );
     final UserReview? mine = ref.watch(myReviewProvider(product.id));
     final bool purchased = ref.watch(canReviewProvider(product.id));
+    final List<Review> shown = reviews.where(_matches).toList();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -82,9 +102,28 @@ class ReviewsSection extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           _WriteCta(product: product, mine: mine, purchased: purchased),
+          _FilterRow(
+            reviews: reviews,
+            selected: _filter,
+            photosLabel: _photosFilter,
+            onSelected: (String? value) => setState(() => _filter = value),
+          ),
           const SizedBox(height: 4),
-          for (int i = 0; i < reviews.length; i++)
-            _ReviewTile(review: reviews[i], isMine: mine != null && i == 0),
+          if (shown.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 22),
+              child: Text(
+                'No reviews mention that yet.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          for (int i = 0; i < shown.length; i++)
+            _ReviewTile(
+              review: shown[i],
+              isMine: mine != null && shown[i] == reviews.first && i == 0,
+            ),
         ],
       ),
     );
@@ -194,10 +233,23 @@ class _ReviewTile extends StatelessWidget {
                             ),
                           ),
                         ],
+                        if (review.verified && !isMine) ...<Widget>[
+                          const SizedBox(width: 6),
+                          Tooltip(
+                            message: 'Bought this from the shop',
+                            child: Icon(
+                              Icons.verified_rounded,
+                              size: 15,
+                              color: AppTheme.success,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     Text(
-                      review.timeAgo,
+                      review.verified && !isMine
+                          ? '${review.timeAgo} · Verified buyer'
+                          : review.timeAgo,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -215,7 +267,82 @@ class _ReviewTile extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+          if (review.tags.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: <Widget>[
+                for (final String tag in review.tags)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(tag, style: theme.textTheme.labelSmall),
+                  ),
+              ],
+            ),
+          ],
+          if (review.photos.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 76,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: review.photos.length,
+                separatorBuilder: (BuildContext context, int _) =>
+                    const SizedBox(width: 8),
+                itemBuilder: (BuildContext context, int i) => GestureDetector(
+                  onTap: () => _openPhoto(context, review.photos, i),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                    child: SizedBox(
+                      width: 76,
+                      height: 76,
+                      child: AppImage(url: review.photos[i]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+
+  /// Full-bleed look at a customer photo, dismissed by tapping it.
+  void _openPhoto(BuildContext context, List<String> photos, int index) {
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        opaque: false,
+        barrierColor: Colors.black87,
+        pageBuilder: (BuildContext context, Animation<double> animation, _) =>
+            FadeTransition(
+              opacity: animation,
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                body: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Center(
+                    child: InteractiveViewer(
+                      maxScale: 4,
+                      child: AppImage(
+                        url: photos[index],
+                        fit: BoxFit.contain,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
       ),
     );
   }
@@ -284,6 +411,75 @@ class _WriteCta extends StatelessWidget {
         onPressed: () => showWriteReviewSheet(context, product),
         icon: const Icon(Icons.rate_review_outlined, size: 18),
         label: const Text('Write a review'),
+      ),
+    );
+  }
+}
+
+/// Chips for the subjects this product's reviews actually cover.
+///
+/// Built from the reviews in hand rather than the full tag list: offering a
+/// filter that can only ever return nothing is worse than not offering it.
+class _FilterRow extends StatelessWidget {
+  const _FilterRow({
+    required this.reviews,
+    required this.selected,
+    required this.photosLabel,
+    required this.onSelected,
+  });
+
+  final List<Review> reviews;
+  final String? selected;
+  final String photosLabel;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final Map<String, int> counts = <String, int>{};
+    for (final Review review in reviews) {
+      for (final String tag in review.tags) {
+        counts[tag] = (counts[tag] ?? 0) + 1;
+      }
+    }
+    final int withPhotos = reviews
+        .where((Review r) => r.photos.isNotEmpty)
+        .length;
+    if (counts.isEmpty && withPhotos == 0) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: SizedBox(
+        height: 40,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            ChoiceChip(
+              label: Text('All ${reviews.length}'),
+              selected: selected == null,
+              onSelected: (_) => onSelected(null),
+            ),
+            for (final String tag in Review.allTags)
+              if (counts[tag] case final int n)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: ChoiceChip(
+                    label: Text('$tag $n'),
+                    selected: selected == tag,
+                    onSelected: (bool on) => onSelected(on ? tag : null),
+                  ),
+                ),
+            if (withPhotos > 0)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: ChoiceChip(
+                  avatar: const Icon(Icons.photo_outlined, size: 16),
+                  label: Text('$photosLabel $withPhotos'),
+                  selected: selected == photosLabel,
+                  onSelected: (bool on) => onSelected(on ? photosLabel : null),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

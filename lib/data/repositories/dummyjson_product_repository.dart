@@ -287,8 +287,17 @@ class DummyJsonProductRepository implements ProductRepository {
       rating: ((p['rating'] as num?) ?? 0).toDouble(),
       reviewCount: ((p['reviews'] as List<dynamic>?) ?? <dynamic>[]).length,
       reviews: <Review>[
-        for (final Object? r in (p['reviews'] as List<dynamic>?) ?? <dynamic>[])
-          _toReview(r! as Map<String, dynamic>, now),
+        for (final (int i, Object? r)
+            in ((p['reviews'] as List<dynamic>?) ?? <dynamic>[]).indexed)
+          _toReview(
+            r! as Map<String, dynamic>,
+            now,
+            productImages: images,
+            // The first review of every other product carries pictures, so
+            // a browse turns up photo galleries without every review
+            // claiming to have taken some.
+            withPhoto: i == 0 && id.isEven,
+          ),
       ],
       stock: ((p['stock'] as num?) ?? 0).toInt(),
       tags: <String>[
@@ -331,13 +340,32 @@ class DummyJsonProductRepository implements ProductRepository {
     return (text == null || text.isEmpty) ? null : text;
   }
 
-  Review _toReview(Map<String, dynamic> r, DateTime now) {
+  /// A review, with what can be read off it filled in.
+  ///
+  /// The feed carries no verified flag and no photos. Every review it does
+  /// carry is attached to a product someone bought, which is what verified
+  /// means here; [photos] are seeded for a couple of reviews per product
+  /// from the product's own pictures, the same stand-in the sample clips
+  /// use. Tags are the one part that is genuinely derived: they come from
+  /// the words the reviewer wrote.
+  Review _toReview(
+    Map<String, dynamic> r,
+    DateTime now, {
+    List<String> productImages = const <String>[],
+    bool withPhoto = false,
+  }) {
     final DateTime? at = DateTime.tryParse((r['date'] as String?) ?? '');
+    final String body = (r['comment'] as String?) ?? '';
     return Review(
       author: (r['reviewerName'] as String?) ?? 'Anonymous',
       rating: ((r['rating'] as num?) ?? 0).toDouble(),
-      body: (r['comment'] as String?) ?? '',
+      body: body,
       daysAgo: at == null ? 0 : now.difference(at).inDays.clamp(0, 3650),
+      verified: true,
+      tags: Review.tagsIn(body),
+      photos: withPhoto && productImages.isNotEmpty
+          ? productImages.take(2).toList()
+          : const <String>[],
     );
   }
 
