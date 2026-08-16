@@ -30,6 +30,49 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.13.0',
+    headline: 'Films, pinching, and a plus you can lean on',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'storefront_outlined',
+        'A first launch that introduces itself',
+        'Opening Aster for the first time now says what it is before it '
+            'asks you to sign in: a demo shop, no payment ever taken, '
+            'everything kept on your device. Skippable, and shown once.',
+      ),
+      ReleaseHighlight(
+        'photo_library_outlined',
+        'Video on the products that have it',
+        'A clip leads the gallery, with the photos a swipe behind. Nothing '
+            'downloads until you press play.',
+      ),
+      ReleaseHighlight(
+        'search_rounded',
+        'Pinch a photo where it already is',
+        'Zooming no longer means opening another screen first — pinch the '
+            'product image to 4× and pan around it. The corner button puts '
+            'it back.',
+      ),
+      ReleaseHighlight(
+        'tune_rounded',
+        'Hold the plus instead of tapping thirty times',
+        'Press and hold either side of the quantity control and it counts '
+            'on its own, speeding up as it goes, stopping at the stock '
+            'ceiling.',
+      ),
+      ReleaseHighlight(
+        'animation_outlined',
+        'No more pulsing quantity buttons',
+        'Pressing plus or minus used to squash the glyph and spring it '
+            'back. Nothing moves now — the button fills in under your thumb '
+            'and stays filled while you hold it. The number beside it has '
+            'stopped falling about too, and holds still entirely during a '
+            'hold. The haptics screen also stops using a different switch '
+            'for its main control than for everything under it.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.12.1',
     headline: 'Reads your accessibility settings, and your back gesture',
     highlights: <ReleaseHighlight>[
