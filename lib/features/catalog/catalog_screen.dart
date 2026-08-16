@@ -13,6 +13,7 @@ import '../../shared/widgets/skeletons.dart';
 import '../../state/app_providers.dart';
 import '../../state/catalog_filter_provider.dart';
 import '../../state/settings_provider.dart';
+import 'widgets/compare_bar.dart';
 import 'widgets/filter_sheet.dart';
 import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
@@ -110,9 +111,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       ),
     );
 
-    if (!twoPane) return Scaffold(body: master);
+    if (!twoPane) {
+      return Scaffold(body: master, bottomNavigationBar: const CompareBar());
+    }
 
     return Scaffold(
+      bottomNavigationBar: const CompareBar(),
       body: TwoPane(
         list: master,
         detail: selected == null

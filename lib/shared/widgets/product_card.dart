@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
+import '../../state/compare_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/semantic_labels.dart';
 import '../../data/models/product.dart';
@@ -18,7 +20,7 @@ import '../../l10n/generated/app_localizations.dart';
 /// The image is wrapped in a [Hero] tagged `product-<id>-<heroPrefix>` so the
 /// transition into the detail page works even when the same product appears in
 /// two rails on one screen.
-class ProductCard extends StatelessWidget {
+class ProductCard extends ConsumerWidget {
   const ProductCard({
     required this.product,
     super.key,
@@ -43,8 +45,9 @@ class ProductCard extends StatelessWidget {
   final String highlight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
+    final bool comparing = ref.watch(compareProvider).contains(product.id);
 
     // The card is one thing to a screen reader — brand, name, rating, price
     // and stock read as a single sentence rather than six stops on the way
@@ -54,10 +57,39 @@ class ProductCard extends StatelessWidget {
       width: width,
       child: Material(
         color: Colors.transparent,
+        shape: comparing
+            ? RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                side: BorderSide(color: theme.colorScheme.primary, width: 2),
+              )
+            : null,
         child: Stack(
           children: <Widget>[
             InkWell(
               onTap: onTap ?? () => context.push(Routes.product(product.id)),
+              // Hold to line one up against another. A press-and-hold has
+              // no other job on a product card, and a permanent compare
+              // checkbox on every card would clutter the whole grid for a
+              // thing most people never do.
+              onLongPress: () {
+                final CompareResult result = ref
+                    .read(compareProvider.notifier)
+                    .toggle(product.id);
+                ScaffoldMessenger.of(context)
+                  ..clearSnackBars()
+                  ..showSnackBar(
+                    SnackBar(
+                      duration: const Duration(seconds: 2),
+                      content: Text(switch (result) {
+                        CompareResult.added => 'Comparing ${product.name}',
+                        CompareResult.removed => 'Removed from compare',
+                        CompareResult.full =>
+                          'Comparing ${CompareNotifier.max} already — '
+                              'let one go first',
+                      }),
+                    ),
+                  );
+              },
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               child: Semantics(
                 label: productSummary(product, AppL10n.of(context)),
