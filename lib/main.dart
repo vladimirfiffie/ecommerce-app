@@ -41,6 +41,6 @@ Future<void> main() async {
   unawaited(container.read(notificationsProvider).ensureInitialized());
 
   runApp(
-    UncontrolledProviderScope(container: container, child: const NovaApp()),
+    UncontrolledProviderScope(container: container, child: const AsterApp()),
   );
 }

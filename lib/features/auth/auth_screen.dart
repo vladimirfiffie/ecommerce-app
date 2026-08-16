@@ -114,7 +114,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               ),
               const SizedBox(height: 14),
               Text(
-                _signUp ? 'Join Nova' : 'Welcome back',
+                _signUp ? 'Join Aster' : 'Welcome back',
                 style: theme.textTheme.headlineMedium,
               ),
               const SizedBox(height: 6),
@@ -288,7 +288,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 child: Text(
                   _signUp
                       ? 'Already have an account? Sign in'
-                      : 'New to Nova? Create an account',
+                      : 'New to Aster? Create an account',
                 ),
               ),
 

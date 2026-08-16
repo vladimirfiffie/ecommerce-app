@@ -50,7 +50,7 @@ void main() {
     addTearDown(container.dispose);
 
     await tester.pumpWidget(
-      UncontrolledProviderScope(container: container, child: const NovaApp()),
+      UncontrolledProviderScope(container: container, child: const AsterApp()),
     );
     await settle(tester);
     return container;
@@ -148,7 +148,7 @@ void main() {
     addTearDown(container.dispose);
 
     await tester.pumpWidget(
-      UncontrolledProviderScope(container: container, child: const NovaApp()),
+      UncontrolledProviderScope(container: container, child: const AsterApp()),
     );
     await settle(tester);
 

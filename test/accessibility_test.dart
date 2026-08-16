@@ -26,7 +26,7 @@ void main() {
   final Product onSale = testProduct(
     id: 'tee',
     name: 'Linen Tee',
-    brand: 'Nova',
+    brand: 'Aster',
     price: 30,
     compareAtPrice: 50,
     rating: 4.5,
@@ -218,7 +218,7 @@ void main() {
 
       expect(
         find.bySemanticsLabel(
-          'Nova. Linen Tee. \$30.00, reduced from \$50.00, 40% off. '
+          'Aster. Linen Tee. \$30.00, reduced from \$50.00, 40% off. '
           'Rated 4.5 out of 5 from 42 reviews. Only 10 left',
         ),
         findsOneWidget,
@@ -263,7 +263,7 @@ void main() {
       );
       addTearDown(c.dispose);
       await tester.pumpWidget(
-        UncontrolledProviderScope(container: c, child: const NovaApp()),
+        UncontrolledProviderScope(container: c, child: const AsterApp()),
       );
       await settle(tester);
     }

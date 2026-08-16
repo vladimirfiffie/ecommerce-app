@@ -79,7 +79,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                         !supported
                             ? 'Notifications need Android or iOS'
                             : granted
-                            ? 'The system will deliver Nova’s notifications'
+                            ? 'The system will deliver Aster’s notifications'
                             : 'Grant permission to receive order updates',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
@@ -142,7 +142,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                       .show(
                         channel: NotifyChannel.orders,
                         id: 999001,
-                        title: 'Nova',
+                        title: 'Aster',
                         body: 'This is what an order update looks like.',
                       );
                   await toast(

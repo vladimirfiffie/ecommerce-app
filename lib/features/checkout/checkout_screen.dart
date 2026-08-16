@@ -217,7 +217,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         )
                       // The last step is the irreversible one, so it asks for
                       // a deliberate gesture rather than a single tap.
-                      : NovaSlideToConfirm(
+                      : AsterSlideToConfirm(
                           label: 'Slide to pay ${formatPrice(summary.total)}',
                           fallbackLabel: 'Pay ${formatPrice(summary.total)}',
                           onConfirmed: _placeOrder,

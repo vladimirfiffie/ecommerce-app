@@ -23,8 +23,8 @@ void main(List<String> args) {
   );
 
   // The workflow names artifacts after the tag, not the documented version,
-  // so a prerelease ships `nova-v0.11.1-beta.1-arm64-v8a.apk`. Telling the
-  // reader to grab `nova-v0.11.1-arm64-v8a.apk` sends them looking for a file
+  // so a prerelease ships `aster-v0.11.1-beta.1-arm64-v8a.apk`. Telling the
+  // reader to grab `aster-v0.11.1-arm64-v8a.apk` sends them looking for a file
   // that isn't attached.
   final String tag = args.isEmpty ? 'v${note.version}' : args.first;
 
@@ -41,7 +41,7 @@ void main(List<String> args) {
     ..writeln('### Installing')
     ..writeln()
     ..writeln(
-      'Grab `nova-$tag-arm64-v8a.apk` for most modern phones, or '
+      'Grab `aster-$tag-arm64-v8a.apk` for most modern phones, or '
       'the `universal` APK if you are unsure of your device ABI. You will '
       'need to allow installs from unknown sources.',
     )

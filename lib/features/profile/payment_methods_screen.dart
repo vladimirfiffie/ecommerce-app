@@ -60,7 +60,7 @@ class PaymentMethodsScreen extends ConsumerWidget {
                   ),
                 const SizedBox(height: 12),
                 Text(
-                  'Nova stores the brand, expiry, cardholder name and last four '
+                  'Aster stores the brand, expiry, cardholder name and last four '
                   'digits only. The full number is never written to disk and '
                   'the security code is never stored at all. No real payment '
                   'is taken by this build.',

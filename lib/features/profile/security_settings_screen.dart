@@ -63,7 +63,7 @@ class SecuritySettingsScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Verification happens entirely on your device. Nova never '
+                    'Verification happens entirely on your device. Aster never '
                     'sees your fingerprint or face — only whether the device '
                     'said yes. This build takes no real payments.',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -89,7 +89,7 @@ class _Body extends ConsumerWidget {
   Future<void> _test(BuildContext context, WidgetRef ref) async {
     final AuthOutcome outcome = await ref
         .read(biometricsProvider)
-        .authenticate(reason: 'Test Nova’s payment verification');
+        .authenticate(reason: 'Test Aster’s payment verification');
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)
       ..clearSnackBars()

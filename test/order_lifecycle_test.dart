@@ -201,7 +201,7 @@ void main() {
       await c.read(catalogProvider.future);
       await c.read(cartProvider.notifier).add(tee); // $25
       await c.read(cartProvider.notifier).add(coat); // $100
-      c.read(appliedPromoProvider.notifier).apply('NOVA10', 125);
+      c.read(appliedPromoProvider.notifier).apply('ASTER10', 125);
       await c
           .read(ordersProvider.notifier)
           .placeOrder(address: address, paymentLabel: 'Visa');
@@ -373,7 +373,7 @@ void main() {
         testL10n,
       );
 
-      expect(text, contains('NOVA'));
+      expect(text, contains('ASTER'));
       expect(text, contains(order.id));
       expect(text, contains('Linen Tee'));
       expect(text, contains('2 x'));
@@ -444,26 +444,26 @@ void main() {
   group('deep links', () {
     test('folds the host back into the path for the custom scheme', () {
       expect(
-        normalizeDeepLink(Uri.parse('nova://product/tee')),
+        normalizeDeepLink(Uri.parse('aster://product/tee')),
         '/product/tee',
       );
-      expect(normalizeDeepLink(Uri.parse('nova://shop')), '/shop');
+      expect(normalizeDeepLink(Uri.parse('aster://shop')), '/shop');
       expect(
-        normalizeDeepLink(Uri.parse('nova://orders/NV-1')),
+        normalizeDeepLink(Uri.parse('aster://orders/NV-1')),
         '/orders/NV-1',
       );
     });
 
     test('keeps a query string', () {
       expect(
-        normalizeDeepLink(Uri.parse('nova://search?q=coat')),
+        normalizeDeepLink(Uri.parse('aster://search?q=coat')),
         '/search?q=coat',
       );
     });
 
     test('leaves https links alone — their path already matches', () {
       expect(
-        normalizeDeepLink(Uri.parse('https://nova.example.com/product/tee')),
+        normalizeDeepLink(Uri.parse('https://aster.example.com/product/tee')),
         isNull,
       );
       expect(normalizeDeepLink(Uri.parse('/product/tee')), isNull);

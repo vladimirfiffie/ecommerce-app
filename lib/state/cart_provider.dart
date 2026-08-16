@@ -96,7 +96,7 @@ class Promo {
 }
 
 const List<Promo> kPromos = <Promo>[
-  Promo(code: 'NOVA10', description: '10% off your order', percentOff: 0.10),
+  Promo(code: 'ASTER10', description: '10% off your order', percentOff: 0.10),
   Promo(
     code: 'WELCOME20',
     description: '20% off orders over \$100',

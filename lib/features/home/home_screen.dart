@@ -16,7 +16,7 @@ import 'widgets/home_app_bar.dart';
 import 'widgets/product_rail.dart';
 import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
-import '../../shared/widgets/nova_refresh.dart';
+import '../../shared/widgets/aster_refresh.dart';
 import 'widgets/for_you_card.dart';
 import 'widgets/deal_countdown.dart';
 import '../../state/deals_provider.dart';
@@ -31,7 +31,7 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: NovaRefresh(
+        child: AsterRefresh(
           child: CustomScrollView(
             slivers: <Widget>[
               const HomeAppBar(),

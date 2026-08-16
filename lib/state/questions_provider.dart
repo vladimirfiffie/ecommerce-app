@@ -120,7 +120,7 @@ List<ProductQuestion> _seedFor(String productId) {
         askedAt: DateTime.now().subtract(Duration(days: 3 + (seed + i) % 40)),
         mine: false,
         answer: pool[i].$2,
-        answeredBy: 'Nova Support',
+        answeredBy: 'Aster Support',
         helpfulCount: (seed + i * 7) % 24,
       ),
   ];

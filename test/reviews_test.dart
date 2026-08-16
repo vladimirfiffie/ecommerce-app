@@ -18,7 +18,7 @@ void main() {
   final Product reviewed = Product(
     id: 'coat',
     name: 'Wool Coat',
-    brand: 'Nova',
+    brand: 'Aster',
     categoryId: 'fashion',
     subcategory: 'Coats',
     price: 100,

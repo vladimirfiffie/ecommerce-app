@@ -61,7 +61,7 @@ void main() {
     addTearDown(container.dispose);
 
     await tester.pumpWidget(
-      UncontrolledProviderScope(container: container, child: const NovaApp()),
+      UncontrolledProviderScope(container: container, child: const AsterApp()),
     );
     // The real repository loads the bundled asset with a deliberate delay.
     await tester.pump(const Duration(seconds: 1));

@@ -25,10 +25,10 @@ class ThemePreset {
       ColorScheme.fromSeed(seedColor: seed, brightness: brightness).primary;
 }
 
-/// The built-in palettes. `nova` is the brand default and must stay first —
+/// The built-in palettes. `aster` is the brand default and must stay first —
 /// it's the fallback when a stored id is no longer recognised.
 const List<ThemePreset> kThemePresets = <ThemePreset>[
-  ThemePreset(id: 'nova', label: 'Nova', seed: Color(0xFF6C4DF6)),
+  ThemePreset(id: 'aster', label: 'Aster', seed: Color(0xFF6C4DF6)),
   ThemePreset(id: 'ocean', label: 'Ocean', seed: Color(0xFF0B6E99)),
   ThemePreset(id: 'forest', label: 'Forest', seed: Color(0xFF2E7D5B)),
   ThemePreset(id: 'sunset', label: 'Sunset', seed: Color(0xFFE4572E)),

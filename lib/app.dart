@@ -20,14 +20,14 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>(
   (Ref ref) => createRouter(ref),
 );
 
-class NovaApp extends ConsumerStatefulWidget {
-  const NovaApp({super.key});
+class AsterApp extends ConsumerStatefulWidget {
+  const AsterApp({super.key});
 
   @override
-  ConsumerState<NovaApp> createState() => _NovaAppState();
+  ConsumerState<AsterApp> createState() => _AsterAppState();
 }
 
-class _NovaAppState extends ConsumerState<NovaApp> {
+class _AsterAppState extends ConsumerState<AsterApp> {
   @override
   void initState() {
     super.initState();
@@ -75,7 +75,7 @@ class _NovaAppState extends ConsumerState<NovaApp> {
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         final bool useDynamic = settings.useDynamicColor;
         return MaterialApp.router(
-          title: 'Nova',
+          title: 'Aster',
           debugShowCheckedModeBanner: false,
           localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,

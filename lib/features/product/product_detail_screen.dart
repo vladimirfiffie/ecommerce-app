@@ -219,7 +219,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   ShareParams(
                     text:
                         'Check out ${product.name} by ${product.brand} '
-                        'on Nova — ${formatPrice(product.price)}\n'
+                        'on Aster — ${formatPrice(product.price)}\n'
                         '${deepLinkForProduct(product.id)}',
                     subject: product.name,
                   ),

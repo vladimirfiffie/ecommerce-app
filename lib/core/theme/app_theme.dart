@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Nova's visual language: one seed colour, two schemes, shared shape and
+/// Aster's visual language: one seed colour, two schemes, shared shape and
 /// component styling so every surface in the app agrees.
 abstract final class AppTheme {
   /// Brand seed — a deep violet that reads well in both schemes.

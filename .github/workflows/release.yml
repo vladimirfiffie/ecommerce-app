@@ -77,16 +77,16 @@ jobs:
         run: |
           mkdir -p dist
           V="${{ steps.version.outputs.tag }}"
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/nova-${V}-universal.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/aster-${V}-universal.apk"
           for abi in arm64-v8a armeabi-v7a x86_64; do
             src="build/app/outputs/flutter-apk/app-${abi}-release.apk"
-            [ -f "$src" ] && cp "$src" "dist/nova-${V}-${abi}.apk"
+            [ -f "$src" ] && cp "$src" "dist/aster-${V}-${abi}.apk"
           done
           ls -lh dist
 
       - uses: actions/upload-artifact@v4
         with:
-          name: nova-apks
+          name: aster-apks
           path: dist/*.apk
           if-no-files-found: error
 
@@ -103,7 +103,7 @@ jobs:
           prerelease: ${{ steps.version.outputs.prerelease }}
           generate_release_notes: true
           make_latest: ${{ steps.version.outputs.prerelease == 'false' }}
-          name: Nova ${{ steps.version.outputs.tag }}
+          name: Aster ${{ steps.version.outputs.tag }}
           files: dist/*.apk
           # Same copy as the in-app "What's new" sheet, generated from
           # lib/core/release_notes.dart so the two can't drift.

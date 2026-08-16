@@ -3,7 +3,7 @@ import 'package:ecommerce_app/data/models/category.dart';
 import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/dummyjson_product_repository.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
-import 'package:ecommerce_app/shared/widgets/nova_refresh.dart';
+import 'package:ecommerce_app/shared/widgets/aster_refresh.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,7 +76,7 @@ void main() {
       addTearDown(c.dispose);
 
       await tester.pumpWidget(
-        UncontrolledProviderScope(container: c, child: const NovaApp()),
+        UncontrolledProviderScope(container: c, child: const AsterApp()),
       );
       await settle(tester);
       return (c, repo);
@@ -116,7 +116,7 @@ void main() {
         await tester.tap(find.text(tab).last);
         await settle(tester);
         expect(
-          find.byType(NovaRefresh),
+          find.byType(AsterRefresh),
           findsWidgets,
           reason: '$tab should be refreshable',
         );
@@ -155,7 +155,7 @@ void main() {
       addTearDown(c.dispose);
 
       await tester.pumpWidget(
-        UncontrolledProviderScope(container: c, child: const NovaApp()),
+        UncontrolledProviderScope(container: c, child: const AsterApp()),
       );
       await settle(tester);
 

@@ -121,7 +121,7 @@ Future<void> revealAndTap(
 Product testProduct({
   String id = 'p1',
   String name = 'Test Jacket',
-  String brand = 'Nova',
+  String brand = 'Aster',
   String categoryId = 'fashion',
   double price = 100,
   double? compareAtPrice,

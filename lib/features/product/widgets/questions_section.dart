@@ -125,7 +125,7 @@ class _QuestionTile extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          question.answeredBy ?? 'Nova',
+                          question.answeredBy ?? 'Aster',
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: theme.colorScheme.primary,
                           ),

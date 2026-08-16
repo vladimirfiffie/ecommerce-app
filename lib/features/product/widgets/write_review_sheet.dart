@@ -216,7 +216,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
                 ),
                 const SizedBox(height: 20),
                 Center(
-                  child: NovaRating(
+                  child: AsterRating(
                     value: _rating,
                     size: 38,
                     onChanged: (int v) => setState(() => _rating = v),

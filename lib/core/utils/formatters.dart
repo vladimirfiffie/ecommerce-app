@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 /// Money and dates, formatted for whatever locale the app is running in.
 ///
-/// The locale comes from [Intl.defaultLocale], which `NovaApp` sets from the
+/// The locale comes from [Intl.defaultLocale], which `AsterApp` sets from the
 /// active [Locale] on every build. Formatters are rebuilt when it changes and
 /// cached per locale — constructing a `NumberFormat` is not free, and prices
 /// are formatted several times per frame in a grid.

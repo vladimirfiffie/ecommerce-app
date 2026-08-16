@@ -50,7 +50,7 @@ void main() {
     addTearDown(c.dispose);
 
     await tester.pumpWidget(
-      UncontrolledProviderScope(container: c, child: const NovaApp()),
+      UncontrolledProviderScope(container: c, child: const AsterApp()),
     );
     await settle(tester);
     return c;
@@ -100,7 +100,7 @@ void main() {
     ) async {
       await pumpApp(tester, await blankStore());
 
-      await tester.tap(find.text('New to Nova? Create an account'));
+      await tester.tap(find.text('New to Aster? Create an account'));
       await settle(tester);
 
       expect(find.text('Create account'), findsWidgets);
@@ -141,7 +141,7 @@ void main() {
     ) async {
       final ProviderContainer c = await pumpApp(tester, await blankStore());
 
-      await tester.tap(find.text('New to Nova? Create an account'));
+      await tester.tap(find.text('New to Aster? Create an account'));
       await settle(tester);
 
       await tester.enterText(find.byType(TextFormField).at(0), 'Bbo');

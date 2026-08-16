@@ -54,7 +54,7 @@ class HapticsSettingsScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  NovaToggle(
+                  AsterToggle(
                     value: settings.enabled,
                     onChanged: (bool v) async {
                       await notifier.setEnabled(v);

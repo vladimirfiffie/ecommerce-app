@@ -57,7 +57,7 @@ void main() {
     addTearDown(c.dispose);
 
     await tester.pumpWidget(
-      UncontrolledProviderScope(container: c, child: const NovaApp()),
+      UncontrolledProviderScope(container: c, child: const AsterApp()),
     );
     await settle(tester);
     return c;

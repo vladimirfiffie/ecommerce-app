@@ -120,7 +120,7 @@ class FilterSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
-                NovaSlider(
+                AsterSlider(
                   value: (filter.maxPrice ?? ceiling).clamp(0, ceiling),
                   min: 0,
                   max: ceiling,

@@ -18,7 +18,7 @@ void main() {
   Product p(
     String id,
     String name, {
-    String brand = 'Nova',
+    String brand = 'Aster',
     String subcategory = 'Tops',
     List<String> tags = const <String>[],
     double rating = 4,
@@ -229,7 +229,7 @@ Future<ProviderContainer> pumpSearch(
   addTearDown(c.dispose);
 
   await tester.pumpWidget(
-    UncontrolledProviderScope(container: c, child: const NovaApp()),
+    UncontrolledProviderScope(container: c, child: const AsterApp()),
   );
   await settle(tester);
 

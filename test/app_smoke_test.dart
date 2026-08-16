@@ -41,7 +41,7 @@ void main() {
           FakeProductRepository(catalog),
         ),
       ],
-      child: const NovaApp(),
+      child: const AsterApp(),
     );
   }
 
@@ -53,7 +53,7 @@ void main() {
 
     // The greeting is the header now — no brand mark above it.
     expect(find.textContaining('Good'), findsOneWidget);
-    expect(find.text('Nova'), findsNothing);
+    expect(find.text('Aster'), findsNothing);
     // Categories live on Shop and Search now, not duplicated on Home.
     expect(find.text('Browse categories'), findsNothing);
     expect(find.byType(HeroCarousel), findsOneWidget);
@@ -94,7 +94,7 @@ void main() {
     addTearDown(container.dispose);
 
     await tester.pumpWidget(
-      UncontrolledProviderScope(container: container, child: const NovaApp()),
+      UncontrolledProviderScope(container: container, child: const AsterApp()),
     );
     await settle(tester);
 

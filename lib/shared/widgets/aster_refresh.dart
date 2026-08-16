@@ -24,8 +24,8 @@ Future<void> refreshCatalog(WidgetRef ref) {
 /// that fires with no feedback leaves you unsure whether it took, and the
 /// closing tick tells you the new data has landed without watching the
 /// spinner.
-class NovaRefresh extends ConsumerWidget {
-  const NovaRefresh({required this.child, super.key, this.onRefresh});
+class AsterRefresh extends ConsumerWidget {
+  const AsterRefresh({required this.child, super.key, this.onRefresh});
 
   final Widget child;
 

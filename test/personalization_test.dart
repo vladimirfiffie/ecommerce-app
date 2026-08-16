@@ -45,7 +45,7 @@ void main() {
             FakeProductRepository(catalog),
           ),
         ],
-        child: const NovaApp(),
+        child: const AsterApp(),
       ),
     );
     await settle(tester);
@@ -71,8 +71,8 @@ void main() {
 
     test('a one-word name is used as-is', () async {
       final ProviderContainer c = await testContainer();
-      await c.read(displayNameProvider.notifier).set('Nova');
-      expect(c.read(firstNameProvider), 'Nova');
+      await c.read(displayNameProvider.notifier).set('Aster');
+      expect(c.read(firstNameProvider), 'Aster');
     });
 
     test('blank clears the override back to the OS name', () async {
@@ -124,14 +124,14 @@ void main() {
   });
 
   group('theme presets', () {
-    test('ids are unique and nova is the default', () {
+    test('ids are unique and aster is the default', () {
       final Set<String> ids = kThemePresets
           .map((ThemePreset p) => p.id)
           .toSet();
       expect(ids, hasLength(kThemePresets.length));
-      expect(kThemePresets.first.id, 'nova');
-      expect(presetById(null).id, 'nova');
-      expect(presetById('does-not-exist').id, 'nova');
+      expect(kThemePresets.first.id, 'aster');
+      expect(presetById(null).id, 'aster');
+      expect(presetById('does-not-exist').id, 'aster');
       expect(presetById('forest').label, 'Forest');
     });
 
@@ -183,7 +183,7 @@ void main() {
 
     test('selection persists', () async {
       final ProviderContainer c = await testContainer();
-      expect(c.read(settingsProvider).presetId, 'nova');
+      expect(c.read(settingsProvider).presetId, 'aster');
 
       await c.read(settingsProvider.notifier).setPreset(presetById('ocean'));
       expect(c.read(settingsProvider).preset.label, 'Ocean');
@@ -200,7 +200,7 @@ void main() {
           'settings.themePreset': 'removed-in-a-later-version',
         },
       );
-      expect(c.read(settingsProvider).presetId, 'nova');
+      expect(c.read(settingsProvider).presetId, 'aster');
     });
 
     testWidgets('picking a preset repaints the app', (

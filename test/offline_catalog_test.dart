@@ -344,7 +344,7 @@ void main() {
       addTearDown(c.dispose);
 
       await tester.pumpWidget(
-        UncontrolledProviderScope(container: c, child: const NovaApp()),
+        UncontrolledProviderScope(container: c, child: const AsterApp()),
       );
       await settle(tester);
       await tester.tap(find.byIcon(Icons.shopping_bag_outlined).last);
@@ -372,7 +372,7 @@ void main() {
       addTearDown(c.dispose);
 
       await tester.pumpWidget(
-        UncontrolledProviderScope(container: c, child: const NovaApp()),
+        UncontrolledProviderScope(container: c, child: const AsterApp()),
       );
       await settle(tester);
       await tester.tap(find.byIcon(Icons.shopping_bag_outlined).last);

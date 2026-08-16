@@ -14,7 +14,7 @@ import '../../state/app_providers.dart';
 import '../../state/catalog_filter_provider.dart';
 import '../product/product_detail_screen.dart';
 import '../../core/layout/two_pane.dart';
-import '../../shared/widgets/nova_refresh.dart';
+import '../../shared/widgets/aster_refresh.dart';
 import '../../state/search_provider.dart';
 import '../../shared/widgets/product_grid.dart';
 import '../../data/models/category.dart';
@@ -150,7 +150,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 title: 'No results for “$_query”',
                 message: 'Check the spelling, or try a broader term.',
               )
-            : NovaRefresh(
+            : AsterRefresh(
                 child: _Results(
                   products: matches,
                   gridView: gridView,

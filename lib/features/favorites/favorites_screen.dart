@@ -15,7 +15,7 @@ import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
 import '../product/product_detail_screen.dart';
 import '../../core/layout/two_pane.dart';
-import '../../shared/widgets/nova_refresh.dart';
+import '../../shared/widgets/aster_refresh.dart';
 
 class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
@@ -102,7 +102,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                     actionLabel: 'Browse the shop',
                     onAction: () => context.go(Routes.catalog),
                   )
-                : NovaRefresh(
+                : AsterRefresh(
                     child: ProductGrid(
                       products: products,
                       heroPrefix: 'saved',

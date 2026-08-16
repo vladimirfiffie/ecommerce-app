@@ -188,7 +188,7 @@ void main() {
           OrderLine(
             entry: CartEntry(productId: 'tee', quantity: 1),
             name: 'Linen Tee',
-            brand: 'Nova',
+            brand: 'Aster',
             imageUrl: '',
             unitPrice: 25,
           ),

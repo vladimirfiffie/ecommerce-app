@@ -20,7 +20,7 @@ import '../../core/l10n/enum_labels.dart';
 /// a screen.
 String buildInvoiceText(Order order, List<OrderLine> items, AppL10n l10n) {
   final StringBuffer out = StringBuffer()
-    ..writeln('NOVA — RECEIPT')
+    ..writeln('ASTER — RECEIPT')
     ..writeln('Order ${order.id}')
     ..writeln(formatDate(order.placedAt))
     ..writeln('Status: ${order.status.labelIn(l10n)}')
@@ -73,7 +73,7 @@ String buildInvoiceText(Order order, List<OrderLine> items, AppL10n l10n) {
 
   out
     ..writeln()
-    ..writeln('Nova is a demo storefront. No payment was taken.');
+    ..writeln('Aster is a demo storefront. No payment was taken.');
   return out.toString();
 }
 
@@ -122,7 +122,7 @@ class InvoiceScreen extends ConsumerWidget {
             tooltip: 'Share',
             icon: const Icon(Icons.ios_share_rounded),
             onPressed: () => SharePlus.instance.share(
-              ShareParams(text: text, subject: 'Nova receipt ${order.id}'),
+              ShareParams(text: text, subject: 'Aster receipt ${order.id}'),
             ),
           ),
           const SizedBox(width: 4),
@@ -149,7 +149,7 @@ class InvoiceScreen extends ConsumerWidget {
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 6),
-                      Text('NOVA', style: theme.textTheme.titleLarge),
+                      Text('ASTER', style: theme.textTheme.titleLarge),
                       Text(
                         'Receipt',
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -237,7 +237,7 @@ class InvoiceScreen extends ConsumerWidget {
                 const SizedBox(height: 18),
                 Center(
                   child: Text(
-                    'Nova is a demo storefront. No payment was taken.',
+                    'Aster is a demo storefront. No payment was taken.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,

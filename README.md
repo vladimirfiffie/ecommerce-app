@@ -1,4 +1,4 @@
-# Nova
+# Aster
 
 A Material 3 storefront built entirely in Flutter — no web views, no platform UI,
 just Flutter widgets and pub plugins.
@@ -34,7 +34,7 @@ just Flutter widgets and pub plugins.
 | **Screen readers** | A product card is one sentence, not six fragments; sale prices say which number is the old one; stars, steppers and gallery images are named. Flutter's tap-target, label and contrast guidelines are asserted in tests |
 | **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
 | **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
-| **Deep links** | `nova://product/<id>` and https App Links resolve to in-app routes |
+| **Deep links** | `aster://product/<id>` and https App Links resolve to in-app routes |
 | **Personalization** | Time-aware greeting using your name, and 8 seed-colour presets that Material 3 expands into full light/dark schemes |
 | **Accounts** | Local sign-up / sign-in with PBKDF2-hashed passwords. Optional — everything works as a guest |
 | **Wallet** | Add/remove cards with Luhn validation and brand detection; only the last four digits are stored, never the CVV |
@@ -176,11 +176,11 @@ builds APKs (per-ABI plus universal) and publishes them as a GitHub
 **prerelease**.
 
 ```bash
-git tag v0.10.0
-git push origin v0.10.0
+git tag v0.11.1
+git push origin v0.11.1
 ```
 
-Grab `nova-v0.10.0-arm64-v8a.apk` for most modern phones, or the `universal` APK
+Grab `aster-v0.11.1-arm64-v8a.apk` for most modern phones, or the `universal` APK
 if you're unsure. You'll need to allow installs from unknown sources.
 
 > APKs are **signed with Android's debug key**. That's fine for sideloaded

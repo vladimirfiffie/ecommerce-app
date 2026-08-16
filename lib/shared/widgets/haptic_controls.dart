@@ -18,8 +18,8 @@ import 'dart:async';
 /// silences the app instead of muting only half of it.
 
 /// Switch that ticks on flip.
-class NovaToggle extends ConsumerWidget {
-  const NovaToggle({required this.value, required this.onChanged, super.key});
+class AsterToggle extends ConsumerWidget {
+  const AsterToggle({required this.value, required this.onChanged, super.key});
 
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -39,8 +39,8 @@ class NovaToggle extends ConsumerWidget {
 }
 
 /// Slider that ticks as it crosses detents.
-class NovaSlider extends ConsumerWidget {
-  const NovaSlider({
+class AsterSlider extends ConsumerWidget {
+  const AsterSlider({
     required this.value,
     required this.onChanged,
     required this.min,
@@ -87,8 +87,8 @@ class NovaSlider extends ConsumerWidget {
 }
 
 /// Star rating with a cascading fill.
-class NovaRating extends ConsumerStatefulWidget {
-  const NovaRating({
+class AsterRating extends ConsumerStatefulWidget {
+  const AsterRating({
     required this.value,
     required this.onChanged,
     super.key,
@@ -102,7 +102,7 @@ class NovaRating extends ConsumerStatefulWidget {
   final double size;
 
   @override
-  ConsumerState<NovaRating> createState() => _NovaRatingState();
+  ConsumerState<AsterRating> createState() => _AsterRatingState();
 }
 
 /// Star rating that animates the same way whether or not haptics are on.
@@ -111,7 +111,7 @@ class NovaRating extends ConsumerStatefulWidget {
 /// one only appears when haptics are enabled, so the control jumped between
 /// two different animations depending on a settings toggle. Haptic feedback
 /// still goes through [HapticService], so nothing is lost with haptics on.
-class _NovaRatingState extends ConsumerState<NovaRating>
+class _AsterRatingState extends ConsumerState<AsterRating>
     with SingleTickerProviderStateMixin {
   static const Color _gold = Color(0xFFF5A623);
 
@@ -130,7 +130,7 @@ class _NovaRatingState extends ConsumerState<NovaRating>
   }
 
   @override
-  void didUpdateWidget(NovaRating old) {
+  void didUpdateWidget(AsterRating old) {
     super.didUpdateWidget(old);
     if (old.value != widget.value) {
       _previous = old.value;
@@ -217,8 +217,8 @@ class _NovaRatingState extends ConsumerState<NovaRating>
 }
 
 /// Slide-to-confirm pill, falling back to a plain button.
-class NovaSlideToConfirm extends ConsumerWidget {
-  const NovaSlideToConfirm({
+class AsterSlideToConfirm extends ConsumerWidget {
+  const AsterSlideToConfirm({
     required this.label,
     required this.fallbackLabel,
     required this.onConfirmed,
@@ -254,8 +254,8 @@ class NovaSlideToConfirm extends ConsumerWidget {
 
 /// Hold-to-confirm target for destructive actions. Without haptics it becomes
 /// a normal button — the caller still confirms via dialog either way.
-class NovaHoldToConfirm extends ConsumerWidget {
-  const NovaHoldToConfirm({
+class AsterHoldToConfirm extends ConsumerWidget {
+  const AsterHoldToConfirm({
     required this.onConfirm,
     required this.label,
     required this.icon,
@@ -316,8 +316,8 @@ class NovaHoldToConfirm extends ConsumerWidget {
 }
 
 /// −/+ counter that bounces and ticks.
-class NovaStepper extends ConsumerWidget {
-  const NovaStepper({
+class AsterStepper extends ConsumerWidget {
+  const AsterStepper({
     required this.value,
     required this.onChanged,
     super.key,
@@ -369,8 +369,8 @@ class NovaStepper extends ConsumerWidget {
 ///
 /// [HapticBounce] takes a `haptics` flag, so this only has to forward the
 /// setting rather than swap the widget out.
-class NovaBounce extends ConsumerWidget {
-  const NovaBounce({
+class AsterBounce extends ConsumerWidget {
+  const AsterBounce({
     required this.child,
     super.key,
     this.onTap,

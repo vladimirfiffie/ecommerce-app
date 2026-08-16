@@ -149,7 +149,7 @@ void main() {
 
       final String? error = c
           .read(appliedPromoProvider.notifier)
-          .apply('nova10', 100);
+          .apply('aster10', 100);
       expect(error, isNull);
 
       final CartSummary s = c.read(cartSummaryProvider);
