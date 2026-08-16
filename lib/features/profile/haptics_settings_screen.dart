@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
-import '../../shared/widgets/haptic_controls.dart';
 import '../../state/haptics_provider.dart';
 
 /// Haptic preferences: the master switch, how hard it buzzes, and which parts
@@ -34,34 +33,26 @@ class HapticsSettingsScreen extends ConsumerWidget {
 
           _Card(
             children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Haptic feedback',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Physical feedback as you shop',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
+              // The same switch as the channel rows below. This one used to
+              // be a hand-built row around a different toggle, which made the
+              // master control look like it belonged to another screen.
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  'Haptic feedback',
+                  style: theme.textTheme.titleSmall,
+                ),
+                subtitle: Text(
+                  'Physical feedback as you shop',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  AsterToggle(
-                    value: settings.enabled,
-                    onChanged: (bool v) async {
-                      await notifier.setEnabled(v);
-                      if (v) await ref.read(hapticsProvider).impact();
-                    },
-                  ),
-                ],
+                ),
+                value: settings.enabled,
+                onChanged: (bool v) async {
+                  await notifier.setEnabled(v);
+                  if (v) await ref.read(hapticsProvider).impact();
+                },
               ),
             ],
           ),
