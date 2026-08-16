@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -38,6 +40,13 @@ class _QuantityStepperState extends State<QuantityStepper> {
   /// +1 counting up, -1 counting down. Decides which way the digits roll.
   int _direction = 1;
 
+  /// True while a button is repeating under a held finger.
+  bool _repeating = false;
+
+  void _setRepeating(bool value) {
+    if (_repeating != value) setState(() => _repeating = value);
+  }
+
   @override
   void didUpdateWidget(QuantityStepper oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -69,10 +78,8 @@ class _QuantityStepperState extends State<QuantityStepper> {
             // to, so the button switches off rather than sitting there live
             // and inert.
             enabled: removes || !atMin,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              widget.onDecrement();
-            },
+            onStep: widget.onDecrement,
+            onRepeatingChanged: _setRepeating,
             tooltip: removes ? l10n.removeItem : l10n.decreaseQuantity,
           ),
           SizedBox(
@@ -86,6 +93,7 @@ class _QuantityStepperState extends State<QuantityStepper> {
               child: _RollingCount(
                 value: widget.quantity,
                 direction: _direction,
+                instant: _repeating,
                 style: theme.textTheme.titleSmall,
               ),
             ),
@@ -94,10 +102,8 @@ class _QuantityStepperState extends State<QuantityStepper> {
             icon: Icons.add_rounded,
             size: size,
             enabled: widget.quantity < widget.max,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              widget.onIncrement();
-            },
+            onStep: widget.onIncrement,
+            onRepeatingChanged: _setRepeating,
             tooltip: l10n.increaseQuantity,
           ),
         ],
@@ -116,12 +122,17 @@ class _RollingCount extends StatelessWidget {
   const _RollingCount({
     required this.value,
     required this.direction,
+    required this.instant,
     this.style,
   });
 
   final int value;
   final int direction;
   final TextStyle? style;
+
+  /// Set while the button is repeating under a held finger, where rolling
+  /// each number in turn is a blur nobody can read.
+  final bool instant;
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +141,12 @@ class _RollingCount extends StatelessWidget {
 
     return ClipRect(
       child: AnimatedSwitcher(
-        duration: still ? Duration.zero : const Duration(milliseconds: 170),
+        // Short: this is a nudge in the direction of travel, not a journey.
+        // It used to run half again as long over three times the distance,
+        // which on a two-character box looked like the number was falling.
+        duration: still || instant
+            ? Duration.zero
+            : const Duration(milliseconds: 120),
         switchInCurve: Curves.easeOutCubic,
         switchOutCurve: Curves.easeInCubic,
         // Both digits occupy the same spot mid-roll rather than the default
@@ -149,7 +165,7 @@ class _RollingCount extends StatelessWidget {
             opacity: animation,
             child: SlideTransition(
               position: Tween<Offset>(
-                begin: Offset(0, dy * 0.9),
+                begin: Offset(0, dy * 0.28),
                 end: Offset.zero,
               ).animate(animation),
               child: child,
@@ -171,14 +187,22 @@ class _StepButton extends StatefulWidget {
   const _StepButton({
     required this.icon,
     required this.size,
-    required this.onTap,
+    required this.onStep,
+    required this.onRepeatingChanged,
     required this.tooltip,
     this.enabled = true,
   });
 
   final IconData icon;
   final double size;
-  final VoidCallback onTap;
+
+  /// One step up or down. Called once per tap, and repeatedly while held.
+  final VoidCallback onStep;
+
+  /// Raised while a hold is running, so the count can stop rolling through
+  /// every number a fast repeat passes.
+  final ValueChanged<bool> onRepeatingChanged;
+
   final String tooltip;
   final bool enabled;
 
@@ -187,10 +211,91 @@ class _StepButton extends StatefulWidget {
 }
 
 class _StepButtonState extends State<_StepButton> {
+  /// How long a press has to be held before it starts repeating. Long enough
+  /// that an ordinary tap never trips it.
+  static const Duration _holdDelay = Duration(milliseconds: 350);
+
+  /// Repeat rate: the first few steps are readable, then it speeds up, so
+  /// going from 1 to 30 is a hold rather than thirty taps.
+  static const Duration _firstInterval = Duration(milliseconds: 160);
+  static const Duration _fastInterval = Duration(milliseconds: 55);
+  static const int _stepsBeforeFast = 5;
+
+  /// A buzz per step at the fast rate is a rattle, so most of them are
+  /// dropped once it gets going.
+  static const int _hapticEveryNSteps = 4;
+
   bool _pressed = false;
+  Timer? _timer;
+  int _steps = 0;
+
+  @override
+  void didUpdateWidget(_StepButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Hitting the stock ceiling switches the button off mid-hold; the finger
+    // is still down, so nothing else would stop the repeat.
+    //
+    // The counting stops here and now. Saying so has to wait for the frame
+    // to finish, because this runs inside one and both halves of _endHold
+    // call setState.
+    if (!widget.enabled && _timer != null) {
+      _timer!.cancel();
+      _timer = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _endHold();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   void _setPressed(bool value) {
     if (_pressed != value) setState(() => _pressed = value);
+  }
+
+  /// One step, with the haptic that belongs to it.
+  void _step({required bool repeated}) {
+    if (!widget.enabled) {
+      _endHold();
+      return;
+    }
+    if (!repeated || _steps % _hapticEveryNSteps == 0) {
+      HapticFeedback.selectionClick();
+    }
+    widget.onStep();
+  }
+
+  void _beginHold() {
+    _setPressed(true);
+    _timer = Timer(_holdDelay, _repeat);
+  }
+
+  void _repeat() {
+    if (!mounted || !widget.enabled) {
+      _endHold();
+      return;
+    }
+    _steps++;
+    if (_steps == 1) widget.onRepeatingChanged(true);
+    _step(repeated: true);
+    _timer = Timer(
+      _steps < _stepsBeforeFast ? _firstInterval : _fastInterval,
+      _repeat,
+    );
+  }
+
+  void _endHold() {
+    _timer?.cancel();
+    _timer = null;
+    if (_steps > 0) {
+      _steps = 0;
+      widget.onRepeatingChanged(false);
+    }
+    _setPressed(false);
   }
 
   @override
@@ -209,37 +314,48 @@ class _StepButtonState extends State<_StepButton> {
       // The tooltip and the semantic label would otherwise both be announced,
       // giving "Decrease quantity, Decrease quantity".
       excludeFromSemantics: true,
+      // A tooltip listens for a long press by default, and wins the gesture
+      // arena about half a second in — which cancelled the tap underneath it
+      // and killed the hold after a single repeat. Here the long press means
+      // "keep counting", so the tooltip gives it up. Hover still shows it.
+      triggerMode: TooltipTriggerMode.manual,
       child: Semantics(
         label: widget.tooltip,
         button: true,
         enabled: widget.enabled,
         // Carried on this node because excluding the descendants takes the
         // ink response's own tap action with them.
-        onTap: widget.enabled ? widget.onTap : null,
+        onTap: widget.enabled ? () => _step(repeated: false) : null,
         excludeSemantics: true,
         child: InkResponse(
-          onTap: widget.enabled ? widget.onTap : null,
+          // A tap that turned into a hold has already counted its steps, so
+          // releasing must not add one more on top.
+          onTap: widget.enabled
+              ? () {
+                  if (_steps == 0) _step(repeated: false);
+                  _endHold();
+                }
+              : null,
           // The ripple alone doesn't read on a 20dp glyph, and the tap
           // already fires a selection haptic — this gives that click
           // something to look like.
-          onTapDown: widget.enabled
-              ? (TapDownDetails _) => _setPressed(true)
-              : null,
+          onTapDown: widget.enabled ? (TapDownDetails _) => _beginHold() : null,
           onTapUp: widget.enabled
               ? (TapUpDetails _) => _setPressed(false)
               : null,
-          onTapCancel: widget.enabled ? () => _setPressed(false) : null,
+          onTapCancel: widget.enabled ? _endHold : null,
           radius: widget.size / 2 + 4,
           child: SizedBox(
             width: widget.size,
             height: widget.size,
             child: Center(
               child: AnimatedScale(
-                scale: _pressed ? 0.72 : 1,
+                // Enough to acknowledge the press and no more. This used to
+                // shrink by nearly a third and spring back past its own size,
+                // which on a control you tap repeatedly reads as wobbling.
+                scale: _pressed ? 0.88 : 1,
                 duration: _pressed ? press : settle,
-                // Springs back past 1 on release, so a quick tap feels like
-                // a button and not a still image.
-                curve: _pressed ? Curves.easeOut : Curves.easeOutBack,
+                curve: Curves.easeOut,
                 child: AnimatedOpacity(
                   // A button that switches off at the stock ceiling should
                   // fade out of reach rather than blink into a paler colour.
