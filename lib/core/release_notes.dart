@@ -30,6 +30,49 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.14.0',
+    headline: 'Put things aside, line them up, get the best price',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'card_giftcard_rounded',
+        'Save for later',
+        'Move something out of your bag without giving up on it, and back '
+            'again when you decide — with the size, color and quantity it '
+            'had when you set it down.',
+      ),
+      ReleaseHighlight(
+        'timer_outlined',
+        'Best code applied for you',
+        'The bag now names the code worth having and what it comes to, and '
+            'checkout applies it if you haven’t picked one. Codes are ranked '
+            'by what you actually pay, so a percentage that would cost you '
+            'free shipping never wins.',
+      ),
+      ReleaseHighlight(
+        'tune_rounded',
+        'Compare, and find your size',
+        'Hold any two or three products to lay them side by side, row by '
+            'row. On clothing, three questions work out which size to try '
+            'and pick it for you.',
+      ),
+      ReleaseHighlight(
+        'receipt_long_outlined',
+        'Five minutes to change your mind',
+        'A live window on the order confirmation to cancel it outright or '
+            'send it somewhere else — and any completed order can now be '
+            'exported as a PDF receipt.',
+      ),
+      ReleaseHighlight(
+        'help_outline_rounded',
+        'Reviews and answers you can search',
+        'Reviews say what they are about and who wrote it, with photos and '
+            'filters, and there is a page for all of them and a page for '
+            'yours. The help center is searchable, and the product page '
+            'suggests what goes with a thing rather than more of it.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.13.1',
     headline: 'Same shop, better tested',
     highlights: <ReleaseHighlight>[
