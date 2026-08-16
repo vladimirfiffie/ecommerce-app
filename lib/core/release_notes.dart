@@ -30,6 +30,33 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.12.1',
+    headline: 'Reads your accessibility settings, and your back gesture',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'accessibility_new_rounded',
+        'High contrast, if that is what you asked Android for',
+        'Turn high contrast on in Android settings and Aster now rebuilds '
+            'its palette to match, pushing text and its background as far '
+            'apart as Material allows.',
+      ),
+      ReleaseHighlight(
+        'animation_outlined',
+        'Back you can see coming',
+        'Dragging from the edge peels the page back far enough to show '
+            'where you would land, and lets you change your mind — the '
+            'gesture Android 14 introduced, instead of a plain fade.',
+      ),
+      ReleaseHighlight(
+        'bug_report_outlined',
+        'A build that gets built',
+        'The v0.12.0 APKs never made it out: a test asserted the home '
+            'screen says "Good morning" and the release ran at four in the '
+            'morning UTC, when it says "Still up" instead.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.12.0',
     headline: 'The shop is called Aster now',
     highlights: <ReleaseHighlight>[
