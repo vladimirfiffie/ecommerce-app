@@ -26,6 +26,7 @@ import '../../features/profile/payment_methods_screen.dart';
 import '../../features/profile/addresses_screen.dart';
 import '../../features/orders/return_request_screen.dart';
 import '../../features/orders/invoice_screen.dart';
+import '../../features/help/help_centre_screen.dart';
 
 /// Route paths, referenced by name everywhere else.
 abstract final class Routes {
@@ -45,6 +46,7 @@ abstract final class Routes {
   static const String addresses = '/settings/addresses';
   static const String payments = '/settings/payments';
   static const String orders = '/orders';
+  static const String help = '/help';
 
   static String product(String id) => '/product/$id';
 
@@ -59,10 +61,10 @@ abstract final class Routes {
 }
 
 /// Custom scheme used by shared links.
-const String kDeepLinkScheme = 'nova';
+const String kDeepLinkScheme = 'aster';
 
 /// Web host that mirrors the app's routes, for https App Links.
-const String kDeepLinkHost = 'nova.example.com';
+const String kDeepLinkHost = 'aster.example.com';
 
 /// A shareable link to a product.
 String deepLinkForProduct(String productId) =>
@@ -70,7 +72,7 @@ String deepLinkForProduct(String productId) =>
 
 /// Rewrites a custom-scheme link into an in-app route.
 ///
-/// `nova://product/abc` parses with host `product` and path `/abc`, so the
+/// `aster://product/abc` parses with host `product` and path `/abc`, so the
 /// path alone never matches a route — the host has to be folded back in.
 /// https links already arrive with the full path and are left alone.
 String? normalizeDeepLink(Uri uri) {
@@ -274,6 +276,12 @@ GoRouter createRouter(Ref ref) {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.help,
+        parentNavigatorKey: _rootKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            const HelpCentreScreen(),
       ),
       GoRoute(
         path: Routes.checkout,

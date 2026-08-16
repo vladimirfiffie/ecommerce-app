@@ -50,7 +50,7 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.help_outline_rounded,
                   title: 'Help centre',
                   subtitle: 'FAQs and contact',
-                  onTap: () => _snack(context, 'Help centre coming soon.'),
+                  onTap: () => context.push(Routes.help),
                 ),
                 _Tile(
                   icon: Icons.code_rounded,
@@ -68,7 +68,7 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 26),
             Center(
               child: Text(
-                'Nova · prerelease build',
+                'Aster · prerelease build',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -78,12 +78,6 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _snack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -159,7 +153,7 @@ class _ProfileHeader extends ConsumerWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        'Nova member',
+                        'Aster member',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onPrimaryContainer,
                         ),
