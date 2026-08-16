@@ -337,14 +337,27 @@ class CartSummary {
   bool get hasFreeShipping => shipping == 0 && subtotal > 0;
 }
 
-final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>((
-  Ref ref,
-) {
-  final List<CartItem> items = ref.watch(cartItemsProvider);
-  final Promo? promo = ref.watch(appliedPromoProvider);
-  final DeliveryOption delivery = ref.watch(deliveryOptionProvider);
-  final GiftOptions gift = ref.watch(giftOptionsProvider);
+final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>(
+  (Ref ref) => summarize(
+    items: ref.watch(cartItemsProvider),
+    promo: ref.watch(appliedPromoProvider),
+    delivery: ref.watch(deliveryOptionProvider),
+    gift: ref.watch(giftOptionsProvider),
+  ),
+);
 
+/// The bag's arithmetic, with no providers involved.
+///
+/// Pulled out so a promo can be priced by asking what the total *would* be
+/// with it — the only honest way to compare codes, since a percentage off can
+/// drop the order under the free-shipping threshold and cost more than it
+/// saves.
+CartSummary summarize({
+  required List<CartItem> items,
+  required Promo? promo,
+  required DeliveryOption delivery,
+  required GiftOptions gift,
+}) {
   final double subtotal = items.fold(
     0,
     (double sum, CartItem i) => sum + i.lineTotal,
@@ -384,4 +397,69 @@ final Provider<CartSummary> cartSummaryProvider = Provider<CartSummary>((
             Pricing.freeShippingThreshold,
           ),
   );
+}
+
+/// Whether checkout has already offered to pick a code this session.
+///
+/// Not persisted, and never reset by the screen: auto-applying is a one-time
+/// courtesy, so a code the shopper takes off stays off.
+final NotifierProvider<PromoAutoApplyNotifier, bool> promoAutoApplyProvider =
+    NotifierProvider<PromoAutoApplyNotifier, bool>(PromoAutoApplyNotifier.new);
+
+class PromoAutoApplyNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void markDone() => state = true;
+}
+
+/// A code worth offering, and what it actually saves on this bag.
+@immutable
+class PromoOffer {
+  const PromoOffer({required this.promo, required this.saving});
+
+  final Promo promo;
+  final double saving;
+}
+
+/// The best code for the bag as it stands, or null when none of them helps.
+///
+/// Every code is priced by totalling the order with and without it, so a
+/// percentage that loses free shipping is ranked on what it really comes to
+/// rather than on the number in its name.
+final Provider<PromoOffer?> bestPromoProvider = Provider<PromoOffer?>((
+  Ref ref,
+) {
+  final List<CartItem> items = ref.watch(cartItemsProvider);
+  if (items.isEmpty) return null;
+
+  final DeliveryOption delivery = ref.watch(deliveryOptionProvider);
+  final GiftOptions gift = ref.watch(giftOptionsProvider);
+  final double plain = summarize(
+    items: items,
+    promo: null,
+    delivery: delivery,
+    gift: gift,
+  ).total;
+
+  PromoOffer? best;
+  for (final Promo promo in kPromos) {
+    final CartSummary withPromo = summarize(
+      items: items,
+      promo: promo,
+      delivery: delivery,
+      gift: gift,
+    );
+    // A code the bag doesn't qualify for saves nothing: summarize applies
+    // percentages regardless, so the floor is checked here.
+    final double subtotal = withPromo.subtotal;
+    if (subtotal < promo.minSubtotal) continue;
+
+    final double saving = plain - withPromo.total;
+    if (saving <= 0.005) continue;
+    if (best == null || saving > best.saving) {
+      best = PromoOffer(promo: promo, saving: saving);
+    }
+  }
+  return best;
 });

@@ -43,6 +43,37 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int _step = 0;
   bool _placing = false;
 
+  /// The code checkout picked, so the notice can name it and take it back.
+  Promo? _autoApplied;
+
+  @override
+  void initState() {
+    super.initState();
+    // After the first frame: applying during a build would rebuild the tree
+    // it is being built into.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _autoApplyBestCode());
+  }
+
+  /// Puts the best available code on the order, once, if none is set.
+  ///
+  /// Only when the shopper has not chosen for themselves — an applied code is
+  /// a decision, and so is having removed one.
+  void _autoApplyBestCode() {
+    if (!mounted) return;
+    if (ref.read(promoAutoApplyProvider)) return;
+    if (ref.read(appliedPromoProvider) != null) return;
+
+    final PromoOffer? best = ref.read(bestPromoProvider);
+    ref.read(promoAutoApplyProvider.notifier).markDone();
+    if (best == null) return;
+
+    final String? rejected = ref
+        .read(appliedPromoProvider.notifier)
+        .apply(best.promo.code, ref.read(cartSummaryProvider).subtotal);
+    if (rejected != null) return;
+    setState(() => _autoApplied = best.promo);
+  }
+
   Future<void> _placeOrder() async {
     final Address? address = ref.read(selectedAddressProvider);
     if (address == null) {
@@ -133,9 +164,24 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     final bool twoPane = useTwoPane(context);
 
+    final Promo? autoApplied = _autoApplied;
+
     final Widget stepBody = ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       children: <Widget>[
+        // Said out loud, with the way out next to it. A discount that
+        // appears on the total with no explanation is a worry, not a gift.
+        if (autoApplied != null &&
+            ref.watch(appliedPromoProvider)?.code == autoApplied.code) ...[
+          _AutoAppliedNotice(
+            promo: autoApplied,
+            onRemove: () {
+              ref.read(appliedPromoProvider.notifier).clear();
+              setState(() => _autoApplied = null);
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
         switch (_step) {
           0 => _ShippingStep(
             address: address,
@@ -939,6 +985,56 @@ class _BagPreview extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Tells the shopper a code was chosen for them, and lets them undo it.
+class _AutoAppliedNotice extends StatelessWidget {
+  const _AutoAppliedNotice({required this.promo, required this.onRemove});
+
+  final Promo promo;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+      decoration: BoxDecoration(
+        color: AppTheme.success.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        border: Border.all(color: AppTheme.success.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: <Widget>[
+          const Icon(
+            Icons.auto_awesome_rounded,
+            size: 18,
+            color: AppTheme.success,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  '${promo.code} applied for you',
+                  style: theme.textTheme.titleSmall,
+                ),
+                Text(
+                  'The best code for this order — ${promo.description}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(onPressed: onRemove, child: const Text('Remove')),
+        ],
+      ),
     );
   }
 }

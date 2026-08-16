@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../state/cart_provider.dart';
 
 /// Promo code entry. Applied codes collapse into a removable row.
@@ -82,9 +83,24 @@ class _PromoFieldState extends ConsumerState<PromoField> {
       );
     }
 
+    final PromoOffer? best = ref.watch(bestPromoProvider);
+    final double subtotal = ref.watch(cartSummaryProvider).subtotal;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        // The codes were all listed below with nothing to choose between
+        // them. This says which one is worth having and what it comes to.
+        if (best != null) ...<Widget>[
+          _BestOffer(
+            offer: best,
+            onApply: () {
+              _controller.text = best.promo.code;
+              _apply();
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
         Row(
           children: <Widget>[
             Expanded(
@@ -120,17 +136,80 @@ class _PromoFieldState extends ConsumerState<PromoField> {
           spacing: 8,
           children: <Widget>[
             for (final Promo promo in kPromos)
-              ActionChip(
-                label: Text(promo.code),
-                avatar: const Icon(Icons.bolt_rounded, size: 15),
-                onPressed: () {
-                  _controller.text = promo.code;
-                  _apply();
-                },
-              ),
+              if (subtotal >= promo.minSubtotal)
+                ActionChip(
+                  label: Text(promo.code),
+                  avatar: const Icon(Icons.bolt_rounded, size: 15),
+                  onPressed: () {
+                    _controller.text = promo.code;
+                    _apply();
+                  },
+                )
+              else
+                // Offering a code the bag can't use yet, and rejecting it on
+                // tap, is a worse introduction than saying what it needs.
+                Tooltip(
+                  message:
+                      'Spend ${formatPrice(promo.minSubtotal)} to use this',
+                  child: Chip(
+                    label: Text(promo.code),
+                    avatar: const Icon(Icons.lock_outline_rounded, size: 15),
+                  ),
+                ),
           ],
         ),
       ],
+    );
+  }
+}
+
+/// The code worth having on this bag, and what it takes off.
+class _BestOffer extends StatelessWidget {
+  const _BestOffer({required this.offer, required this.onApply});
+
+  final PromoOffer offer;
+  final VoidCallback onApply;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.savings_outlined,
+            size: 18,
+            color: theme.colorScheme.onPrimaryContainer,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Best code: ${offer.promo.code}',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                Text(
+                  'Saves ${formatPrice(offer.saving)} on this bag',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(onPressed: onApply, child: const Text('Apply')),
+        ],
+      ),
     );
   }
 }
