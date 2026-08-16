@@ -4,6 +4,7 @@ import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/state/cart_provider.dart';
+import 'package:ecommerce_app/state/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,8 +52,10 @@ void main() {
     await tester.pumpWidget(await buildApp());
     await settle(tester);
 
-    // The greeting is the header now — no brand mark above it.
-    expect(find.textContaining('Good'), findsOneWidget);
+    // The greeting is the header now — no brand mark above it. Asked of the
+    // same function the header uses, because between midnight and five it
+    // says "Still up" and nothing containing "Good" is on screen at all.
+    expect(find.textContaining(greetingFor(DateTime.now())), findsOneWidget);
     expect(find.text('Aster'), findsNothing);
     // Categories live on Shop and Search now, not duplicated on Home.
     expect(find.text('Browse categories'), findsNothing);
