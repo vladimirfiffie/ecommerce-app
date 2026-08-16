@@ -336,37 +336,38 @@ class _StepButtonState extends State<_StepButton> {
                   _endHold();
                 }
               : null,
-          // The ripple alone doesn't read on a 20dp glyph, and the tap
-          // already fires a selection haptic — this gives that click
-          // something to look like.
           onTapDown: widget.enabled ? (TapDownDetails _) => _beginHold() : null,
           onTapUp: widget.enabled
               ? (TapUpDetails _) => _setPressed(false)
               : null,
           onTapCancel: widget.enabled ? _endHold : null,
           radius: widget.size / 2 + 4,
-          child: SizedBox(
+          child: AnimatedContainer(
+            // The press used to squash the glyph and spring it back, which
+            // on a button you tap over and over — or hold — reads as a pulse.
+            // Nothing moves now: the button fills in under your thumb and
+            // stays filled for as long as you keep it there.
+            duration: _pressed ? press : settle,
+            curve: Curves.easeOut,
             width: widget.size,
             height: widget.size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _pressed
+                  ? theme.colorScheme.primary.withValues(alpha: 0.16)
+                  : Colors.transparent,
+            ),
             child: Center(
-              child: AnimatedScale(
-                // Enough to acknowledge the press and no more. This used to
-                // shrink by nearly a third and spring back past its own size,
-                // which on a control you tap repeatedly reads as wobbling.
-                scale: _pressed ? 0.88 : 1,
-                duration: _pressed ? press : settle,
-                curve: Curves.easeOut,
-                child: AnimatedOpacity(
-                  // A button that switches off at the stock ceiling should
-                  // fade out of reach rather than blink into a paler colour.
-                  opacity: widget.enabled ? 1 : 0.3,
-                  duration: settle,
-                  child: _SwappingIcon(
-                    icon: widget.icon,
-                    size: widget.size * 0.52,
-                    color: theme.colorScheme.onSurface,
-                    still: still,
-                  ),
+              child: AnimatedOpacity(
+                // A button that switches off at the stock ceiling should
+                // fade out of reach rather than blink into a paler colour.
+                opacity: widget.enabled ? 1 : 0.3,
+                duration: settle,
+                child: _SwappingIcon(
+                  icon: widget.icon,
+                  size: widget.size * 0.52,
+                  color: theme.colorScheme.onSurface,
+                  still: still,
                 ),
               ),
             ),
