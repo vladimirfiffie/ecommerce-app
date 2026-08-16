@@ -60,6 +60,59 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
   });
 
+  testWidgets('searching narrows to the answers that match', (
+    WidgetTester tester,
+  ) async {
+    await openHelp(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'refund');
+    await settle(tester);
+
+    // Matched headings are RichText, not Text — the query is picked out
+    // inside them, the same as a search result's name.
+    expect(
+      find.textContaining('When does a refund arrive?', findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Where is my order?', findRichText: true),
+      findsNothing,
+    );
+    // Results open on the answer: the question was the search.
+    expect(find.textContaining('five working days'), findsOneWidget);
+  });
+
+  testWidgets('a search with no answers says so', (WidgetTester tester) async {
+    await openHelp(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'helicopter');
+    await settle(tester);
+
+    expect(find.textContaining('Nothing about'), findsOneWidget);
+    expect(
+      find.textContaining('Where is my order?', findRichText: true),
+      findsNothing,
+    );
+  });
+
+  testWidgets('clearing the search puts everything back', (
+    WidgetTester tester,
+  ) async {
+    await openHelp(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'refund');
+    await settle(tester);
+    await tester.tap(find.byTooltip('Clear'));
+    await settle(tester);
+
+    expect(find.text('Nova is a demo storefront'), findsNothing);
+    expect(find.text('Aster is a demo storefront'), findsOneWidget);
+    expect(
+      find.textContaining('Where is my order?', findRichText: true),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('an answer is behind its question', (WidgetTester tester) async {
     await openHelp(tester);
 

@@ -8,6 +8,7 @@ import '../../core/release_notes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/order.dart';
 import '../../shared/widgets/fade_up.dart';
+import '../../shared/widgets/highlighted_text.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../state/haptics_provider.dart';
 import '../whats_new/whats_new_sheet.dart';
@@ -17,29 +18,151 @@ import '../whats_new/whats_new_sheet.dart';
 /// The answers are deliberately specific about what this build does and
 /// doesn't do — a help center that promises a support desk nobody staffs is
 /// worse than no help center at all.
-class HelpCenterScreen extends StatelessWidget {
+class HelpCenterScreen extends StatefulWidget {
   const HelpCenterScreen({super.key});
 
   @override
+  State<HelpCenterScreen> createState() => _HelpCenterScreenState();
+}
+
+class _HelpCenterScreenState extends State<HelpCenterScreen> {
+  final TextEditingController _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  /// Topics with only the questions that match, topics with none dropped.
+  ///
+  /// Answers are searched as well as questions: people describe the problem
+  /// they have, not the heading someone filed it under — "card" should find
+  /// "Is a real payment ever taken?".
+  List<_Topic> get _results {
+    final String q = _query.trim().toLowerCase();
+    if (q.isEmpty) return _topics;
+
+    return <_Topic>[
+      for (final _Topic topic in _topics)
+        if (<_Faq>[
+              for (final _Faq faq in topic.questions)
+                if (faq.question.toLowerCase().contains(q) ||
+                    faq.answer.toLowerCase().contains(q))
+                  faq,
+            ]
+            case final List<_Faq> hits when hits.isNotEmpty)
+          _Topic(title: topic.title, icon: topic.icon, questions: hits),
+    ];
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final List<_Topic> results = _results;
+    final bool searching = _query.trim().isNotEmpty;
+
     final List<Widget> blocks = <Widget>[
-      const _DemoNotice(),
-      for (final _Topic topic in _topics) _TopicCard(topic: topic),
-      const _ContactCard(),
+      if (!searching) const _DemoNotice(),
+      for (final _Topic topic in results)
+        _TopicCard(topic: topic, query: _query, startExpanded: searching),
+      if (searching && results.isEmpty) _NoResults(query: _query.trim()),
+      if (!searching) const _ContactCard(),
     ];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Help center')),
-      body: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-        itemCount: blocks.length,
-        separatorBuilder: (BuildContext context, int i) =>
-            const SizedBox(height: 20),
-        // The list is short and fully built above, so the stagger can run
-        // straight down it without the delays drifting as you scroll.
-        itemBuilder: (BuildContext context, int i) =>
-            FadeUp.at(i, child: blocks[i]),
+      body: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+            child: TextField(
+              controller: _search,
+              textInputAction: TextInputAction.search,
+              onChanged: (String value) => setState(() => _query = value),
+              decoration: InputDecoration(
+                hintText: 'Search help',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: searching
+                    ? IconButton(
+                        tooltip: 'Clear',
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () {
+                          _search.clear();
+                          setState(() => _query = '');
+                        },
+                      )
+                    : null,
+              ),
+            ),
+          ),
+          if (searching)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _answerCount(results) == 1
+                      ? '1 answer'
+                      : '${_answerCount(results)} answers',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(20, 6, 20, 40),
+              itemCount: blocks.length,
+              separatorBuilder: (BuildContext context, int i) =>
+                  const SizedBox(height: 20),
+              // Short and fully built above, so the stagger runs straight
+              // down it without the delays drifting as you scroll.
+              itemBuilder: (BuildContext context, int i) =>
+                  FadeUp.at(i, child: blocks[i]),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  int _answerCount(List<_Topic> topics) =>
+      topics.fold(0, (int sum, _Topic t) => sum + t.questions.length);
+}
+
+/// Nothing matched — with the way to reach a person still in reach.
+class _NoResults extends StatelessWidget {
+  const _NoResults({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Column(
+      children: <Widget>[
+        const SizedBox(height: 24),
+        Icon(
+          Icons.search_off_rounded,
+          size: 40,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(height: 12),
+        Text('Nothing about “$query”', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 6),
+        Text(
+          'Try a shorter word, or report it on GitHub — an unanswered '
+          'question is usually a missing answer.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -237,9 +360,17 @@ class _DemoNotice extends StatelessWidget {
 }
 
 class _TopicCard extends StatelessWidget {
-  const _TopicCard({required this.topic});
+  const _TopicCard({
+    required this.topic,
+    this.query = '',
+    this.startExpanded = false,
+  });
 
   final _Topic topic;
+  final String query;
+
+  /// Search results open on the answer: the question was the search.
+  final bool startExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +397,15 @@ class _TopicCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Column(
               children: <Widget>[
-                for (final _Faq faq in topic.questions) _FaqTile(faq: faq),
+                for (final _Faq faq in topic.questions)
+                  _FaqTile(
+                    // Keyed by the query so a tile left open by one search
+                    // does not stay open for the next.
+                    key: ValueKey<String>('${faq.question}|$query'),
+                    faq: faq,
+                    query: query,
+                    startExpanded: startExpanded,
+                  ),
               ],
             ),
           ),
@@ -277,9 +416,16 @@ class _TopicCard extends StatelessWidget {
 }
 
 class _FaqTile extends ConsumerWidget {
-  const _FaqTile({required this.faq});
+  const _FaqTile({
+    required this.faq,
+    super.key,
+    this.query = '',
+    this.startExpanded = false,
+  });
 
   final _Faq faq;
+  final String query;
+  final bool startExpanded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -297,7 +443,13 @@ class _FaqTile extends ConsumerWidget {
       tilePadding: const EdgeInsets.symmetric(horizontal: 16),
       childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       expandedCrossAxisAlignment: CrossAxisAlignment.start,
-      title: Text(faq.question, style: theme.textTheme.titleSmall),
+      initiallyExpanded: startExpanded,
+      title: HighlightedText(
+        text: faq.question,
+        query: query,
+        maxLines: 3,
+        style: theme.textTheme.titleSmall,
+      ),
       children: <Widget>[
         Text(
           faq.answer,
