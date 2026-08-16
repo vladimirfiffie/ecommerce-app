@@ -109,6 +109,29 @@ class OrdersNotifier extends Notifier<List<Order>> {
     return true;
   }
 
+  /// Sends an order somewhere else, while the change window is still open.
+  ///
+  /// Refused once it has closed: an order this far along is on its way, and
+  /// quietly rewriting where it is going would be a lie about what happens
+  /// next.
+  Future<bool> changeAddress(String orderId, Address address) async {
+    final Order? order = _byId(orderId);
+    if (order == null || !order.inChangeWindow) return false;
+
+    await _write(<Order>[
+      for (final Order o in state)
+        if (o.id == orderId)
+          // Snapshotted the same way placing the order does, so a changed
+          // address reads identically to one that was right the first time.
+          o.copyWith(
+            shippingAddress: '${address.recipient}, ${address.oneLine}',
+          )
+        else
+          o,
+    ]);
+    return true;
+  }
+
   /// What would be refunded for the given lines.
   ///
   /// Item value is refunded pro-rata against any discount that was applied.

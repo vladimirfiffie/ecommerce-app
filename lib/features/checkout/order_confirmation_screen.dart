@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,13 +11,25 @@ import '../../core/utils/formatters.dart';
 import '../../data/models/order.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../state/orders_provider.dart';
+import '../../state/addresses_provider.dart';
 import '../../state/haptics_provider.dart';
-import 'dart:async';
+import 'package:haptic_kit/haptic_kit.dart';
+import '../../shared/widgets/confirm.dart';
+import '../../data/models/address.dart';
+import 'widgets/address_sheet.dart';
 import '../../shared/widgets/animated_check.dart';
 import '../../shared/widgets/app_image.dart';
 import '../../data/models/order_line.dart';
 
 /// Success screen shown straight after an order is placed.
+/// How often the change-window clock redraws.
+///
+/// Null stops it entirely: a repeating timer schedules a frame per tick, and
+/// a test that pumps to settle would never finish. Seconds here because the
+/// label counts them.
+@visibleForTesting
+Duration? changeWindowTick = const Duration(seconds: 1);
+
 class OrderConfirmationScreen extends ConsumerStatefulWidget {
   const OrderConfirmationScreen({required this.orderId, super.key});
 
@@ -72,75 +86,117 @@ class _OrderConfirmationScreenState
               constraints: const BoxConstraints(maxWidth: 520),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-                child: Column(
-                  children: <Widget>[
-                    const Spacer(),
-                    // Draws itself: ring sweeps closed, tick strokes in,
-                    // halo expands. Plays once — see AnimatedCheck.
-                    const AnimatedCheck(color: AppTheme.success),
-                    const SizedBox(height: 28),
-                    Text(
-                      'Order confirmed',
-                      style: theme.textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
-                    ).animate(delay: 460.ms).fadeIn().moveY(begin: 12, end: 0),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Thanks! We’re getting order ${order.id} ready to ship.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ).animate(delay: 560.ms).fadeIn(),
-                    const SizedBox(height: 32),
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.45),
-                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                      ),
-                      child: Column(
-                        children: <Widget>[
-                          if (items.isNotEmpty) ...<Widget>[
-                            _OrderedItems(items: items),
-                            const SizedBox(height: 14),
-                            Divider(
-                              height: 1,
-                              color: theme.colorScheme.outlineVariant
-                                  .withValues(alpha: 0.6),
+                // The Spacers below centre this on a tall screen; the scroll
+                // view keeps it reachable on a short one. Without it the
+                // change-window card tips the page into an overflow on a
+                // small phone, which is exactly where it matters most.
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) =>
+                      SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: IntrinsicHeight(
+                            child: Column(
+                              children: <Widget>[
+                                const Spacer(),
+                                // Draws itself: ring sweeps closed, tick strokes in,
+                                // halo expands. Plays once — see AnimatedCheck.
+                                const AnimatedCheck(color: AppTheme.success),
+                                const SizedBox(height: 28),
+                                Text(
+                                      'Order confirmed',
+                                      style: theme.textTheme.headlineMedium,
+                                      textAlign: TextAlign.center,
+                                    )
+                                    .animate(delay: 460.ms)
+                                    .fadeIn()
+                                    .moveY(begin: 12, end: 0),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Thanks! We’re getting order ${order.id} ready to ship.',
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ).animate(delay: 560.ms).fadeIn(),
+                                const SizedBox(height: 32),
+                                Container(
+                                      padding: const EdgeInsets.all(18),
+                                      decoration: BoxDecoration(
+                                        color: theme
+                                            .colorScheme
+                                            .surfaceContainerHighest
+                                            .withValues(alpha: 0.45),
+                                        borderRadius: BorderRadius.circular(
+                                          AppTheme.radiusMd,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: <Widget>[
+                                          if (items.isNotEmpty) ...<Widget>[
+                                            _OrderedItems(items: items),
+                                            const SizedBox(height: 14),
+                                            Divider(
+                                              height: 1,
+                                              color: theme
+                                                  .colorScheme
+                                                  .outlineVariant
+                                                  .withValues(alpha: 0.6),
+                                            ),
+                                            const SizedBox(height: 8),
+                                          ],
+                                          _Row(
+                                            label: 'Items',
+                                            value:
+                                                '${order.itemCount} ${order.itemCount == 1 ? 'item' : 'items'}',
+                                          ),
+                                          _Row(
+                                            label: 'Total paid',
+                                            value: formatPrice(order.total),
+                                          ),
+                                          _Row(
+                                            label: 'Arrives by',
+                                            value: formatDeliveryDate(
+                                              order.estimatedDelivery,
+                                            ),
+                                          ),
+                                          _Row(
+                                            label: 'Paid with',
+                                            value: order.paymentLabel,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                    .animate(delay: 660.ms)
+                                    .fadeIn()
+                                    .moveY(begin: 16, end: 0),
+                                const SizedBox(height: 16),
+                                _ChangeWindow(order: order),
+                                const Spacer(),
+                                FilledButton(
+                                      onPressed: () => context.pushReplacement(
+                                        Routes.order(order.id),
+                                      ),
+                                      child: const Text('Track this order'),
+                                    )
+                                    .animate(delay: 780.ms)
+                                    .fadeIn()
+                                    .moveY(begin: 10, end: 0),
+                                const SizedBox(height: 10),
+                                OutlinedButton(
+                                      onPressed: () => context.go(Routes.home),
+                                      child: const Text('Keep shopping'),
+                                    )
+                                    .animate(delay: 860.ms)
+                                    .fadeIn()
+                                    .moveY(begin: 10, end: 0),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                          ],
-                          _Row(
-                            label: 'Items',
-                            value:
-                                '${order.itemCount} ${order.itemCount == 1 ? 'item' : 'items'}',
                           ),
-                          _Row(
-                            label: 'Total paid',
-                            value: formatPrice(order.total),
-                          ),
-                          _Row(
-                            label: 'Arrives by',
-                            value: formatDeliveryDate(order.estimatedDelivery),
-                          ),
-                          _Row(label: 'Paid with', value: order.paymentLabel),
-                        ],
+                        ),
                       ),
-                    ).animate(delay: 660.ms).fadeIn().moveY(begin: 16, end: 0),
-                    const Spacer(),
-                    FilledButton(
-                      onPressed: () =>
-                          context.pushReplacement(Routes.order(order.id)),
-                      child: const Text('Track this order'),
-                    ).animate(delay: 780.ms).fadeIn().moveY(begin: 10, end: 0),
-                    const SizedBox(height: 10),
-                    OutlinedButton(
-                      onPressed: () => context.go(Routes.home),
-                      child: const Text('Keep shopping'),
-                    ).animate(delay: 860.ms).fadeIn().moveY(begin: 10, end: 0),
-                  ],
                 ),
               ),
             ),
@@ -278,6 +334,192 @@ class _Row extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The few minutes after placing an order in which it can still be undone.
+///
+/// Every shop has this window and most of them hide it: the order is not
+/// going anywhere for a while, and a mistake noticed ten seconds later
+/// should not need a support conversation. It disappears when the time is
+/// up rather than staying on as a dead control.
+class _ChangeWindow extends ConsumerStatefulWidget {
+  const _ChangeWindow({required this.order});
+
+  final Order order;
+
+  @override
+  ConsumerState<_ChangeWindow> createState() => _ChangeWindowState();
+}
+
+class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
+  Timer? _timer;
+  DateTime _now = DateTime.now();
+
+  /// Each fires once. A countdown that buzzed every second would be a
+  /// nuisance rather than a warning.
+  bool _warnedOneMinute = false;
+  bool _warnedClosed = false;
+
+  /// Buzzes at the two moments that matter: the last minute starting, and
+  /// the window closing under you. Both go through the service, so the
+  /// shopper's intensity and channel settings decide what they feel.
+  void _announce(Duration left) {
+    final HapticService haptics = ref.read(hapticsProvider);
+    if (left == Duration.zero) {
+      if (_warnedClosed) return;
+      _warnedClosed = true;
+      unawaited(haptics.notification(HapticNotificationStyle.warning));
+      return;
+    }
+    if (left.inSeconds <= 60 && !_warnedOneMinute) {
+      _warnedOneMinute = true;
+      unawaited(haptics.selection());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final Duration? tick = changeWindowTick;
+    if (tick != null) {
+      _timer = Timer.periodic(tick, (_) {
+        if (mounted) setState(() => _now = DateTime.now());
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _cancel() async {
+    unawaited(ref.read(hapticsProvider).impact());
+    final bool yes = await confirmDestructive(
+      context,
+      title: 'Cancel this order?',
+      message: 'Nothing was charged, and the items go back to your bag.',
+      confirmLabel: 'Cancel order',
+    );
+    if (!yes || !mounted) return;
+
+    final bool done = await ref
+        .read(ordersProvider.notifier)
+        .cancel(widget.order.id);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            done ? 'Order cancelled' : 'Too late to cancel — track it instead',
+          ),
+        ),
+      );
+    if (done) context.go(Routes.home);
+  }
+
+  Future<void> _changeAddress() async {
+    unawaited(ref.read(hapticsProvider).impact());
+    await showAddressSheet(context);
+    if (!mounted) return;
+
+    final Address? picked = ref.read(selectedAddressProvider);
+    if (picked == null) return;
+
+    final bool done = await ref
+        .read(ordersProvider.notifier)
+        .changeAddress(widget.order.id, picked);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            done ? 'Sending it to $picked instead' : 'Too late to change that',
+          ),
+        ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    // Read from the store rather than the argument: cancelling has to take
+    // this card off the screen it is drawn on.
+    final Order order =
+        ref.watch(orderByIdProvider(widget.order.id)) ?? widget.order;
+    final Duration left = order.changeWindowLeft;
+    _announce(left);
+    if (left == Duration.zero) return const SizedBox.shrink();
+
+    final String clock =
+        '${left.inMinutes}:${(left.inSeconds % 60).toString().padLeft(2, '0')}';
+
+    return Container(
+      key: ValueKey<String>('change-window-${_now.minute}'),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(
+                Icons.timer_outlined,
+                size: 18,
+                color: theme.colorScheme.onTertiaryContainer,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Changed your mind? $clock left',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.onTertiaryContainer,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Padding(
+            padding: const EdgeInsets.only(left: 28),
+            child: Text(
+              'Until then this order can be cancelled or sent somewhere else.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onTertiaryContainer,
+              ),
+            ),
+          ),
+          // Shared width rather than a Spacer between them: two full-width
+          // labels and a gap do not fit across a small phone.
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: TextButton(
+                  onPressed: _changeAddress,
+                  child: const Text('Change address'),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  onPressed: _cancel,
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.error,
+                  ),
+                  child: const Text('Cancel order'),
+                ),
+              ),
+            ],
           ),
         ],
       ),

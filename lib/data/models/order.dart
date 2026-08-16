@@ -187,6 +187,21 @@ class Order {
   /// come back as a return instead.
   bool get canCancel => status == OrderStatus.processing;
 
+  /// How long after placing an order it can still be undone without going
+  /// through the order screen — the "wait, no" window.
+  static const Duration changeWindow = Duration(minutes: 5);
+
+  /// Whether that window is still open.
+  bool get inChangeWindow =>
+      canCancel && DateTime.now().difference(placedAt) < changeWindow;
+
+  /// What's left of it, or zero once it has closed.
+  Duration get changeWindowLeft {
+    final Duration gone = DateTime.now().difference(placedAt);
+    final Duration left = changeWindow - gone;
+    return left.isNegative || !canCancel ? Duration.zero : left;
+  }
+
   /// Returnable once delivered, until the window closes.
   bool get canReturn =>
       status == OrderStatus.delivered &&
@@ -205,6 +220,7 @@ class Order {
   Order copyWith({
     DateTime? cancelledAt,
     ReturnRequest? returnRequest,
+    String? shippingAddress,
     bool clearReturn = false,
   }) => Order(
     id: id,
@@ -214,7 +230,7 @@ class Order {
     shipping: shipping,
     discount: discount,
     total: total,
-    shippingAddress: shippingAddress,
+    shippingAddress: shippingAddress ?? this.shippingAddress,
     paymentLabel: paymentLabel,
     deliveryId: deliveryId,
     cancelledAt: cancelledAt ?? this.cancelledAt,
