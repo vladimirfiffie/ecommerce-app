@@ -28,7 +28,9 @@ import 'widgets/specs_section.dart';
 import 'widgets/variant_selector.dart';
 import '../../state/haptics_provider.dart';
 import 'package:haptic_kit/haptic_kit.dart';
+import 'widgets/size_calculator_sheet.dart';
 import 'widgets/size_guide_sheet.dart';
+import '../../state/fit_provider.dart';
 import 'widgets/questions_section.dart';
 import '../../state/alerts_provider.dart';
 import '../home/widgets/deal_countdown.dart';
@@ -445,15 +447,36 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               selected: _size,
               onSelected: (String value) => setState(() => _size = value),
             ),
-            if (SizeChart.forProduct(product) != null)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => showSizeGuideSheet(context, product),
-                  icon: const Icon(Icons.straighten_rounded, size: 18),
-                  label: const Text('Size guide'),
-                ),
-              ),
+            Row(
+              children: <Widget>[
+                if (SizeChart.forProduct(product) != null)
+                  TextButton.icon(
+                    onPressed: () => showSizeGuideSheet(context, product),
+                    icon: const Icon(Icons.straighten_rounded, size: 18),
+                    label: const Text('Size guide'),
+                  ),
+                // Only for letter runs: body measurements say nothing about
+                // what shoe someone takes.
+                if (recommendedSize(
+                      const FitProfile(heightCm: 170, weightKg: 70),
+                      product.sizes,
+                    ) !=
+                    null)
+                  TextButton.icon(
+                    onPressed: () async {
+                      final String? picked = await showSizeCalculatorSheet(
+                        context,
+                        product.sizes,
+                      );
+                      if (picked != null && mounted) {
+                        setState(() => _size = picked);
+                      }
+                    },
+                    icon: const Icon(Icons.straighten_outlined, size: 18),
+                    label: const Text('Find my size'),
+                  ),
+              ],
+            ),
             const SizedBox(height: 22),
           ],
           if (product.colors.isNotEmpty) ...<Widget>[
