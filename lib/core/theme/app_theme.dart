@@ -15,13 +15,27 @@ abstract final class AppTheme {
   static const double radiusMd = 18;
   static const double radiusLg = 28;
 
+  /// Contrast level asked of [ColorScheme.fromSeed] when the OS reports that
+  /// the shopper wants high contrast. 1.0 is the top of the Material scale.
+  static const double _highContrastLevel = 1.0;
+
   /// Light theme. [dynamicScheme] wins when the platform supplies one;
   /// otherwise the scheme is derived from [seedColor] (a preset, or the brand
   /// seed by default).
-  static ThemeData light(ColorScheme? dynamicScheme, {Color? seedColor}) =>
-      _build(
-        dynamicScheme ?? ColorScheme.fromSeed(seedColor: seedColor ?? seed),
-      );
+  ///
+  /// [highContrast] pulls the pairs further apart — see [_scheme].
+  static ThemeData light(
+    ColorScheme? dynamicScheme, {
+    Color? seedColor,
+    bool highContrast = false,
+  }) => _build(
+    _scheme(
+      dynamicScheme,
+      seedColor: seedColor,
+      brightness: Brightness.light,
+      highContrast: highContrast,
+    ),
+  );
 
   /// Dark theme. With [amoled] the surfaces collapse to true black so OLED
   /// panels can switch those pixels off entirely.
@@ -29,14 +43,34 @@ abstract final class AppTheme {
     ColorScheme? dynamicScheme, {
     bool amoled = false,
     Color? seedColor,
+    bool highContrast = false,
   }) {
-    final ColorScheme base =
-        dynamicScheme ??
-        ColorScheme.fromSeed(
-          seedColor: seedColor ?? seed,
-          brightness: Brightness.dark,
-        );
+    final ColorScheme base = _scheme(
+      dynamicScheme,
+      seedColor: seedColor,
+      brightness: Brightness.dark,
+      highContrast: highContrast,
+    );
     return _build(amoled ? _toAmoled(base) : base);
+  }
+
+  /// The scheme to paint with.
+  ///
+  /// A wallpaper palette arrives already mixed, with no contrast dial to turn,
+  /// so asking for high contrast drops it and derives from the seed instead —
+  /// legibility is the thing being asked for, and it outranks the wallpaper.
+  static ColorScheme _scheme(
+    ColorScheme? dynamicScheme, {
+    required Brightness brightness,
+    required bool highContrast,
+    Color? seedColor,
+  }) {
+    if (dynamicScheme != null && !highContrast) return dynamicScheme;
+    return ColorScheme.fromSeed(
+      seedColor: seedColor ?? seed,
+      brightness: brightness,
+      contrastLevel: highContrast ? _highContrastLevel : 0.0,
+    );
   }
 
   /// Pushes a dark scheme to true black.
@@ -215,7 +249,11 @@ abstract final class AppTheme {
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
-          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+          // Android's own back gesture: dragging from the edge peels this
+          // page back to show where it would land, and lets go of the drag
+          // rather than committing to it. Falls back to the same fade this
+          // used to do where the platform can't drive it.
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
           TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
         },
       ),

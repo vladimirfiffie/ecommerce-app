@@ -10,9 +10,14 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
 
+    <!-- enableOnBackInvokedCallback hands the back gesture to the platform,
+         which is what lets the predictive back transition draw the page
+         behind this one while the drag is still in progress. Ignored below
+         Android 13. -->
     <application
         android:label="Aster"
         android:name="${applicationName}"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

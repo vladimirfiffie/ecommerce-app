@@ -71,6 +71,13 @@ class _AsterAppState extends ConsumerState<AsterApp> {
     final AppSettings settings = ref.watch(settingsProvider);
     final GoRouter router = ref.watch(routerProvider);
 
+    // Android only started reporting this alongside iOS recently. Nothing
+    // wraps the app in a MediaQuery on device, so the platform's own view is
+    // the fallback; a test can state it by wrapping this widget in one.
+    final bool highContrast =
+        MediaQuery.maybeHighContrastOf(context) ??
+        MediaQueryData.fromView(View.of(context)).highContrast;
+
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         final bool useDynamic = settings.useDynamicColor;
@@ -102,11 +109,13 @@ class _AsterAppState extends ConsumerState<AsterApp> {
           theme: AppTheme.light(
             useDynamic ? lightDynamic?.harmonized() : null,
             seedColor: settings.preset.seed,
+            highContrast: highContrast,
           ),
           darkTheme: AppTheme.dark(
             useDynamic ? darkDynamic?.harmonized() : null,
             amoled: settings.amoled,
             seedColor: settings.preset.seed,
+            highContrast: highContrast,
           ),
           routerConfig: router,
         );

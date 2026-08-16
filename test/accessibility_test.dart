@@ -249,9 +249,12 @@ void main() {
   });
 
   group('the shop', () {
-    Future<void> pumpApp(WidgetTester tester) async {
+    Future<void> pumpApp(
+      WidgetTester tester, {
+      Map<String, Object> stored = const <String, Object>{},
+    }) async {
       useMobileSurface(tester);
-      setMockPrefs();
+      setMockPrefs(stored);
       final SharedPreferences store = await SharedPreferences.getInstance();
       final ProviderContainer c = ProviderContainer(
         overrides: [
@@ -286,6 +289,34 @@ void main() {
       await pumpApp(tester);
 
       await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('wordless tabs still stand out from the bar behind them', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await pumpApp(
+        tester,
+        stored: <String, Object>{'settings.navLabels': false},
+      );
+
+      // With the labels off the icon is the whole target, and the text
+      // guideline has no text left to judge it by. 3:1 is what WCAG asks of
+      // a graphic that carries meaning on its own.
+      await expectLater(
+        tester,
+        meetsGuideline(
+          CustomMinimumContrastGuideline(
+            finder: find.descendant(
+              of: find.byType(NavigationBar),
+              matching: find.byType(Icon),
+            ),
+            minimumRatio: 3,
+            description: 'Tab icons should stand out from the bar',
+          ),
+        ),
+      );
       handle.dispose();
     });
   });
