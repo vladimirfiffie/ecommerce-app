@@ -30,6 +30,21 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.13.1',
+    headline: 'Same shop, better tested',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'bug_report_outlined',
+        'Nothing new to look at',
+        'The app is unchanged from 0.13.0. This build exists because the '
+            'end-to-end tests had not been told about the new first-launch '
+            'intro, so nothing was checking that a freshly installed copy '
+            'gets from the intro through to the shop. It does, and now '
+            'something checks every time.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.13.0',
     headline: 'Films, pinching, and a plus you can lean on',
     highlights: <ReleaseHighlight>[
