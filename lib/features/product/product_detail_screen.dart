@@ -447,7 +447,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               selected: _size,
               onSelected: (String value) => setState(() => _size = value),
             ),
-            Row(
+            // Wrap, not Row: both labels side by side run off a narrow
+            // phone, and the second one drops to its own line instead.
+            Wrap(
+              spacing: 4,
               children: <Widget>[
                 if (SizeChart.forProduct(product) != null)
                   TextButton.icon(
