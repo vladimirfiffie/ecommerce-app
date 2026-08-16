@@ -18,6 +18,8 @@ import '../../state/notifications_provider.dart';
 import '../../state/orders_provider.dart';
 import '../../state/payments_provider.dart';
 import '../../state/profile_provider.dart';
+import '../../state/reviews_provider.dart';
+import '../../state/saved_for_later_provider.dart';
 import '../../state/settings_provider.dart';
 import 'widgets/edit_name_sheet.dart';
 import 'widgets/settings_group.dart';
@@ -27,6 +29,7 @@ import 'payment_methods_screen.dart';
 import 'notification_settings_screen.dart';
 import 'haptics_settings_screen.dart';
 import 'addresses_screen.dart';
+import 'my_reviews_screen.dart';
 import '../../core/layout/two_pane.dart';
 import '../whats_new/whats_new_sheet.dart';
 import '../../core/release_notes.dart';
@@ -37,7 +40,14 @@ import '../../core/release_notes.dart';
 /// heading, and the shopping details (addresses, cards) now have real screens
 /// instead of a sheet buried in Profile.
 /// Which sub-screen the detail pane is showing.
-enum SettingsPane { addresses, payments, haptics, notifications, security }
+enum SettingsPane {
+  addresses,
+  payments,
+  haptics,
+  notifications,
+  security,
+  reviews,
+}
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -69,6 +79,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       embedded: true,
     ),
     SettingsPane.security => const SecuritySettingsScreen(embedded: true),
+    SettingsPane.reviews => const MyReviewsScreen(embedded: true),
   };
 
   @override
@@ -89,6 +100,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final String name = ref.watch(displayNameProvider);
     final int addressCount = ref.watch(addressesProvider).length;
     final int cardCount = ref.watch(paymentCardsProvider).length;
+    final int savedCount = ref.watch(savedForLaterProvider).length;
+    final int reviewCount = ref.watch(userReviewsProvider).length;
 
     final bool twoPane = useTwoPane(context);
 
@@ -143,6 +156,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: cardCount == 0 ? 'No cards saved' : '$cardCount saved',
               onTap: () =>
                   _open(SettingsPane.payments, Routes.payments, twoPane),
+            ),
+            SettingsRow(
+              icon: Icons.bookmark_border_rounded,
+              title: 'Saved for later',
+              subtitle: savedCount == 0
+                  ? 'Nothing put aside'
+                  : '$savedCount waiting in your bag',
+              onTap: () => context.go(Routes.cart),
+            ),
+            SettingsRow(
+              icon: Icons.rate_review_outlined,
+              title: 'Your reviews',
+              subtitle: reviewCount == 0
+                  ? 'None written yet'
+                  : reviewCount == 1
+                  ? '1 written'
+                  : '$reviewCount written',
+              onTap: () =>
+                  _open(SettingsPane.reviews, Routes.myReviews, twoPane),
             ),
             SettingsSwitch(
               icon: Icons.grid_view_rounded,
@@ -260,6 +292,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   : 'Not required',
               onTap: () =>
                   _open(SettingsPane.security, Routes.security, twoPane),
+            ),
+          ],
+        ),
+
+        SettingsGroup(
+          title: 'Help',
+          children: <Widget>[
+            SettingsRow(
+              icon: Icons.help_outline_rounded,
+              title: 'Help center',
+              subtitle: 'Searchable answers about orders, returns and data',
+              onTap: () => context.push(Routes.help),
             ),
           ],
         ),

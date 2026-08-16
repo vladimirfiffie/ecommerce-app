@@ -47,6 +47,12 @@ class ProfileScreen extends ConsumerWidget {
                   onTap: () => context.push(Routes.settings),
                 ),
                 _Tile(
+                  icon: Icons.rate_review_outlined,
+                  title: 'Your reviews',
+                  subtitle: 'What you have said about what you bought',
+                  onTap: () => context.push(Routes.myReviews),
+                ),
+                _Tile(
                   icon: Icons.help_outline_rounded,
                   title: 'Help center',
                   subtitle: 'FAQs and contact',

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/product.dart';
@@ -12,9 +15,17 @@ import 'write_review_sheet.dart';
 
 /// Rating summary, star histogram, and the review list.
 class ReviewsSection extends ConsumerStatefulWidget {
-  const ReviewsSection({required this.product, super.key});
+  const ReviewsSection({
+    required this.product,
+    super.key,
+    this.showAll = false,
+  });
 
   final Product product;
+
+  /// The product page shows the first few and links onwards; the reviews
+  /// page shows the lot.
+  final bool showAll;
 
   @override
   ConsumerState<ReviewsSection> createState() => _ReviewsSectionState();
@@ -26,6 +37,9 @@ class _ReviewsSectionState extends ConsumerState<ReviewsSection> {
 
   /// Not a tag: "show me the ones with pictures".
   static const String _photosFilter = 'With photos';
+
+  /// How many reviews the product page shows before handing over.
+  static const int _previewCount = 3;
 
   bool _matches(Review review) => switch (_filter) {
     null => true,
@@ -43,7 +57,11 @@ class _ReviewsSectionState extends ConsumerState<ReviewsSection> {
     );
     final UserReview? mine = ref.watch(myReviewProvider(product.id));
     final bool purchased = ref.watch(canReviewProvider(product.id));
-    final List<Review> shown = reviews.where(_matches).toList();
+    final List<Review> matching = reviews.where(_matches).toList();
+    final bool trimmed = !widget.showAll && matching.length > _previewCount;
+    final List<Review> shown = trimmed
+        ? matching.take(_previewCount).toList()
+        : matching;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -124,6 +142,14 @@ class _ReviewsSectionState extends ConsumerState<ReviewsSection> {
               review: shown[i],
               isMine: mine != null && shown[i] == reviews.first && i == 0,
             ),
+          if (trimmed) ...<Widget>[
+            const SizedBox(height: 6),
+            OutlinedButton(
+              onPressed: () => context.push(Routes.productReviews(product.id)),
+              child: Text('See all ${matching.length} reviews'),
+            ),
+            const SizedBox(height: 8),
+          ],
         ],
       ),
     );

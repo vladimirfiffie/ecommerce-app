@@ -14,6 +14,7 @@ import '../../features/home/home_screen.dart';
 import '../../features/profile/haptics_settings_screen.dart';
 import '../../features/orders/order_detail_screen.dart';
 import '../../features/orders/orders_screen.dart';
+import '../../features/product/all_reviews_screen.dart';
 import '../../features/product/product_detail_screen.dart';
 import '../../features/profile/profile_screen.dart';
 import '../../features/profile/settings_screen.dart';
@@ -23,6 +24,7 @@ import '../../features/profile/security_settings_screen.dart';
 import '../../features/profile/notification_settings_screen.dart';
 import '../../features/auth/auth_screen.dart';
 import '../../features/brand/brand_screen.dart';
+import '../../features/profile/my_reviews_screen.dart';
 import '../../features/profile/payment_methods_screen.dart';
 import '../../features/profile/addresses_screen.dart';
 import '../../features/orders/return_request_screen.dart';
@@ -49,9 +51,11 @@ abstract final class Routes {
   static const String payments = '/settings/payments';
   static const String orders = '/orders';
   static const String help = '/help';
+  static const String myReviews = '/reviews';
   static const String onboarding = '/welcome';
 
   static String product(String id) => '/product/$id';
+  static String productReviews(String id) => '/product/$id/reviews';
 
   /// Brand is free text, so it has to be escaped into the path.
   static String brand(String name) => '/brand/${Uri.encodeComponent(name)}';
@@ -209,6 +213,14 @@ GoRouter createRouter(Ref ref) {
         parentNavigatorKey: _rootKey,
         builder: (BuildContext context, GoRouterState state) =>
             ProductDetailScreen(productId: state.pathParameters['id']!),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'reviews',
+            parentNavigatorKey: _rootKey,
+            builder: (BuildContext context, GoRouterState state) =>
+                AllReviewsScreen(productId: state.pathParameters['id']!),
+          ),
+        ],
       ),
       GoRoute(
         // go_router hands back an already-decoded parameter, so the name is
@@ -307,6 +319,12 @@ GoRouter createRouter(Ref ref) {
         parentNavigatorKey: _rootKey,
         builder: (BuildContext context, GoRouterState state) =>
             const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: Routes.myReviews,
+        parentNavigatorKey: _rootKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            const MyReviewsScreen(),
       ),
       GoRoute(
         path: Routes.help,
