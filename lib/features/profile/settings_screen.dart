@@ -101,7 +101,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             SettingsRow(
               icon: Icons.badge_outlined,
               title: 'Name',
-              subtitle: 'Nova greets you with this',
+              subtitle: 'Aster greets you with this',
               trailing: _Value(name.isEmpty ? 'Not set' : name),
               onTap: () => showEditNameSheet(context),
             ),
@@ -215,6 +215,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: settings.amoled,
               onChanged: notifier.setAmoled,
             ),
+            SettingsSwitch(
+              icon: Icons.label_outline_rounded,
+              title: 'Tab labels',
+              subtitle: 'Words under the icons at the bottom',
+              value: settings.navLabels,
+              onChanged: notifier.setNavLabels,
+            ),
           ],
         ),
 
@@ -319,7 +326,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('About Nova', style: theme.textTheme.titleSmall),
+              Text('About Aster', style: theme.textTheme.titleSmall),
               const SizedBox(height: 6),
               Text(
                 'A Flutter storefront demo. Product data ships with the app; '
@@ -331,7 +338,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Version 0.10.0 · prerelease',
+                // Off the release notes, which a test pins to pubspec —
+                // typed by hand this had already drifted two versions.
+                'Version $currentReleaseVersion · prerelease',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

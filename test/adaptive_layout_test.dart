@@ -32,12 +32,16 @@ void main() {
     ],
   );
 
-  Future<void> pumpAt(WidgetTester tester, Size logical) async {
+  Future<void> pumpAt(
+    WidgetTester tester,
+    Size logical, {
+    Map<String, Object> stored = const <String, Object>{},
+  }) async {
     tester.view.physicalSize = logical * 3;
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    setMockPrefs();
+    setMockPrefs(stored);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       ProviderScope(
@@ -47,7 +51,7 @@ void main() {
             FakeProductRepository(catalog),
           ),
         ],
-        child: const NovaApp(),
+        child: const AsterApp(),
       ),
     );
     await settle(tester);
@@ -98,6 +102,51 @@ void main() {
       await tester.tap(find.text('Bag').last);
       await settle(tester);
       expect(find.text('Your bag'), findsOneWidget);
+    });
+  });
+
+  group('tab labels can be turned off', () {
+    const Map<String, Object> wordless = <String, Object>{
+      'settings.navLabels': false,
+    };
+
+    testWidgets('the bottom bar keeps the icons alone', (
+      WidgetTester tester,
+    ) async {
+      await pumpAt(tester, const Size(400, 900), stored: wordless);
+
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).labelBehavior,
+        NavigationDestinationLabelBehavior.alwaysHide,
+      );
+    });
+
+    testWidgets('the rail collapses, shortcuts and all', (
+      WidgetTester tester,
+    ) async {
+      await pumpAt(tester, const Size(1000, 800), stored: wordless);
+
+      final NavigationRail rail = tester.widget<NavigationRail>(
+        find.byType(NavigationRail),
+      );
+      expect(rail.extended, isFalse);
+
+      // The word goes, the way to reach orders doesn't.
+      expect(find.text('Orders'), findsNothing);
+      expect(
+        find.byTooltip('Orders'),
+        findsOneWidget,
+        reason: 'a collapsed shortcut still has to name itself',
+      );
+    });
+
+    testWidgets('on by default', (WidgetTester tester) async {
+      await pumpAt(tester, const Size(400, 900));
+
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).labelBehavior,
+        NavigationDestinationLabelBehavior.alwaysShow,
+      );
     });
   });
 
@@ -158,7 +207,7 @@ void main() {
               FakeProductRepository(catalog),
             ),
           ],
-          child: const NovaApp(),
+          child: const AsterApp(),
         ),
       );
       await settle(tester);

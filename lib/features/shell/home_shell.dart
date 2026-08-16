@@ -9,6 +9,7 @@ import '../../core/router/app_router.dart';
 import '../../state/cart_provider.dart';
 import '../../state/favorites_provider.dart';
 import '../../state/haptics_provider.dart';
+import '../../state/settings_provider.dart';
 
 /// A single destination, rendered as either a bar item or a rail item.
 class _Destination {
@@ -46,6 +47,9 @@ class HomeShell extends ConsumerWidget {
     final int cartCount = ref.watch(cartCountProvider);
     final int favoriteCount = ref.watch(favoritesProvider).length;
     final WindowSize size = Breakpoints.of(context);
+    final bool labels = ref.watch(
+      settingsProvider.select((AppSettings s) => s.navLabels),
+    );
 
     final List<_Destination> destinations = <_Destination>[
       const _Destination(
@@ -85,6 +89,7 @@ class HomeShell extends ConsumerWidget {
               destinations: destinations,
               selectedIndex: shell.currentIndex,
               onSelected: (int i) => _onTap(ref, i),
+              labels: labels,
             ),
             const VerticalDivider(width: 1),
             Expanded(child: shell),
@@ -98,6 +103,11 @@ class HomeShell extends ConsumerWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: shell.currentIndex,
         onDestinationSelected: (int i) => _onTap(ref, i),
+        // The label is still the semantic name of the tab either way, so
+        // hiding it costs a screen reader nothing.
+        labelBehavior: labels
+            ? NavigationDestinationLabelBehavior.alwaysShow
+            : NavigationDestinationLabelBehavior.alwaysHide,
         destinations: <Widget>[
           for (final _Destination d in destinations)
             NavigationDestination(
@@ -121,11 +131,16 @@ class _Rail extends StatelessWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onSelected,
+    required this.labels,
   });
 
   final List<_Destination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+
+  /// Words alongside the icons. Off collapses the rail to its icon width,
+  /// which the brand mark and the shortcuts below have to fit as well.
+  final bool labels;
 
   @override
   Widget build(BuildContext context) {
@@ -135,41 +150,46 @@ class _Rail extends StatelessWidget {
       selectedIndex: selectedIndex,
       onDestinationSelected: onSelected,
       labelType: NavigationRailLabelType.none,
-      extended: true,
+      extended: labels,
       minExtendedWidth: 200,
       backgroundColor: theme.colorScheme.surfaceContainer,
       leading: Padding(
         padding: const EdgeInsets.fromLTRB(4, 12, 4, 24),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Icon(
               Icons.auto_awesome_rounded,
               color: theme.colorScheme.primary,
               size: 22,
             ),
-            const SizedBox(width: 10),
-            Text('Nova', style: theme.textTheme.titleLarge),
+            if (labels) ...<Widget>[
+              const SizedBox(width: 10),
+              Text('Aster', style: theme.textTheme.titleLarge),
+            ],
           ],
         ),
       ),
       trailing: Expanded(
         child: Align(
-          alignment: Alignment.bottomLeft,
+          alignment: labels ? Alignment.bottomLeft : Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 16, left: 8),
+            padding: EdgeInsets.only(bottom: 16, left: labels ? 8 : 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                TextButton.icon(
+                _RailShortcut(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Orders',
+                  labelled: labels,
                   onPressed: () => context.push(Routes.orders),
-                  icon: const Icon(Icons.receipt_long_outlined, size: 20),
-                  label: const Text('Orders'),
                 ),
-                TextButton.icon(
+                _RailShortcut(
+                  icon: Icons.settings_outlined,
+                  label: 'Settings',
+                  labelled: labels,
                   onPressed: () => context.push(Routes.settings),
-                  icon: const Icon(Icons.settings_outlined, size: 20),
-                  label: const Text('Settings'),
                 ),
               ],
             ),
@@ -187,6 +207,39 @@ class _Rail extends StatelessWidget {
             label: Text(d.label),
           ),
       ],
+    );
+  }
+}
+
+/// Orders and Settings under the rail, which lose their words with the tabs
+/// above them but keep them as a tooltip.
+class _RailShortcut extends StatelessWidget {
+  const _RailShortcut({
+    required this.icon,
+    required this.label,
+    required this.labelled,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool labelled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!labelled) {
+      return IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        tooltip: label,
+      );
+    }
+
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20),
+      label: Text(label),
     );
   }
 }

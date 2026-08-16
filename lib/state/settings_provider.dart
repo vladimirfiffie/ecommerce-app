@@ -12,7 +12,8 @@ class AppSettings {
     this.useDynamicColor = true,
     this.gridView = true,
     this.amoled = false,
-    this.presetId = 'nova',
+    this.navLabels = true,
+    this.presetId = 'aster',
   });
 
   final ThemeMode themeMode;
@@ -26,6 +27,10 @@ class AppSettings {
   /// Collapse dark-theme surfaces to true black for OLED panels.
   final bool amoled;
 
+  /// Word the tabs. Off leaves the bottom bar and the rail on icons alone,
+  /// which buys the shop a little more height.
+  final bool navLabels;
+
   /// Chosen [ThemePreset] id. Ignored while the wallpaper palette is in use.
   final String presetId;
 
@@ -36,12 +41,14 @@ class AppSettings {
     bool? useDynamicColor,
     bool? gridView,
     bool? amoled,
+    bool? navLabels,
     String? presetId,
   }) => AppSettings(
     themeMode: themeMode ?? this.themeMode,
     useDynamicColor: useDynamicColor ?? this.useDynamicColor,
     gridView: gridView ?? this.gridView,
     amoled: amoled ?? this.amoled,
+    navLabels: navLabels ?? this.navLabels,
     presetId: presetId ?? this.presetId,
   );
 }
@@ -51,6 +58,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const String _dynamicKey = 'settings.dynamicColor';
   static const String _gridKey = 'settings.gridView';
   static const String _amoledKey = 'settings.amoled';
+  static const String _navLabelsKey = 'settings.navLabels';
   static const String _presetKey = 'settings.themePreset';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
@@ -66,6 +74,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       useDynamicColor: prefs.getBool(_dynamicKey) ?? true,
       gridView: prefs.getBool(_gridKey) ?? true,
       amoled: prefs.getBool(_amoledKey) ?? false,
+      navLabels: prefs.getBool(_navLabelsKey) ?? true,
       presetId: presetById(prefs.getString(_presetKey)).id,
     );
   }
@@ -88,6 +97,11 @@ class SettingsNotifier extends Notifier<AppSettings> {
   Future<void> setAmoled(bool value) async {
     state = state.copyWith(amoled: value);
     await _prefs.setBool(_amoledKey, value);
+  }
+
+  Future<void> setNavLabels(bool value) async {
+    state = state.copyWith(navLabels: value);
+    await _prefs.setBool(_navLabelsKey, value);
   }
 
   Future<void> setPreset(ThemePreset preset) async {
