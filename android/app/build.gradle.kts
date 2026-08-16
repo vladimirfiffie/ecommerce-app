@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.vladimirfiffie.ecommerce_app"
+    namespace = "com.vladimirfiffie.aster"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -19,8 +19,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.vladimirfiffie.ecommerce_app"
+        // Renamed from com.vladimirfiffie.ecommerce_app with the app itself.
+        // Android treats a new id as a different app: an installed copy of the
+        // old one has to be uninstalled, it will not upgrade in place.
+        applicationId = "com.vladimirfiffie.aster"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

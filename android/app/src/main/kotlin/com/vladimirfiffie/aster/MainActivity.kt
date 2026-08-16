@@ -1,4 +1,4 @@
-package com.vladimirfiffie.ecommerce_app
+package com.vladimirfiffie.aster
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

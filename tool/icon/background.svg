@@ -1,0 +1,17 @@
+<!--
+  The plate the mark sits on, in the brand purple the theme is seeded from
+  (#6C4DF6) lifted at the top and deepened at the bottom.
+
+  Only used to bake the legacy pre-Android-8 PNGs; the adaptive icon draws the
+  same gradient from res/drawable/ic_launcher_background.xml, which stays sharp
+  at whatever size a launcher asks for.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7C5CFF"/>
+      <stop offset="1" stop-color="#4B32C3"/>
+    </linearGradient>
+  </defs>
+  <rect width="108" height="108" fill="url(#plate)"/>
+</svg>

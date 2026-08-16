@@ -1,0 +1,26 @@
+# Native launch screen, generated into android/ by:
+#
+#   dart run flutter_native_splash:create
+#
+# The generated files are committed, so a checkout builds without running this.
+# Re-run it after changing anything here or either source PNG — those come from
+# tool/icon/foreground.svg via tool/icon/generate.sh's sibling commands.
+flutter_native_splash:
+  # Only Android exists in this project; there is no ios/ or web/ directory.
+  android: true
+  ios: false
+  web: false
+
+  # The brand purple the whole theme is seeded from, so the launch screen and
+  # the first frame the app paints are the same family of colour.
+  color: "#6C4DF6"
+  image: tool/icon/splash.png
+
+  # Android 12 replaced the old full-screen window background with a system
+  # splash that only ever draws an icon on a solid colour. It masks the icon to
+  # a circle, so this image is padded: the mark sits inside the middle 768px of
+  # a 1152px canvas, which is the safe area the platform guarantees.
+  android_12:
+    color: "#6C4DF6"
+    image: tool/icon/splash_android12.png
+    icon_background_color: "#6C4DF6"

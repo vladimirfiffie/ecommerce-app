@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Adaptive icon, used from Android 8. The launcher crops these two layers
+    to whatever shape the device uses, so the mark is drawn well inside the
+    centre 66dp its foreground guarantees.
+
+    monochrome is the Android 13 themed icon: the same flat white mark, which
+    the system recolours to the wallpaper palette.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+    <monochrome android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>

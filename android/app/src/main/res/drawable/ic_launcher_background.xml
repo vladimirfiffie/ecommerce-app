@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The plate behind the mark, kept as a shape so it stays sharp whatever
+    size a launcher asks for. Matches tool/icon/background.svg, which bakes
+    the same gradient into the legacy PNGs.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:startColor="#7C5CFF"
+        android:endColor="#4B32C3"
+        android:type="linear" />
+</shape>
