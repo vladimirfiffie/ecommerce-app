@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../state/auth_provider.dart';
+import '../../state/onboarding_provider.dart';
 
 import '../../features/cart/cart_screen.dart';
 import '../../features/catalog/catalog_screen.dart';
@@ -27,6 +28,7 @@ import '../../features/profile/addresses_screen.dart';
 import '../../features/orders/return_request_screen.dart';
 import '../../features/orders/invoice_screen.dart';
 import '../../features/help/help_centre_screen.dart';
+import '../../features/onboarding/onboarding_screen.dart';
 
 /// Route paths, referenced by name everywhere else.
 abstract final class Routes {
@@ -47,6 +49,7 @@ abstract final class Routes {
   static const String payments = '/settings/payments';
   static const String orders = '/orders';
   static const String help = '/help';
+  static const String onboarding = '/welcome';
 
   static String product(String id) => '/product/$id';
 
@@ -106,10 +109,19 @@ GoRouter createRouter(Ref ref) {
   });
   ref.onDispose(pastGate.dispose);
 
+  // Same bridge for the intro, which sits one step in front of the gate.
+  final ValueNotifier<bool> seenIntro = ValueNotifier<bool>(
+    ref.read(onboardingSeenProvider),
+  );
+  ref.listen<bool>(onboardingSeenProvider, (bool? _, bool next) {
+    seenIntro.value = next;
+  });
+  ref.onDispose(seenIntro.dispose);
+
   return GoRouter(
     navigatorKey: _rootKey,
     initialLocation: Routes.home,
-    refreshListenable: pastGate,
+    refreshListenable: Listenable.merge(<Listenable>[pastGate, seenIntro]),
     redirect: (BuildContext context, GoRouterState state) {
       final String? rewritten = normalizeDeepLink(state.uri);
       // Returning the same location would loop.
@@ -117,9 +129,22 @@ GoRouter createRouter(Ref ref) {
         return rewritten;
       }
 
+      // The intro comes before everything, including the gate — a first
+      // launch should say what this is before asking anyone to sign in.
+      if (!seenIntro.value) {
+        return state.matchedLocation == Routes.onboarding
+            ? null
+            : Routes.onboarding;
+      }
+
       // The shop opens on sign in / sign up. Guests get in by saying so.
       if (!pastGate.value && !_isAuthRoute(state.matchedLocation)) {
         return Routes.signIn;
+      }
+
+      // Seen once, it is not a place you can go back to.
+      if (state.matchedLocation == Routes.onboarding) {
+        return pastGate.value ? Routes.home : Routes.signIn;
       }
       return null;
     },
@@ -276,6 +301,12 @@ GoRouter createRouter(Ref ref) {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.onboarding,
+        parentNavigatorKey: _rootKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            const OnboardingScreen(),
       ),
       GoRoute(
         path: Routes.help,

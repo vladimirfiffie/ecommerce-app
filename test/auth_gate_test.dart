@@ -6,6 +6,7 @@ import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/features/home/widgets/hero_carousel.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/state/auth_provider.dart';
+import 'package:ecommerce_app/state/onboarding_provider.dart';
 import 'package:ecommerce_app/state/cart_provider.dart';
 import 'package:ecommerce_app/state/orders_provider.dart';
 import 'package:flutter/material.dart';
@@ -57,8 +58,13 @@ void main() {
   }
 
   /// A blank device: nobody has signed in and nobody has skipped.
+  ///
+  /// The intro is marked seen even so — it sits in front of the gate, and
+  /// these tests are about what the gate does once it is reached.
   Future<SharedPreferences> blankStore() async {
-    SharedPreferences.setMockInitialValues(const <String, Object>{});
+    SharedPreferences.setMockInitialValues(const <String, Object>{
+      OnboardingNotifier.prefsKey: true,
+    });
     return SharedPreferences.getInstance();
   }
 

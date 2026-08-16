@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ecommerce_app/features/home/widgets/deal_countdown.dart';
 import 'package:ecommerce_app/state/auth_provider.dart';
 import 'package:ecommerce_app/state/orders_provider.dart';
+import 'package:ecommerce_app/state/onboarding_provider.dart';
 
 /// Keeps tests hermetic: no font downloads, no HTTP.
 void configureTestEnvironment() {
@@ -21,10 +22,12 @@ void configureTestEnvironment() {
   GoogleFonts.config.allowRuntimeFetching = false;
 }
 
-/// Clears the welcome gate, so a test that boots the app lands in the shop
-/// instead of on the sign-in screen. Auth tests override this.
+/// Clears the intro and the welcome gate, so a test that boots the app lands
+/// in the shop instead of on the first-launch pages. Auth and onboarding
+/// tests override this.
 const Map<String, Object> pastAuthGatePrefs = <String, Object>{
   GuestModeNotifier.prefsKey: true,
+  OnboardingNotifier.prefsKey: true,
 };
 
 /// Seeds mock preferences with the welcome gate already cleared.
@@ -130,6 +133,7 @@ Product testProduct({
   List<String> sizes = const <String>[],
   List<ProductColor> colors = const <ProductColor>[],
   List<String> tags = const <String>[],
+  List<String> videos = const <String>[],
   String subcategory = 'Jackets',
   bool isFeatured = false,
   bool isNew = false,
@@ -146,6 +150,7 @@ Product testProduct({
   compareAtPrice: compareAtPrice,
   description: 'A test product.',
   images: const <String>['https://example.invalid/1.webp'],
+  videos: videos,
   rating: rating,
   reviewCount: 42,
   stock: stock,
