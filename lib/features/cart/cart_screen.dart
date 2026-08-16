@@ -16,7 +16,9 @@ import '../../shared/widgets/product_card.dart';
 import '../../shared/widgets/quantity_stepper.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../state/app_providers.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../state/cart_provider.dart';
+import '../../state/saved_for_later_provider.dart';
 import 'widgets/order_summary.dart';
 import 'widgets/promo_field.dart';
 
@@ -39,6 +41,7 @@ class CartScreen extends ConsumerWidget {
     final List<CartEntry> unavailable = ref.watch(
       unavailableCartEntriesProvider,
     );
+    final List<CartItem> saved = ref.watch(savedForLaterItemsProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -73,14 +76,22 @@ class CartScreen extends ConsumerWidget {
               )
             else if (items.isEmpty)
               Expanded(
-                child: EmptyState(
-                  icon: Icons.shopping_bag_outlined,
-                  title: 'Your bag is empty',
-                  message:
-                      'Once you add something you like, it’ll show up here.',
-                  actionLabel: 'Start shopping',
-                  onAction: () => context.go(Routes.catalog),
-                ),
+                child: saved.isEmpty
+                    ? EmptyState(
+                        icon: Icons.shopping_bag_outlined,
+                        title: 'Your bag is empty',
+                        message:
+                            'Once you add something you like, it’ll show up '
+                            'here.',
+                        actionLabel: 'Start shopping',
+                        onAction: () => context.go(Routes.catalog),
+                      )
+                    // An empty bag with things put aside is not an empty
+                    // screen: what was saved is the reason to come back.
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+                        children: const <Widget>[_SavedForLaterSection()],
+                      ),
               )
             else ...<Widget>[
               if (unavailable.isNotEmpty)
@@ -174,6 +185,7 @@ class CartScreen extends ConsumerWidget {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: OrderSummary(),
                       ),
+                      const _SavedForLaterSection(),
                     ],
                   ),
                 ),
@@ -315,9 +327,31 @@ class _CartLine extends ConsumerWidget {
           child: ProductRow(
             product: item.product,
             heroPrefix: 'cart',
-            subtitle: item.variantLabel == null
-                ? null
-                : Text(item.variantLabel!),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (item.variantLabel != null) Text(item.variantLabel!),
+                // Not a destructive action, so it sits quietly under the
+                // line rather than competing with the bin on the swipe.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => ref
+                        .read(savedForLaterProvider.notifier)
+                        .saveForLater(item.entry),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      minimumSize: const Size(0, 32),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.bookmark_border_rounded, size: 17),
+                    label: const Text('Save for later'),
+                  ),
+                ),
+              ],
+            ),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -395,6 +429,87 @@ class _CheckoutBar extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Things put aside, under the bag they came out of.
+///
+/// Draws nothing at all when the list is empty — an empty section here would
+/// be a permanent invitation to a feature nobody has used yet.
+class _SavedForLaterSection extends ConsumerWidget {
+  const _SavedForLaterSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final List<CartItem> saved = ref.watch(savedForLaterItemsProvider);
+    if (saved.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const SizedBox(height: 26),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: SectionHeader(
+            title: 'Saved for later',
+            subtitle: saved.length == 1
+                ? '1 item waiting'
+                : '${saved.length} items waiting',
+            padding: EdgeInsets.zero,
+          ),
+        ),
+        const SizedBox(height: 10),
+        for (final CartItem item in saved)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Card(
+              child: ProductRow(
+                product: item.product,
+                heroPrefix: 'saved',
+                subtitle: item.variantLabel == null
+                    ? null
+                    : Text(item.variantLabel!),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Text(
+                      formatPrice(item.lineTotal),
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconButton(
+                          tooltip: 'Remove',
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                          onPressed: () => ref
+                              .read(savedForLaterProvider.notifier)
+                              .remove(item.lineId),
+                        ),
+                        FilledButton.tonal(
+                          onPressed: () => ref
+                              .read(savedForLaterProvider.notifier)
+                              .moveToBag(item.entry),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(0, 36),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('Move to bag'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
