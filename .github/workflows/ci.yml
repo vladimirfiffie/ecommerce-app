@@ -21,7 +21,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.44.9
+          flutter-version: 3.47.0
           cache: true
 
       - name: Install dependencies
@@ -69,7 +69,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.44.9
+          flutter-version: 3.47.0
           cache: true
 
       # The Linux desktop target needs GTK and the usual build chain.
