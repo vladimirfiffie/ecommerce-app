@@ -48,7 +48,7 @@ void main() {
 
       expect(find.byType(ProductVideo), findsOneWidget);
       // One clip plus one photo, so the page it opens on is the clip.
-      expect(find.text('Tap to zoom'), findsNothing);
+      expect(find.text('Pinch or tap to zoom'), findsNothing);
     });
 
     testWidgets('says nothing about zoom until a photo is on screen', (
@@ -67,7 +67,7 @@ void main() {
       await tester.drag(find.byType(PageView), const Offset(-500, 0));
       await settle(tester);
 
-      expect(find.text('Tap to zoom'), findsOneWidget);
+      expect(find.text('Pinch or tap to zoom'), findsOneWidget);
     });
 
     testWidgets('a product with no clip is exactly as it was', (
@@ -83,7 +83,49 @@ void main() {
       await tester.pump();
 
       expect(find.byType(ProductVideo), findsNothing);
-      expect(find.text('Tap to zoom'), findsOneWidget);
+      expect(find.text('Pinch or tap to zoom'), findsOneWidget);
+    });
+  });
+
+  group('zooming a photo in place', () {
+    testWidgets('a pinch zooms without leaving the product page', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          const ImageGallery(
+            images: <String>['https://example.invalid/1.webp'],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Pinch or tap to zoom'), findsOneWidget);
+      expect(find.text('Reset'), findsNothing);
+
+      final Offset centre = tester.getCenter(find.byType(InteractiveViewer));
+      final TestGesture a = await tester.startGesture(
+        centre - const Offset(20, 0),
+      );
+      final TestGesture b = await tester.startGesture(
+        centre + const Offset(20, 0),
+      );
+      await tester.pump();
+      await a.moveTo(centre - const Offset(90, 0));
+      await b.moveTo(centre + const Offset(90, 0));
+      await tester.pump();
+      await a.up();
+      await b.up();
+      await settle(tester);
+
+      // Still on the product page, and now offering the way back out.
+      expect(find.byType(ImageGallery), findsOneWidget);
+      expect(find.text('Reset'), findsOneWidget);
+      expect(find.text('Pinch or tap to zoom'), findsNothing);
+
+      await tester.tap(find.text('Reset'));
+      await settle(tester);
+      expect(find.text('Pinch or tap to zoom'), findsOneWidget);
     });
   });
 
