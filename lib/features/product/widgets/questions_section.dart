@@ -244,6 +244,8 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
               minLines: 3,
               maxLines: 5,
               maxLength: 250,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 labelText: 'Your question',

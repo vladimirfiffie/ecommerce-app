@@ -29,8 +29,8 @@ class CatalogException implements Exception {
 ///
 /// Two fields have no source in the feed. Sizes are filled in per apparel
 /// category from [_sizeRuns] — a shop convention rather than per-product
-/// data, which is what keeps the size guide usable. Colours are left empty:
-/// the only available signal is the product title, and matching colour words
+/// data, which is what keeps the size guide usable. Colors are left empty:
+/// the only available signal is the product title, and matching color words
 /// there tags "Ice Cream" as cream and "Red Onions" as red, so a wrong
 /// swatch is worse than none.
 class DummyJsonProductRepository implements ProductRepository {
@@ -234,7 +234,7 @@ class DummyJsonProductRepository implements ProductRepository {
   /// Stand-in clips, because DummyJSON serves no video of its own.
   ///
   /// Flutter's own documentation assets: small, stable, and already public.
-  /// Real catalogue video would arrive in the same `videos` field and need
+  /// Real catalog video would arrive in the same `videos` field and need
   /// none of this.
   static const List<String> _sampleVideos = <String>[
     'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',

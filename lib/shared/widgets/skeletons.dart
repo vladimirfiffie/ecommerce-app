@@ -4,7 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../core/theme/app_theme.dart';
 
 /// Wraps children in the app's standard shimmer so every skeleton pulses in
-/// sync and with the same colours.
+/// sync and with the same colors.
 class SkeletonShimmer extends StatelessWidget {
   const SkeletonShimmer({required this.child, super.key});
 

@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers.dart';
 
-/// WCAG contrast ratio between two opaque colours.
+/// WCAG contrast ratio between two opaque colors.
 double _ratio(Color a, Color b) {
   final double la = a.computeLuminance();
   final double lb = b.computeLuminance();

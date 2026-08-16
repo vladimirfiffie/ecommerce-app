@@ -103,7 +103,7 @@ class _SizeChip extends StatelessWidget {
   }
 }
 
-/// Colour swatches with a ring on the active one.
+/// Color swatches with a ring on the active one.
 class ColorSelector extends ConsumerWidget {
   const ColorSelector({
     required this.colors,
@@ -125,7 +125,7 @@ class ColorSelector extends ConsumerWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            Text('Colour', style: theme.textTheme.titleSmall),
+            Text('Color', style: theme.textTheme.titleSmall),
             const Spacer(),
             Text(
               selected?.name ?? 'Select one',

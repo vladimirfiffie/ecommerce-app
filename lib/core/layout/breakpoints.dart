@@ -56,7 +56,7 @@ abstract final class Breakpoints {
   };
 }
 
-/// Centres and width-limits page content so text lines stay readable on a
+/// Centers and width-limits page content so text lines stay readable on a
 /// wide window instead of stretching edge to edge.
 class ContentBounds extends StatelessWidget {
   const ContentBounds({

@@ -239,7 +239,7 @@ class _CategoryStrip extends ConsumerWidget {
 ///
 /// "All" and the categories are the same widget so their label styling can't
 /// drift apart — previously "All" alone fell back to the default chip label
-/// colour and weight, so it looked greyer and lighter than the rest.
+/// color and weight, so it looked grayer and lighter than the rest.
 class _CategoryChip extends StatelessWidget {
   const _CategoryChip({
     required this.label,

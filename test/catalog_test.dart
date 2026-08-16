@@ -332,8 +332,8 @@ void main() {
       expect(data.products.single.sizes, isEmpty);
     });
 
-    test('no product claims a colour it cannot support', () async {
-      // The feed has no colour field; guessing from the title tags
+    test('no product claims a color it cannot support', () async {
+      // The feed has no color field; guessing from the title tags
       // "Ice Cream" as cream, so the selector stays hidden instead.
       const String iceCream =
           '{"id":4,"title":"Ice Cream","category":"groceries","price":5,'

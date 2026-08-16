@@ -90,6 +90,8 @@ class _PromoFieldState extends ConsumerState<PromoField> {
             Expanded(
               child: TextField(
                 controller: _controller,
+                autocorrect: false,
+                enableSuggestions: false,
                 textCapitalization: TextCapitalization.characters,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _apply(),

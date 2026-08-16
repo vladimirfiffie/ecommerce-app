@@ -315,8 +315,8 @@ class OrderDetailScreen extends ConsumerWidget {
     return l10n.reorderPartial(added, skipped);
   }
 
-  /// The variant colour as the live product spells it, or null if that
-  /// colourway has gone.
+  /// The variant color as the live product spells it, or null if that
+  /// colorway has gone.
   static ProductColor? _colorOn(Product product, String? name) {
     if (name == null) return null;
     for (final ProductColor c in product.colors) {

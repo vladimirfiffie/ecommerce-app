@@ -35,7 +35,7 @@ List<Product> dealsFor(
   ).difference(DateTime.utc(2024)).inDays;
 
   // Rotate through the pool a day at a time. With a stride co-prime to the
-  // pool size this walks the whole catalogue before repeating, so a product
+  // pool size this walks the whole catalog before repeating, so a product
   // isn't stuck on sale forever or never picked.
   final int size = onSale.length;
   final int stride = _coprimeStride(size);

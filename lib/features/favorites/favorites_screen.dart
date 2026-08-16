@@ -141,7 +141,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
   }
 
   /// Only products with no variant choices can be bulk-added; anything needing
-  /// a size or colour is skipped so we never guess on the shopper's behalf.
+  /// a size or color is skipped so we never guess on the shopper's behalf.
   Future<void> _addAll(
     BuildContext context,
     WidgetRef ref,
@@ -162,9 +162,9 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     if (!context.mounted) return;
     final String message = switch ((added, skipped)) {
       (0, 0) => 'Nothing available to add',
-      (0, _) => 'These need a size or colour — open them to choose',
+      (0, _) => 'These need a size or color — open them to choose',
       (_, 0) => 'Added $added to your bag',
-      _ => 'Added $added — $skipped need a size or colour',
+      _ => 'Added $added — $skipped need a size or color',
     };
     ScaffoldMessenger.of(context)
       ..clearSnackBars()

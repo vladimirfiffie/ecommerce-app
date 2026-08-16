@@ -7,7 +7,7 @@ import '../../../state/settings_provider.dart';
 /// Row of preset swatches.
 ///
 /// Presets stay tappable while the wallpaper palette is on, but dim, with a
-/// note explaining why the app's colours aren't changing — silently ignoring
+/// note explaining why the app's colors aren't changing — silently ignoring
 /// taps would read as a bug.
 class ThemePicker extends ConsumerWidget {
   const ThemePicker({super.key, this.dynamicActive = false});

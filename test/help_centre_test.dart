@@ -47,7 +47,7 @@ void main() {
 
     await tester.tap(find.text('Profile').last);
     await settle(tester);
-    await tester.tap(find.text('Help centre'));
+    await tester.tap(find.text('Help center'));
     await settle(tester);
   }
 

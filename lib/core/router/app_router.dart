@@ -27,7 +27,7 @@ import '../../features/profile/payment_methods_screen.dart';
 import '../../features/profile/addresses_screen.dart';
 import '../../features/orders/return_request_screen.dart';
 import '../../features/orders/invoice_screen.dart';
-import '../../features/help/help_centre_screen.dart';
+import '../../features/help/help_center_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 
 /// Route paths, referenced by name everywhere else.
@@ -312,7 +312,7 @@ GoRouter createRouter(Ref ref) {
         path: Routes.help,
         parentNavigatorKey: _rootKey,
         builder: (BuildContext context, GoRouterState state) =>
-            const HelpCentreScreen(),
+            const HelpCenterScreen(),
       ),
       GoRoute(
         path: Routes.checkout,

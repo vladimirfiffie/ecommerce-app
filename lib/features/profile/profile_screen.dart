@@ -48,7 +48,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 _Tile(
                   icon: Icons.help_outline_rounded,
-                  title: 'Help centre',
+                  title: 'Help center',
                   subtitle: 'FAQs and contact',
                   onTap: () => context.push(Routes.help),
                 ),

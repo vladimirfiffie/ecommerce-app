@@ -235,6 +235,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
                 TextFormField(
                   controller: _title,
                   textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
                   maxLength: 60,
                   decoration: const InputDecoration(
                     labelText: 'Headline (optional)',
@@ -244,6 +245,8 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _body,
+                  keyboardType: TextInputType.multiline,
+                  textInputAction: TextInputAction.newline,
                   textCapitalization: TextCapitalization.sentences,
                   minLines: 3,
                   maxLines: 6,

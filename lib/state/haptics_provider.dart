@@ -21,7 +21,10 @@ enum HapticIntensity {
 /// silence the chattier per-step ticks.
 enum HapticChannel {
   buttons('Buttons & taps', 'Add to bag, checkout, card presses'),
-  selection('Selection ticks', 'Chips, steppers, sliders, star ratings'),
+  selection(
+    'Selection ticks',
+    'Chips, steppers, sliders, star ratings, help center answers',
+  ),
   notifications('Confirmations', 'Order placed, validation errors'),
   vibrations('Long vibrations', 'Order confirmation and alert patterns');
 

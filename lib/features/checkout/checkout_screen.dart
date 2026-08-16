@@ -354,7 +354,7 @@ class _StepDot extends StatelessWidget {
 }
 
 /// The line between two dots. Fills left-to-right as the step completes,
-/// rather than switching colour in one frame.
+/// rather than switching color in one frame.
 class _StepConnector extends StatelessWidget {
   const _StepConnector({required this.filled});
 
@@ -820,7 +820,7 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
     final GiftOptions gift = ref.watch(giftOptionsProvider);
     final GiftOptionsNotifier notifier = ref.read(giftOptionsProvider.notifier);
 
-    // A Material, not a coloured Container: ListTile paints its ink on the
+    // A Material, not a colored Container: ListTile paints its ink on the
     // nearest Material ancestor, and a DecoratedBox in between hides it,
     // which Flutter asserts on.
     return Material(
@@ -851,6 +851,8 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
               minLines: 2,
               maxLines: 3,
               maxLength: 200,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
               textCapitalization: TextCapitalization.sentences,
               onChanged: notifier.setMessage,
               decoration: const InputDecoration(

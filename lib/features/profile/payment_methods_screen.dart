@@ -347,6 +347,9 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _holder,
+                keyboardType: TextInputType.name,
+                // The last field in the form, so the key says so.
+                textInputAction: TextInputAction.done,
                 textCapitalization: TextCapitalization.words,
                 autofillHints: const <String>[AutofillHints.creditCardName],
                 decoration: const InputDecoration(

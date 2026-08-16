@@ -27,7 +27,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       icon: Icons.storefront_outlined,
       title: 'Welcome to Aster',
       body:
-          'A storefront built to be browsed — a real catalogue, a bag that '
+          'A storefront built to be browsed — a real catalog, a bag that '
           'remembers, orders that move along on their own.',
     ),
     _Page(

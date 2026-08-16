@@ -225,7 +225,7 @@ void main() {
       );
     });
 
-    testWidgets('leaves the favourite button separately reachable', (
+    testWidgets('leaves the favorite button separately reachable', (
       WidgetTester tester,
     ) async {
       await pumpBare(

@@ -346,7 +346,7 @@ void main() {
       expect(item.subtitle, contains('only 2 left'));
     });
 
-    test('a sold-out favourite is left to the back-in-stock watch', () async {
+    test('a sold-out favorite is left to the back-in-stock watch', () async {
       final ProviderContainer c = await container(
         prefs: <String, Object>{
           'favorites.ids': <String>['gone'],

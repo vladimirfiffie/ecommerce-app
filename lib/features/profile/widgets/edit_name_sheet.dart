@@ -64,6 +64,8 @@ class _EditNameSheetState extends ConsumerState<EditNameSheet> {
             TextField(
               controller: _controller,
               autofocus: true,
+              keyboardType: TextInputType.name,
+              autofillHints: const <String>[AutofillHints.name],
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.done,
               maxLength: 32,

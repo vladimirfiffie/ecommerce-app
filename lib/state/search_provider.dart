@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/product.dart';
 import 'app_providers.dart';
 
-/// Lowercased haystacks, one per product, rebuilt only when the catalogue
+/// Lowercased haystacks, one per product, rebuilt only when the catalog
 /// changes.
 ///
 /// [Product.searchIndex] concatenates and lowercases on every call, so
@@ -16,14 +16,14 @@ final Provider<Map<String, String>> searchHaystackProvider =
       };
     });
 
-/// Ranked search over the catalogue.
+/// Ranked search over the catalog.
 ///
 /// Two things this does that a plain `contains` didn't:
 ///
 /// * **Every word has to match, but not as one run.** "tee linen" and
 ///   "blue shirt" now find "Blue Linen Tee"; a contiguous-substring match
 ///   found neither.
-/// * **Results are ordered by how well they match** rather than by catalogue
+/// * **Results are ordered by how well they match** rather than by catalog
 ///   position, so typing a product's name puts it first instead of behind
 ///   whatever happened to share a tag.
 List<Product> searchProducts(

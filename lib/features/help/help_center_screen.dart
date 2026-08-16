@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/release_notes.dart';
@@ -6,15 +9,16 @@ import '../../core/theme/app_theme.dart';
 import '../../data/models/order.dart';
 import '../../shared/widgets/fade_up.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../state/haptics_provider.dart';
 import '../whats_new/whats_new_sheet.dart';
 
 /// FAQs and the one place that says, plainly, that this is a demo.
 ///
 /// The answers are deliberately specific about what this build does and
-/// doesn't do — a help centre that promises a support desk nobody staffs is
-/// worse than no help centre at all.
-class HelpCentreScreen extends StatelessWidget {
-  const HelpCentreScreen({super.key});
+/// doesn't do — a help center that promises a support desk nobody staffs is
+/// worse than no help center at all.
+class HelpCenterScreen extends StatelessWidget {
+  const HelpCenterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +29,7 @@ class HelpCentreScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Help centre')),
+      appBar: AppBar(title: const Text('Help center')),
       body: ListView.separated(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
         itemCount: blocks.length,
@@ -60,7 +64,7 @@ class _Topic {
   final List<_Faq> questions;
 }
 
-/// Written against what the app actually does. If behaviour changes, these
+/// Written against what the app actually does. If behavior changes, these
 /// change with it.
 final List<_Topic> _topics = <_Topic>[
   const _Topic(
@@ -272,16 +276,21 @@ class _TopicCard extends StatelessWidget {
   }
 }
 
-class _FaqTile extends StatelessWidget {
+class _FaqTile extends ConsumerWidget {
   const _FaqTile({required this.faq});
 
   final _Faq faq;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
 
     return ExpansionTile(
+      // A tick as the answer opens, the same as every other control that
+      // reveals something. Routed through the service, so the shopper's
+      // channel and intensity settings apply here as anywhere else.
+      onExpansionChanged: (bool _) =>
+          unawaited(ref.read(hapticsProvider).selection()),
       // The default outline draws a box inside the card it already sits in.
       shape: const Border(),
       collapsedShape: const Border(),
@@ -302,12 +311,14 @@ class _FaqTile extends StatelessWidget {
 }
 
 /// Where a real storefront would put a support number.
-class _ContactCard extends StatelessWidget {
+class _ContactCard extends ConsumerWidget {
   const _ContactCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
+    // Leaving for a browser or opening a sheet is a press, not a tick.
+    void tapped() => unawaited(ref.read(hapticsProvider).impact());
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,12 +350,18 @@ class _ContactCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall,
                   ),
                   trailing: const Icon(Icons.open_in_new_rounded, size: 18),
-                  onTap: () => launchUrl(
-                    Uri.parse(
-                      'https://github.com/vladimirfiffie/ecommerce-app/issues',
-                    ),
-                    mode: LaunchMode.externalApplication,
-                  ),
+                  onTap: () {
+                    tapped();
+                    unawaited(
+                      launchUrl(
+                        Uri.parse(
+                          'https://github.com/vladimirfiffie/'
+                          'ecommerce-app/issues',
+                        ),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                    );
+                  },
                 ),
                 ListTile(
                   leading: Icon(
@@ -357,11 +374,16 @@ class _ContactCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall,
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => showWhatsNewSheet(
-                    context,
-                    notes: kReleaseNotes,
-                    offerMute: false,
-                  ),
+                  onTap: () {
+                    tapped();
+                    unawaited(
+                      showWhatsNewSheet(
+                        context,
+                        notes: kReleaseNotes,
+                        offerMute: false,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

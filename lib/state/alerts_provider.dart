@@ -54,7 +54,7 @@ final isWatchingStockProvider = Provider.family<bool, String>(
       ref.watch(stockWatchProvider).contains(productId),
 );
 
-/// Last price seen for each favourited product, so a drop can be detected.
+/// Last price seen for each favorited product, so a drop can be detected.
 class PriceWatchNotifier extends Notifier<Map<String, double>> {
   static const String _key = 'alerts.priceSnapshots';
 
@@ -111,7 +111,7 @@ class AlertSweepResult {
 ///
 /// The bundled catalog is static, so in this build a restock only fires if the
 /// data changes underneath — the plumbing is real, the events are rare. Price
-/// snapshots are taken the first time a product is favourited, so a genuine
+/// snapshots are taken the first time a product is favorited, so a genuine
 /// price change would be caught.
 class AlertSweeper {
   const AlertSweeper(this.ref);
@@ -143,14 +143,14 @@ class AlertSweeper {
       await ref.read(stockWatchProvider.notifier).stopWatching(id);
     }
 
-    // Price drops on favourites.
-    final Set<String> favourites = ref.read(favoritesProvider);
+    // Price drops on favorites.
+    final Set<String> favorites = ref.read(favoritesProvider);
     final Map<String, double> snapshots = <String, double>{
       ...ref.read(priceWatchProvider),
     };
     final Map<String, double> next = <String, double>{};
 
-    for (final String id in favourites) {
+    for (final String id in favorites) {
       final Product? product = catalog.byId(id);
       if (product == null) continue;
 

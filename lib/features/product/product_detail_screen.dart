@@ -78,7 +78,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       return;
     }
     if (product.colors.isNotEmpty && _color == null) {
-      _nudge('Pick a colour first');
+      _nudge('Pick a color first');
       return;
     }
 

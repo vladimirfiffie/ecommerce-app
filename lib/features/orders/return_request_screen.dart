@@ -194,6 +194,8 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
             minLines: 2,
             maxLines: 4,
             maxLength: 300,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
             textCapitalization: TextCapitalization.sentences,
             decoration: const InputDecoration(
               labelText: 'Anything else? (optional)',

@@ -63,7 +63,7 @@ void main() {
       expect(zip(''), isNotNull);
     });
 
-    test('the US is recognised however it is spelled', () {
+    test('the US is recognized however it is spelled', () {
       for (final String country in <String>[
         'US',
         'usa',

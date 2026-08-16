@@ -127,8 +127,8 @@ const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
       ),
       ReleaseHighlight(
         'help_outline_rounded',
-        'A help centre that exists',
-        'Profile → Help centre used to promise itself for later. It now '
+        'A help center that exists',
+        'Profile → Help center used to promise itself for later. It now '
             'opens on answers about orders, returns, payment and what we '
             'keep on your device — written against what the app really does.',
       ),
@@ -176,7 +176,7 @@ const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
       ReleaseHighlight(
         'cloud_off_rounded',
         'The shop opens without a signal',
-        'Aster now keeps the catalogue on your device, so your bag, your '
+        'Aster now keeps the catalog on your device, so your bag, your '
             'saved items and your orders still open with no connection. When '
             'something genuinely can’t be reached it says so, instead of '
             'looking like you own nothing.',
@@ -374,7 +374,7 @@ const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
       ReleaseHighlight(
         'cloud_download_outlined',
         'Live products',
-        'The catalogue is fetched fresh instead of shipped inside the app, '
+        'The catalog is fetched fresh instead of shipped inside the app, '
             'so the shop needs a connection now.',
       ),
       ReleaseHighlight(
@@ -435,7 +435,7 @@ const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
     highlights: <ReleaseHighlight>[
       ReleaseHighlight(
         'palette_outlined',
-        'Eight colour themes',
+        'Eight color themes',
         'Plus AMOLED black, and Material You on Android 12+.',
       ),
       ReleaseHighlight(

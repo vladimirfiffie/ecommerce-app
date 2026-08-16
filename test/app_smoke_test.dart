@@ -101,7 +101,7 @@ void main() {
     );
     await settle(tester);
 
-    // The tee has no size or colour options, so it adds in one tap.
+    // The tee has no size or color options, so it adds in one tap.
     await container
         .read(cartProvider.notifier)
         .add(catalog.byId('tee')!, quantity: 2);

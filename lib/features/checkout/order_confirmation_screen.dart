@@ -67,7 +67,7 @@ class _OrderConfirmationScreenState
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(
-              // Centred and width-limited rather than stretched: a
+              // Centered and width-limited rather than stretched: a
               // confirmation is a short message, not a page of content.
               constraints: const BoxConstraints(maxWidth: 520),
               child: Padding(

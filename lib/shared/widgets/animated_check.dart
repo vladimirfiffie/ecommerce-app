@@ -92,13 +92,13 @@ class _CheckPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset centre = size.center(Offset.zero);
+    final Offset center = size.center(Offset.zero);
     final double radius = size.width / 2 - size.width * 0.06;
 
     // Halo: expands past the ring and fades out as it goes.
     if (halo > 0 && halo < 1) {
       canvas.drawCircle(
-        centre,
+        center,
         radius * (1 + halo * 0.35),
         Paint()
           ..color = color.withValues(alpha: 0.18 * (1 - halo))
@@ -107,7 +107,7 @@ class _CheckPainter extends CustomPainter {
     }
 
     canvas.drawCircle(
-      centre,
+      center,
       radius,
       Paint()..color = color.withValues(alpha: 0.14 * ring),
     );
@@ -122,7 +122,7 @@ class _CheckPainter extends CustomPainter {
     // Ring sweeps from 12 o'clock.
     if (ring > 0) {
       canvas.drawArc(
-        Rect.fromCircle(center: centre, radius: radius),
+        Rect.fromCircle(center: center, radius: radius),
         -math.pi / 2,
         2 * math.pi * ring,
         false,

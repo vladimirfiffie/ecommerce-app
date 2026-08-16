@@ -108,7 +108,7 @@ void main() {
       expect(find.text('Shipped'), findsNothing);
     });
 
-    testWidgets('the notice is drawn in the error colour', (
+    testWidgets('the notice is drawn in the error color', (
       WidgetTester tester,
     ) async {
       final ProviderContainer c = await openOrder(tester);

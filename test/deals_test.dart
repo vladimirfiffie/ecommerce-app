@@ -106,7 +106,7 @@ void main() {
       expect(dealsFor(const <Product>[], DateTime(2026, 8, 11)), isEmpty);
     });
 
-    test('works its way through the catalogue over a fortnight', () {
+    test('works its way through the catalog over a fortnight', () {
       final List<Product> products = pool(40);
       final Set<String> seen = <String>{};
       for (int d = 0; d < 14; d++) {

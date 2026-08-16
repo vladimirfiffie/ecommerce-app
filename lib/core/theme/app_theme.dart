@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Aster's visual language: one seed colour, two schemes, shared shape and
+/// Aster's visual language: one seed color, two schemes, shared shape and
 /// component styling so every surface in the app agrees.
 abstract final class AppTheme {
   /// Brand seed — a deep violet that reads well in both schemes.
@@ -76,7 +76,7 @@ abstract final class AppTheme {
   /// Pushes a dark scheme to true black.
   ///
   /// Only the surface family is flattened — keeping the accent, container and
-  /// "on" colours intact preserves contrast and the brand palette. Elevation
+  /// "on" colors intact preserves contrast and the brand palette. Elevation
   /// tiers stay faintly distinguishable so cards and sheets don't dissolve
   /// into the background.
   static ColorScheme _toAmoled(ColorScheme scheme) => scheme.copyWith(

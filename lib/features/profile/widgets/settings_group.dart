@@ -35,7 +35,7 @@ class SettingsGroup extends StatelessWidget {
             ),
           ),
         ),
-        // Material rather than a coloured Container: the rows are ListTiles,
+        // Material rather than a colored Container: the rows are ListTiles,
         // which paint their ink on the nearest Material ancestor.
         Material(
           color: theme.colorScheme.surfaceContainerLow,

@@ -264,7 +264,7 @@ void main() {
     }
   });
 
-  group('order status colours', () {
+  group('order status colors', () {
     Future<ColorScheme> pumpPill(
       WidgetTester tester,
       OrderStatus status,

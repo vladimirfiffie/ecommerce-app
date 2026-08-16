@@ -245,7 +245,7 @@ class _Suggestions extends ConsumerWidget {
         const SizedBox(height: 12),
         // Real categories with their own artwork, rather than a hardcoded
         // list of words — a picture says what "Fragrances" is faster than
-        // the chip did, and these follow the live catalogue.
+        // the chip did, and these follow the live catalog.
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// A filled button in the error colour, for the action that deletes,
+/// A filled button in the error color, for the action that deletes,
 /// cancels, or otherwise can't be taken back.
 class DangerButton extends StatelessWidget {
   const DangerButton({
@@ -43,7 +43,7 @@ class DangerButton extends StatelessWidget {
 /// Asks before something irreversible, with the confirming button in red.
 ///
 /// Every destructive flow in the app routes through here so the wording and
-/// the colour are the same wherever you meet one — previously each screen
+/// the color are the same wherever you meet one — previously each screen
 /// hand-rolled its own dialog with a plain primary button, which made
 /// "Remove" look exactly like "Save".
 ///

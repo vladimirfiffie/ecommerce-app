@@ -210,7 +210,7 @@ void main() {
       expect(n.shown, isEmpty);
     });
 
-    test('only favourites are tracked', () async {
+    test('only favorites are tracked', () async {
       final (ProviderContainer c, RecordingNotifications _) = await setUpSweep(
         catalog: catalogWith(teeStock: 0),
       );

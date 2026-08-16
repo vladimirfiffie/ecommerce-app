@@ -36,7 +36,7 @@ class ProductCard extends StatelessWidget {
   /// Marked as the current item in a two-pane layout.
   final bool selected;
 
-  /// Overrides the default push-a-route behaviour.
+  /// Overrides the default push-a-route behavior.
   final VoidCallback? onTap;
 
   /// Search terms to pick out in the name, so a result shows why it matched.
@@ -48,7 +48,7 @@ class ProductCard extends StatelessWidget {
 
     // The card is one thing to a screen reader — brand, name, rating, price
     // and stock read as a single sentence rather than six stops on the way
-    // past. The favourite button stays outside that node: it's a separate
+    // past. The favorite button stays outside that node: it's a separate
     // action, so it has to stay separately reachable.
     return SizedBox(
       width: width,

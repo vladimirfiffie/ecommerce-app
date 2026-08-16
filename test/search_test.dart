@@ -86,7 +86,7 @@ void main() {
         p('tagged', 'Wool Coat', tags: <String>['linen']),
         p('named', 'Linen'),
       ];
-      // Catalogue order would have put the tag hit first.
+      // Catalog order would have put the tag hit first.
       expect(run(products, 'linen').first.id, 'named');
     });
 
@@ -177,7 +177,7 @@ void main() {
 
       expect(find.text('Browse'), findsOneWidget);
       expect(find.byType(ActionChip), findsNothing);
-      // One tappable picture per category in the live catalogue.
+      // One tappable picture per category in the live catalog.
       expect(find.byType(AppImage), findsWidgets);
     });
 

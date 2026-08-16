@@ -110,7 +110,7 @@ class OrderCard extends ConsumerWidget {
   /// Highlighted as the current order in a two-pane layout.
   final bool selected;
 
-  /// Overrides the default push-a-route behaviour.
+  /// Overrides the default push-a-route behavior.
   final VoidCallback? onTap;
 
   @override

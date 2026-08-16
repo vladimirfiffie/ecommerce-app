@@ -41,7 +41,7 @@ void main() {
     }
   }
 
-  /// A product with no size or colour choices, so it adds in one tap.
+  /// A product with no size or color choices, so it adds in one tap.
   Product simpleProduct(ProviderContainer container) => container
       .read(catalogDataProvider)
       .products

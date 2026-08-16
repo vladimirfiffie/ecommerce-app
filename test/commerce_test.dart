@@ -97,9 +97,9 @@ void main() {
       expect(card.expiryYear, 2028);
       expect(card.label, 'Visa •••• 4242');
 
-      final String serialised = card.toJson().toString();
-      expect(serialised, isNot(contains(visa)));
-      expect(serialised, isNot(contains('424242424242')));
+      final String serialized = card.toJson().toString();
+      expect(serialized, isNot(contains(visa)));
+      expect(serialized, isNot(contains('424242424242')));
     });
 
     test('the full number never reaches storage', () async {

@@ -91,7 +91,7 @@ class Product {
   final List<String> images;
 
   /// Clip URLs, shown in the gallery ahead of the photos. Usually empty: the
-  /// live catalogue has no video, so these are seeded for a few items.
+  /// live catalog has no video, so these are seeded for a few items.
   final List<String> videos;
 
   final double rating;
@@ -198,7 +198,7 @@ class ProductSpecs {
   final String? shipping;
   final String? returnPolicy;
 
-  /// Some catalogue lines only sell in bulk. Only worth showing above 1.
+  /// Some catalog lines only sell in bulk. Only worth showing above 1.
   final int? minimumOrderQuantity;
 
   bool get hasDimensions =>
@@ -228,7 +228,7 @@ class ProductSpecs {
   };
 }
 
-/// A named colourway, stored as an ARGB value so it survives serialisation.
+/// A named colorway, stored as an ARGB value so it survives serialization.
 @immutable
 class ProductColor {
   const ProductColor(this.name, this.argb);

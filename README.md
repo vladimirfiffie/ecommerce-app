@@ -35,7 +35,7 @@ just Flutter widgets and pub plugins.
 | **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
 | **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
 | **Deep links** | `aster://product/<id>` and https App Links resolve to in-app routes |
-| **Personalization** | Time-aware greeting using your name, and 8 seed-colour presets that Material 3 expands into full light/dark schemes |
+| **Personalization** | Time-aware greeting using your name, and 8 seed-color presets that Material 3 expands into full light/dark schemes |
 | **Accounts** | Local sign-up / sign-in with PBKDF2-hashed passwords. Optional — everything works as a guest |
 | **Wallet** | Add/remove cards with Luhn validation and brand detection; only the last four digits are stored, never the CVV |
 | **Settings** | Grouped by concern: account, shopping, appearance, feedback, security, data |
@@ -157,7 +157,7 @@ Coverage spans cart maths (variant merging, stock caps, promos, shipping
 thresholds), catalog filtering and sorting, feed parsing and its error paths,
 the offline snapshot and its staleness rules, order-line snapshots against a
 repriced or shrunken feed, haptic gating and intensity scaling, breakpoint and
-AMOLED behaviour, the biometric payment gate, notification gating, review
+AMOLED behavior, the biometric payment gate, notification gating, review
 storage and rating maths, screen-reader labels and Flutter's own tap-target,
 label and contrast guidelines, and locale-aware money and dates — plus widget
 tests that drive the real purchase flow end to end: shop → product → bag →

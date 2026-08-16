@@ -188,7 +188,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         notifier.setThemeMode(s.first),
                   ),
                   const SizedBox(height: 18),
-                  Text('Colour', style: theme.textTheme.titleSmall),
+                  Text('Color', style: theme.textTheme.titleSmall),
                   const SizedBox(height: 8),
                   ThemePicker(
                     dynamicActive:
