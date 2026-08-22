@@ -190,17 +190,37 @@ when an unregistered notification plugin raised a `LateInitializationError`
 
 ## Releases
 
-Pushing a `v*` tag runs `.github/workflows/release.yml`, which analyzes, tests,
-builds APKs (per-ABI plus universal) and publishes them as a GitHub
-**prerelease**.
+`.github/workflows/release.yml` analyzes, tests, builds APKs (per-ABI plus
+universal) and publishes them as a GitHub release. There are three ways to set
+it off.
+
+**Bump the version and push to main.** The tag is created for you, on GitHub's
+side, so a machine that can commit but not push tags can still cut a release:
 
 ```bash
-git tag v0.11.1
-git push origin v0.11.1
+# pubspec.yaml:  version: 0.15.0+19  ->  0.16.0+20
+git push origin main
 ```
 
-Grab `aster-v0.11.1-arm64-v8a.apk` for most modern phones, or the `universal` APK
-if you're unsure. You'll need to allow installs from unknown sources.
+A push to main whose version has already been released does nothing — the
+`decide` job checks the remote for the tag first, so ordinary commits don't
+spend ten minutes rebuilding a shipped version.
+
+**Or push a tag yourself**, which is what it has always done:
+
+```bash
+git tag v0.16.0
+git push origin v0.16.0
+```
+
+**Or run it by hand** from the Actions tab, giving the version label as input.
+
+Either way the version comes from one place: a test pins `pubspec.yaml` to
+`lib/core/release_notes.dart`, so the tag, the in-app "What's new" sheet and
+the published notes can't name three different versions.
+
+Grab `aster-v0.15.0-arm64-v8a.apk` for most modern phones, or the `universal`
+APK if you're unsure. You'll need to allow installs from unknown sources.
 
 > APKs are **signed with Android's debug key**. That's fine for sideloaded
 > testing but not for distribution — add a real signing config in

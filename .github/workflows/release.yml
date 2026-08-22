@@ -1,10 +1,18 @@
 name: Release
 
-# Push a tag to cut a build:
-#   git tag v0.1.0 && git push origin v0.1.0
-# Tags containing a hyphen (v0.1.0-beta.1) are also treated as prereleases.
+# Three ways to cut a build:
+#
+#   1. Bump `version:` in pubspec.yaml and push to main. The release is cut
+#      for you and the tag is created server-side — no local tag push, which
+#      is the step that used to strand a release on a machine that could
+#      commit but not push tags.
+#   2. Push a tag yourself:  git tag v0.1.0 && git push origin v0.1.0
+#   3. Run this workflow by hand from the Actions tab.
+#
+# Tags containing a hyphen (v0.1.0-beta.1) are treated as prereleases.
 on:
   push:
+    branches: [main]
     tags:
       - 'v*'
   workflow_dispatch:
@@ -18,8 +26,68 @@ permissions:
   contents: write
 
 jobs:
+  # Cheap gate, so an ordinary commit to main doesn't spend ten minutes
+  # building an APK for a version that has already shipped.
+  decide:
+    name: Decide whether to release
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      prerelease: ${{ steps.resolve.outputs.prerelease }}
+      publish: ${{ steps.resolve.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version and decide
+        id: resolve
+        run: |
+          set -euo pipefail
+
+          case "${{ github.event_name }}" in
+            workflow_dispatch) TAG="${{ inputs.tag }}" ;;
+            *)
+              if [ "${GITHUB_REF_TYPE:-branch}" = "tag" ]; then
+                TAG="${GITHUB_REF_NAME}"
+              else
+                # pubspec is the source of truth on a branch push. A test
+                # already pins it to lib/core/release_notes.dart, so the tag,
+                # the in-app "What's new" sheet and the published notes
+                # cannot name three different versions.
+                VERSION=$(sed -n 's/^version: *\([0-9][^+ ]*\).*/\1/p' pubspec.yaml)
+                if [ -z "$VERSION" ]; then
+                  echo "::error::could not read version from pubspec.yaml"
+                  exit 1
+                fi
+                TAG="v${VERSION}"
+              fi
+              ;;
+          esac
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+          # Only hyphenated tags (v0.4.0-beta.1) are prereleases. A plain
+          # vX.Y.Z is a full release, so GitHub gives it the "Latest" badge —
+          # marking everything prerelease leaves /releases/latest a 404 and
+          # the releases page looking like a bare list of tags.
+          case "$TAG" in
+            *-*) echo "prerelease=true"  >> "$GITHUB_OUTPUT" ;;
+            *)   echo "prerelease=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+          # A branch push only releases a version that hasn't shipped. Without
+          # this, every commit to main would try to republish the same tag.
+          if [ "${{ github.event_name }}" = "push" ] && [ "${GITHUB_REF_TYPE:-branch}" = "branch" ] \
+             && git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::${TAG} is already released — bump version in pubspec.yaml to cut a new one."
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Releasing ${TAG}"
+          fi
+
   android:
     name: Build Android
+    needs: decide
+    if: needs.decide.outputs.publish == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,26 +113,6 @@ jobs:
       - name: Test
         run: flutter test
 
-      - name: Resolve version label
-        id: version
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ inputs.tag }}"
-          else
-            TAG="${GITHUB_REF_NAME}"
-          fi
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-
-          # Only hyphenated tags (v0.4.0-beta.1) are prereleases. A plain
-          # vX.Y.Z is a full release, so GitHub gives it the "Latest" badge —
-          # marking everything prerelease leaves /releases/latest a 404 and
-          # the releases page looking like a bare list of tags.
-          case "$TAG" in
-            *-*) echo "prerelease=true"  >> "$GITHUB_OUTPUT" ;;
-            *)   echo "prerelease=false" >> "$GITHUB_OUTPUT" ;;
-          esac
-          echo "Publishing ${TAG} as prerelease=$(case "$TAG" in *-*) echo true;; *) echo false;; esac)"
-
       # Debug-signed: this is a test build, not a Play Store artifact.
       # Installing it requires "install from unknown sources".
       - name: Build release APKs (split per ABI)
@@ -76,7 +124,7 @@ jobs:
       - name: Rename artifacts
         run: |
           mkdir -p dist
-          V="${{ steps.version.outputs.tag }}"
+          V="${{ needs.decide.outputs.tag }}"
           cp build/app/outputs/flutter-apk/app-release.apk "dist/aster-${V}-universal.apk"
           for abi in arm64-v8a armeabi-v7a x86_64; do
             src="build/app/outputs/flutter-apk/app-${abi}-release.apk"
@@ -93,17 +141,24 @@ jobs:
       - name: Generate release notes
         run: |
           dart run tool/generate_release_notes.dart \
-            "${{ steps.version.outputs.tag }}" > RELEASE_NOTES.md
+            "${{ needs.decide.outputs.tag }}" > RELEASE_NOTES.md
           cat RELEASE_NOTES.md
 
-      - name: Publish prerelease
-        if: startsWith(github.ref, 'refs/tags/v')
+      # No `if` here any more: the decide job already settled whether this
+      # version should ship, and a branch push has to publish too or
+      # releasing from main doesn't happen at all.
+      #
+      # tag_name is what makes that work — the action creates the tag at this
+      # commit when it doesn't exist yet, so nobody has to push one.
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          prerelease: ${{ steps.version.outputs.prerelease }}
+          tag_name: ${{ needs.decide.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          prerelease: ${{ needs.decide.outputs.prerelease }}
           generate_release_notes: true
-          make_latest: ${{ steps.version.outputs.prerelease == 'false' }}
-          name: Aster ${{ steps.version.outputs.tag }}
+          make_latest: ${{ needs.decide.outputs.prerelease == 'false' }}
+          name: Aster ${{ needs.decide.outputs.tag }}
           files: dist/*.apk
           # Same copy as the in-app "What's new" sheet, generated from
           # lib/core/release_notes.dart so the two can't drift.
