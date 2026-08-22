@@ -165,10 +165,7 @@ void main() {
 
     // The size dropdown sits under the sticky buy bar until the page is
     // scrolled, and its options only exist once it is open.
-    await revealAndTap(
-      tester,
-      find.byType(DropdownButtonFormField<String>),
-    );
+    await revealAndTap(tester, find.byType(DropdownButtonFormField<String>));
     await tester.tap(find.text('M').last);
     await settle(tester);
 

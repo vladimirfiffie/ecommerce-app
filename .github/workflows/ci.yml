@@ -47,8 +47,15 @@ jobs:
 
       # Printed rather than uploaded: no third-party token to keep alive, and
       # the number is right there in the log next to the run that produced it.
+      #
+      # always(), so a run whose tests failed still reports what it covered —
+      # but only where there is something to report on. On its own, always()
+      # meant any failure *before* the test step ended with lcov complaining
+      # it "cannot read file coverage/lcov.info", which reads like a second
+      # fault and buries the formatting or analyzer error that actually
+      # stopped the run.
       - name: Coverage summary
-        if: always()
+        if: always() && hashFiles('coverage/lcov.info') != ''
         run: |
           sudo apt-get update && sudo apt-get install -y lcov
           lcov --summary coverage/lcov.info
