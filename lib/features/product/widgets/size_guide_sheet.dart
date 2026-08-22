@@ -78,14 +78,23 @@ Future<void> showSizeGuideSheet(BuildContext context, Product product) {
   );
 }
 
-class SizeGuideSheet extends StatelessWidget {
+class SizeGuideSheet extends StatefulWidget {
   const SizeGuideSheet({required this.chart, super.key});
 
+  /// The chart the product itself implies — where the sheet opens.
   final SizeChart chart;
+
+  @override
+  State<SizeGuideSheet> createState() => _SizeGuideSheetState();
+}
+
+class _SizeGuideSheetState extends State<SizeGuideSheet> {
+  late SizeChart _chart = widget.chart;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final SizeChart chart = _chart;
 
     return SafeArea(
       top: false,
@@ -95,12 +104,34 @@ class SizeGuideSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(chart.title, style: theme.textTheme.titleLarge),
+            // The product picks the chart it opens on, but a shopper buying a
+            // gift is looking for a different one — so every chart is here,
+            // rather than only the one this product happens to imply.
+            DropdownButtonFormField<SizeChart>(
+              initialValue: chart,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: 'Size chart',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              items: <DropdownMenuItem<SizeChart>>[
+                for (final SizeChart option in SizeChart.values)
+                  DropdownMenuItem<SizeChart>(
+                    value: option,
+                    child: Text(option.title),
+                  ),
+              ],
+              onChanged: (SizeChart? next) {
+                if (next != null) setState(() => _chart = next);
+              },
+            ),
             const SizedBox(height: 16),
             // Charts are wide; let them scroll rather than squeeze.
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
+                key: ValueKey<SizeChart>(chart),
                 headingRowHeight: 40,
                 dataRowMinHeight: 38,
                 dataRowMaxHeight: 44,
