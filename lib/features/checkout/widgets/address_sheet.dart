@@ -127,6 +127,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                     flex: 2,
                     child: TextFormField(
                       controller: _recipient,
+                      keyboardType: TextInputType.name,
                       validator: (String? v) =>
                           AddressValidator.validateRecipient(v ?? ''),
                       textCapitalization: TextCapitalization.words,
@@ -183,6 +184,13 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                             v ?? '',
                             country: _country.text,
                           ),
+                      // A US ZIP is five digits, so it gets the number pad.
+                      // Everywhere else a postcode can hold letters — the
+                      // same rule the label and the validator already follow.
+                      keyboardType:
+                          AddressValidator.isUnitedStates(_country.text)
+                          ? TextInputType.number
+                          : TextInputType.text,
                       textCapitalization: TextCapitalization.characters,
                       textInputAction: TextInputAction.next,
                       autofillHints: const <String>[AutofillHints.postalCode],

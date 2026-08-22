@@ -283,17 +283,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: hapticSummary,
               onTap: () => _open(SettingsPane.haptics, Routes.haptics, twoPane),
             ),
-            SettingsRow(
-              icon: Icons.inbox_outlined,
-              title: 'Your notifications',
-              subtitle: () {
-                final int unread = ref.watch(unreadInboxCountProvider);
-                return unread == 0
-                    ? 'Everything the app has told you'
-                    : '$unread unread';
-              }(),
-              onTap: () => context.push(Routes.inbox),
-            ),
+            // The inbox is not listed here. It has a front door already —
+            // the bell on Home, with the unread count on it — and a second
+            // entry called "Your notifications" sitting directly above
+            // "Notifications" read as two notification centres rather than
+            // as a list and the switches that govern it.
             SettingsRow(
               icon: Icons.notifications_outlined,
               title: 'Notifications',

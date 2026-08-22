@@ -135,6 +135,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     if (_signUp) ...<Widget>[
                       TextFormField(
                         controller: _name,
+                        keyboardType: TextInputType.name,
                         textCapitalization: TextCapitalization.words,
                         textInputAction: TextInputAction.next,
                         autofillHints: const <String>[AutofillHints.name],
