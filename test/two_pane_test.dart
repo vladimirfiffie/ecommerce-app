@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers.dart';
-import 'package:ecommerce_app/state/favorites_provider.dart';
+import 'package:ecommerce_app/state/wishlists_provider.dart';
 
 void main() {
   setUpAll(configureTestEnvironment);
@@ -211,7 +211,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final ProviderContainer c = await pumpAt(tester, tablet);
-      await c.read(favoritesProvider.notifier).toggle('tee');
+      await c.read(wishListsProvider.notifier).toggle('tee');
       await settle(tester);
 
       await tester.tap(find.text('Saved').last);

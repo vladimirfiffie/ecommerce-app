@@ -14,7 +14,7 @@ import '../../state/biometrics_provider.dart';
 import '../../state/cart_provider.dart';
 import '../../state/catalog_filter_provider.dart';
 import '../../state/credit_provider.dart';
-import '../../state/favorites_provider.dart';
+import '../../state/wishlists_provider.dart';
 import '../../state/haptics_provider.dart';
 import '../../state/inbox_provider.dart';
 import '../../state/notifications_provider.dart';
@@ -374,7 +374,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               destructive: true,
               onConfirm: () {
                 ref.read(cartProvider.notifier).clear();
-                ref.read(favoritesProvider.notifier).clear();
+                ref.read(wishListsProvider.notifier).clear();
                 ref.read(ordersProvider.notifier).clear();
                 ref.read(searchHistoryProvider.notifier).clear();
                 ref.read(recentlyViewedProvider.notifier).clear();

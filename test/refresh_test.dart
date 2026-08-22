@@ -13,7 +13,7 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers.dart';
-import 'package:ecommerce_app/state/favorites_provider.dart';
+import 'package:ecommerce_app/state/wishlists_provider.dart';
 
 void main() {
   setUpAll(configureTestEnvironment);
@@ -109,7 +109,7 @@ void main() {
       );
       // Saved shows its empty state with nothing in it, and an empty
       // wishlist has nothing to refresh into.
-      await c.read(favoritesProvider.notifier).toggle('tee');
+      await c.read(wishListsProvider.notifier).toggle('tee');
       await settle(tester);
 
       for (final String tab in <String>['Shop', 'Saved']) {

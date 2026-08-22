@@ -1,54 +1,47 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/product.dart';
+import '../data/models/wish_list.dart';
 import '../data/repositories/product_repository.dart';
 import 'app_providers.dart';
+import 'wishlists_provider.dart';
 
-/// Wishlist, stored as a set of product ids.
-class FavoritesNotifier extends Notifier<Set<String>> {
-  static const String _key = 'favorites.ids';
+/// Everything saved, in any list.
+///
+/// Kept as the seam it always was: a heart, a tab badge and the price-drop
+/// alerts all want "is this saved" and none of them care which list it landed
+/// in. What changed underneath is that there is now more than one list — see
+/// [WishListsNotifier].
+final Provider<Set<String>> favoritesProvider = Provider<Set<String>>(
+  (Ref ref) => <String>{
+    for (final WishList list in ref.watch(wishListsProvider))
+      ...list.productIds,
+  },
+);
 
-  SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
-
-  @override
-  Set<String> build() =>
-      (_prefs.getStringList(_key) ?? const <String>[]).toSet();
-
-  bool contains(String productId) => state.contains(productId);
-
-  /// Returns true when the product ended up favorited.
-  Future<bool> toggle(String productId) async {
-    final Set<String> next = <String>{...state};
-    final bool added = next.add(productId);
-    if (!added) next.remove(productId);
-    state = next;
-    await _prefs.setStringList(_key, next.toList());
-    return added;
-  }
-
-  Future<void> clear() async {
-    state = <String>{};
-    await _prefs.remove(_key);
-  }
-}
-
-final NotifierProvider<FavoritesNotifier, Set<String>> favoritesProvider =
-    NotifierProvider<FavoritesNotifier, Set<String>>(FavoritesNotifier.new);
-
-/// Whether a single product is favorited — cheap to watch per card.
+/// Whether a single product is saved — cheap to watch per card.
 final isFavoriteProvider = Provider.family<bool, String>(
   (Ref ref, String productId) =>
       ref.watch(favoritesProvider).contains(productId),
 );
 
-/// Favorited products resolved against the catalog.
+/// Saved products resolved against the catalog, newest first.
+///
+/// Ordered by when each list saved them rather than by list, so the union
+/// reads as one wishlist — which is what it is, from anywhere but the Saved
+/// tab.
 final Provider<List<Product>> favoriteProductsProvider =
     Provider<List<Product>>((Ref ref) {
-      final Set<String> ids = ref.watch(favoritesProvider);
       final Catalog catalog = ref.watch(catalogDataProvider);
+      final List<String> ordered = <String>[
+        for (final WishList list in ref.watch(wishListsProvider))
+          ...list.productIds,
+      ].reversed.toList();
+
+      final Set<String> seen = <String>{};
       return <Product>[
-        for (final String id in ids)
-          if (catalog.byId(id) case final Product p) p,
+        for (final String id in ordered)
+          if (seen.add(id))
+            if (catalog.byId(id) case final Product p) p,
       ];
     });

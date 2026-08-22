@@ -10,7 +10,10 @@ import '../../shared/widgets/empty_state.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../state/app_providers.dart';
 import '../../state/cart_provider.dart';
-import '../../state/favorites_provider.dart';
+import '../../state/wishlists_provider.dart';
+import '../../data/models/wish_list.dart';
+import '../../shared/widgets/confirm.dart';
+import 'widgets/list_strip.dart';
 import '../../shared/widgets/product_grid.dart';
 import '../../core/layout/breakpoints.dart';
 import '../product/product_detail_screen.dart';
@@ -26,18 +29,25 @@ class FavoritesScreen extends ConsumerStatefulWidget {
 
 class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
   String? _selectedId;
+  String _listId = WishList.defaultId;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final List<Product> products = ref.watch(favoriteProductsProvider);
+    final List<WishList> lists = ref.watch(wishListsProvider);
+
+    // A list the shopper just deleted leaves the tab pointing at nothing.
+    final WishList list = lists.firstWhere(
+      (WishList l) => l.id == _listId,
+      orElse: () => lists.first,
+    );
+    final List<Product> products = ref.watch(wishListProductsProvider(list.id));
     final double gutter = Breakpoints.gutter(Breakpoints.of(context));
 
     // Saved items are ids resolved against the catalog, so "nothing saved" and
     // "couldn't look up what you saved" render identically unless asked apart.
     final AsyncValue<Catalog> catalog = ref.watch(catalogProvider);
-    final bool unresolved =
-        products.isEmpty && ref.watch(favoritesProvider).isNotEmpty;
+    final bool unresolved = products.isEmpty && list.productIds.isNotEmpty;
     final bool twoPane = useTwoPane(context);
     final String? selected =
         twoPane && products.any((Product p) => p.id == _selectedId)
@@ -55,14 +65,21 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 Expanded(
                   child: Text('Saved', style: theme.textTheme.headlineMedium),
                 ),
-                if (products.isNotEmpty)
-                  TextButton(
-                    onPressed: () =>
-                        ref.read(favoritesProvider.notifier).clear(),
-                    child: const Text('Clear'),
-                  ),
+                _ListMenu(
+                  list: list,
+                  onRename: () => _rename(list),
+                  onDelete: () => _delete(list),
+                  onEmpty: () => _empty(list),
+                  onNew: _createList,
+                ),
               ],
             ),
+          ),
+          ListStrip(
+            lists: lists,
+            selectedId: list.id,
+            onSelect: (String id) => setState(() => _listId = id),
+            onNew: _createList,
           ),
           if (products.isNotEmpty)
             Padding(
@@ -96,9 +113,12 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 : products.isEmpty
                 ? EmptyState(
                     icon: Icons.favorite_border_rounded,
-                    title: 'Nothing saved yet',
-                    message:
-                        'Tap the heart on anything you like and it’ll wait for you here.',
+                    title: list.isDefault
+                        ? 'Nothing saved yet'
+                        : '${list.name} is empty',
+                    message: list.isDefault
+                        ? 'Tap the heart on anything you like and it’ll wait for you here.'
+                        : 'Hold the heart on anything you like to put it in this list.',
                     actionLabel: 'Browse the shop',
                     onAction: () => context.go(Routes.catalog),
                   )
@@ -106,6 +126,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                     child: ProductGrid(
                       products: products,
                       heroPrefix: 'saved',
+                      key: ValueKey<String>(list.id),
                       padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 32),
                       selectedId: selected,
                       onSelect: twoPane
@@ -140,6 +161,49 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     );
   }
 
+  Future<void> _createList() async {
+    final String? name = await _askForName(context, title: 'New list');
+    if (name == null) return;
+    final String? id = await ref.read(wishListsProvider.notifier).create(name);
+    if (id != null && mounted) setState(() => _listId = id);
+  }
+
+  Future<void> _rename(WishList list) async {
+    final String? name = await _askForName(
+      context,
+      title: 'Rename list',
+      initial: list.name,
+    );
+    if (name == null) return;
+    await ref.read(wishListsProvider.notifier).rename(list.id, name);
+  }
+
+  Future<void> _delete(WishList list) async {
+    final bool yes = await confirmDestructive(
+      context,
+      title: 'Delete ${list.name}?',
+      message: list.length == 0
+          ? 'The list will be removed.'
+          : 'The list and the ${list.length} '
+                '${list.length == 1 ? 'item' : 'items'} in it will be '
+                'removed. The products themselves stay in the shop.',
+      confirmLabel: 'Delete',
+    );
+    if (!yes) return;
+    await ref.read(wishListsProvider.notifier).delete(list.id);
+    if (mounted) setState(() => _listId = WishList.defaultId);
+  }
+
+  Future<void> _empty(WishList list) async {
+    final bool yes = await confirmDestructive(
+      context,
+      title: 'Empty ${list.name}?',
+      message: 'Everything in this list will be unsaved.',
+      confirmLabel: 'Empty',
+    );
+    if (yes) await ref.read(wishListsProvider.notifier).emptyList(list.id);
+  }
+
   /// Only products with no variant choices can be bulk-added; anything needing
   /// a size or color is skipped so we never guess on the shopper's behalf.
   Future<void> _addAll(
@@ -170,4 +234,86 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       ..clearSnackBars()
       ..showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
+/// Asks for a list name, returning null when the shopper backs out.
+Future<String?> _askForName(
+  BuildContext context, {
+  required String title,
+  String initial = '',
+}) async {
+  final TextEditingController controller = TextEditingController(text: initial);
+  final String? name = await showDialog<String>(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: Text(title),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        maxLength: WishList.maxNameLength,
+        textCapitalization: TextCapitalization.sentences,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (String value) => Navigator.of(context).pop(value),
+        decoration: const InputDecoration(
+          labelText: 'Name',
+          hintText: 'Birthday ideas',
+          counterText: '',
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(controller.text),
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+  controller.dispose();
+  final String? trimmed = name?.trim();
+  return trimmed == null || trimmed.isEmpty ? null : trimmed;
+}
+
+/// Rename, empty, delete — and a way to start another list.
+class _ListMenu extends StatelessWidget {
+  const _ListMenu({
+    required this.list,
+    required this.onRename,
+    required this.onDelete,
+    required this.onEmpty,
+    required this.onNew,
+  });
+
+  final WishList list;
+  final VoidCallback onRename;
+  final VoidCallback onDelete;
+  final VoidCallback onEmpty;
+  final VoidCallback onNew;
+
+  @override
+  Widget build(BuildContext context) => PopupMenuButton<String>(
+    tooltip: 'List options',
+    icon: const Icon(Icons.more_vert_rounded),
+    onSelected: (String value) => switch (value) {
+      'new' => onNew(),
+      'rename' => onRename(),
+      'empty' => onEmpty(),
+      _ => onDelete(),
+    },
+    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+      const PopupMenuItem<String>(value: 'new', child: Text('New list')),
+      const PopupMenuItem<String>(value: 'rename', child: Text('Rename list')),
+      if (list.length > 0)
+        const PopupMenuItem<String>(value: 'empty', child: Text('Empty list')),
+      // The default list has to survive: a heart tap needs somewhere to land.
+      if (!list.isDefault)
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: Text('Delete list'),
+        ),
+    ],
+  );
 }

@@ -4,6 +4,7 @@ import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/state/catalog_filter_provider.dart';
 import 'package:ecommerce_app/state/favorites_provider.dart';
+import 'package:ecommerce_app/state/wishlists_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -185,7 +186,7 @@ void main() {
   group('favorites', () {
     test('toggle adds then removes, and persists', () async {
       final ProviderContainer c = await loaded();
-      final FavoritesNotifier favorites = c.read(favoritesProvider.notifier);
+      final WishListsNotifier favorites = c.read(wishListsProvider.notifier);
 
       expect(await favorites.toggle('mid'), isTrue);
       expect(c.read(isFavoriteProvider('mid')), isTrue);

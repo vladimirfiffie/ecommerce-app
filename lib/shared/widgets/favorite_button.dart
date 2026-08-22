@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/favorites_provider.dart';
+import '../../state/wishlists_provider.dart';
 import '../../state/haptics_provider.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../features/favorites/widgets/save_to_list_sheet.dart';
 
 /// Heart toggle with a pop animation, wired straight to the wishlist.
 class FavoriteButton extends ConsumerStatefulWidget {
@@ -61,9 +63,19 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton>
     super.dispose();
   }
 
+  /// A tap saves; a long press asks where.
+  ///
+  /// The sheet is the second gesture rather than the first because saving
+  /// something has to stay one tap — being asked to pick a list every time
+  /// turns a reflex into a decision.
+  Future<void> _chooseList() async {
+    unawaited(ref.read(hapticsProvider).impact(HapticImpactStyle.medium));
+    await showSaveToListSheet(context, widget.productId);
+  }
+
   Future<void> _toggle() async {
     final bool added = await ref
-        .read(favoritesProvider.notifier)
+        .read(wishListsProvider.notifier)
         .toggle(widget.productId);
     if (added) {
       unawaited(ref.read(hapticsProvider).impact(HapticImpactStyle.light));
@@ -110,10 +122,12 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton>
       label: isFavorite
           ? AppL10n.of(context).removeFromWishlist
           : AppL10n.of(context).saveToWishlist,
+      onLongPressHint: 'Choose a list',
       child: SizedBox.square(
         dimension: FavoriteButton.minTapTarget,
         child: InkResponse(
           onTap: _toggle,
+          onLongPress: _chooseList,
           radius: widget.size + 12,
           child: Center(child: visual),
         ),

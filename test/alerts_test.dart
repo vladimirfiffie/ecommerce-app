@@ -3,7 +3,7 @@ import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/alerts_provider.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
-import 'package:ecommerce_app/state/favorites_provider.dart';
+import 'package:ecommerce_app/state/wishlists_provider.dart';
 import 'package:ecommerce_app/state/notifications_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -217,7 +217,7 @@ void main() {
       await c.read(alertSweeperProvider).sweep();
       expect(c.read(priceWatchProvider), isEmpty);
 
-      await c.read(favoritesProvider.notifier).toggle('coat');
+      await c.read(wishListsProvider.notifier).toggle('coat');
       await c.read(alertSweeperProvider).sweep();
       expect(c.read(priceWatchProvider).keys, <String>['coat']);
     });
