@@ -35,6 +35,8 @@ const Map<String, IconData> _icons = <String, IconData>{
   'receipt_long_outlined': Icons.receipt_long_outlined,
   'animation_outlined': Icons.animation_outlined,
   'bug_report_outlined': Icons.bug_report_outlined,
+  'bookmarks_outlined': Icons.bookmarks_outlined,
+  'show_chart_rounded': Icons.show_chart_rounded,
 };
 
 /// Shows the update sheet.

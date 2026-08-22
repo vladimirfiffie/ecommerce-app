@@ -30,6 +30,65 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.15.0',
+    headline: 'Money you already have, lists you actually keep, and Spanish',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'card_giftcard_rounded',
+        'Gift cards and store credit',
+        'Redeem a code and the balance goes towards your next order before '
+            'any card is charged — all of it, if it stretches that far. '
+            'Cancel an order and the credit comes straight back; return one '
+            'and the share you paid with credit returns the same way.',
+      ),
+      ReleaseHighlight(
+        'bookmarks_outlined',
+        'More than one list',
+        'Saved is now as many lists as you want to keep — gifts, next '
+            'month, whatever you call them. Tapping the heart still saves in '
+            'one tap; hold it to choose where something goes.',
+      ),
+      ReleaseHighlight(
+        'notifications_active_outlined',
+        'Nothing lost to a swiped-away notification',
+        'A bell on Home with everything the shop has told you: '
+            'confirmations, shipping, delivery, refunds. It is read off your '
+            'orders rather than off what happened to get posted, so it is '
+            'there whether or not you caught the notification at the time.',
+      ),
+      ReleaseHighlight(
+        'show_chart_rounded',
+        'What it has actually cost',
+        'The product page notes the price each day you open it, and tells '
+            'you the lowest and highest it has seen — and only ever what it '
+            'has really watched, rather than a line implying a longer memory '
+            'than it has.',
+      ),
+      ReleaseHighlight(
+        'location_on_outlined',
+        'Tell the courier where to leave it',
+        'A drop-off choice and a note — a gate code, the blue door round '
+            'the side — remembered between orders and printed on the '
+            'receipt. Long-press the app icon for Orders, Saved, Search and '
+            'Bag while you are there.',
+      ),
+      ReleaseHighlight(
+        'photo_library_outlined',
+        'Show what it looked like',
+        'Reviews you write can carry up to four photos, which stay on this '
+            'device. Sizes are a dropdown now instead of a wall of buttons, '
+            'and the size guide lets you pick which chart to read.',
+      ),
+      ReleaseHighlight(
+        'translate_rounded',
+        'Ahora en español',
+        'Aster speaks Spanish. The whole buy path — bag, checkout, orders, '
+            'returns and receipts — follows the language your phone is set '
+            'to, alongside the money and dates that already did.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.14.0',
     headline: 'Put things aside, line them up, get the best price',
     highlights: <ReleaseHighlight>[
