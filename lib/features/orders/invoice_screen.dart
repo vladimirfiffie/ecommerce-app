@@ -51,7 +51,13 @@ String buildInvoiceText(Order order, List<OrderLine> items, AppL10n l10n) {
       'Shipping        '
       '${order.shipping == 0 ? 'Free' : formatPrice(order.shipping)}',
     )
-    ..writeln('TOTAL           ${formatPrice(order.total)}')
+    ..writeln('TOTAL           ${formatPrice(order.total)}');
+  if (order.creditApplied > 0) {
+    out
+      ..writeln('Store credit   -${formatPrice(order.creditApplied)}')
+      ..writeln('CHARGED         ${formatPrice(order.cardCharged)}');
+  }
+  out
     ..writeln()
     ..writeln('Delivery: ${order.delivery.labelIn(l10n)}')
     ..writeln('Ship to: ${order.shippingAddress}')
@@ -250,6 +256,10 @@ class InvoiceScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 28),
                 _Row('Ship to', order.shippingAddress, wrap: true),
+                if (order.creditApplied > 0) ...<Widget>[
+                  _Row('Store credit', '−${formatPrice(order.creditApplied)}'),
+                  _Row('Charged', formatPrice(order.cardCharged)),
+                ],
                 _Row('Paid with', order.paymentLabel),
                 if (order.returnRequest case final ReturnRequest r) ...<Widget>[
                   const Divider(height: 28),

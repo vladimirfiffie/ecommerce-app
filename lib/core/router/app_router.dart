@@ -27,6 +27,7 @@ import '../../features/brand/brand_screen.dart';
 import '../../features/profile/my_reviews_screen.dart';
 import '../../features/profile/payment_methods_screen.dart';
 import '../../features/profile/addresses_screen.dart';
+import '../../features/profile/store_credit_screen.dart';
 import '../../features/orders/return_request_screen.dart';
 import '../../features/orders/invoice_screen.dart';
 import '../../features/help/help_center_screen.dart';
@@ -49,6 +50,7 @@ abstract final class Routes {
   static const String notifications = '/settings/notifications';
   static const String addresses = '/settings/addresses';
   static const String payments = '/settings/payments';
+  static const String storeCredit = '/settings/credit';
   static const String orders = '/orders';
   static const String help = '/help';
   static const String myReviews = '/reviews';
@@ -283,6 +285,12 @@ GoRouter createRouter(Ref ref) {
             parentNavigatorKey: _rootKey,
             builder: (BuildContext context, GoRouterState state) =>
                 const PaymentMethodsScreen(),
+          ),
+          GoRoute(
+            path: 'credit',
+            parentNavigatorKey: _rootKey,
+            builder: (BuildContext context, GoRouterState state) =>
+                const StoreCreditScreen(),
           ),
         ],
       ),

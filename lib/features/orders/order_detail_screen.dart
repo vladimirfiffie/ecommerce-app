@@ -145,9 +145,31 @@ class OrderDetailScreen extends ConsumerWidget {
             children: <Widget>[
               Text('Total', style: theme.textTheme.titleMedium),
               const Spacer(),
-              Text(formatPrice(order.total), style: theme.textTheme.titleLarge),
+              Text(
+                formatPrice(order.total),
+                style: order.creditApplied > 0
+                    ? theme.textTheme.titleMedium
+                    : theme.textTheme.titleLarge,
+              ),
             ],
           ),
+          if (order.creditApplied > 0) ...<Widget>[
+            _SummaryRow(
+              label: 'Store credit',
+              value: '−${formatPrice(order.creditApplied)}',
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: <Widget>[
+                Text('Charged', style: theme.textTheme.titleMedium),
+                const Spacer(),
+                Text(
+                  formatPrice(order.cardCharged),
+                  style: theme.textTheme.titleLarge,
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 26),
           Text('Delivery', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -566,7 +588,9 @@ class _ReturnBanner extends ConsumerWidget {
           Text(
             refunded
                 ? '${request.reason.labelIn(AppL10n.of(context))} · '
-                      'refunded to ${order.paymentLabel}'
+                      // A refund goes back the way it was paid, so an order
+                      // part-settled with credit gets part of it back there.
+                      '${order.creditApplied > 0 ? 'refunded to your card and store credit' : 'refunded to ${order.paymentLabel}'}'
                 : '${request.reason.labelIn(AppL10n.of(context))} · '
                       'expect your refund by '
                       '${formatDeliveryDate(request.expectedRefundBy)}',

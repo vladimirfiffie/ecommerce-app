@@ -15,6 +15,7 @@ import '../../shared/widgets/app_image.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../state/addresses_provider.dart';
 import '../../state/cart_provider.dart';
+import '../../state/credit_provider.dart';
 import '../../state/orders_provider.dart';
 import '../cart/widgets/order_summary.dart';
 import 'widgets/address_sheet.dart';
@@ -118,13 +119,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 900));
 
     final PaymentCard? card = ref.read(selectedCardProvider);
+    final CheckoutTotal checkout = ref.read(checkoutTotalProvider);
     final Order order = await ref
         .read(ordersProvider.notifier)
         .placeOrder(
           address: address,
-          paymentLabel: card?.label ?? 'Card on file',
+          // An order settled entirely by credit never reaches a card, so
+          // naming one on the receipt would be a receipt for something that
+          // didn't happen.
+          paymentLabel: checkout.paidEntirelyByCredit
+              ? 'Store credit'
+              : card?.label ?? 'Card on file',
           delivery: ref.read(deliveryOptionProvider),
+          creditApplied: checkout.creditApplied,
         );
+    // Back on for the next order: whether to spend the balance is a decision
+    // about the order in hand, not a setting.
+    ref.read(useStoreCreditProvider.notifier).reset();
     unawaited(ref.read(hapticsProvider).success());
     unawaited(
       ref
@@ -145,7 +156,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final List<CartItem> items = ref.watch(cartItemsProvider);
-    final CartSummary summary = ref.watch(cartSummaryProvider);
+    final CheckoutTotal checkout = ref.watch(checkoutTotalProvider);
+    final double due = checkout.amountDue;
     final Address? address = ref.watch(selectedAddressProvider);
     final PaymentCard? payment = ref.watch(selectedCardProvider);
 
@@ -214,7 +226,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   children: <Widget>[
                     _BagPreview(items: items),
                     const SizedBox(height: 20),
-                    const OrderSummary(),
+                    const OrderSummary(showCredit: true),
                   ],
                 ),
               ),
@@ -264,8 +276,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       // The last step is the irreversible one, so it asks for
                       // a deliberate gesture rather than a single tap.
                       : AsterSlideToConfirm(
-                          label: 'Slide to pay ${formatPrice(summary.total)}',
-                          fallbackLabel: 'Pay ${formatPrice(summary.total)}',
+                          label: 'Slide to pay ${formatPrice(due)}',
+                          fallbackLabel: 'Pay ${formatPrice(due)}',
                           onConfirmed: _placeOrder,
                         ),
                 ),
@@ -521,7 +533,36 @@ class _PaymentStep extends ConsumerWidget {
       children: <Widget>[
         Text('Pay with', style: theme.textTheme.titleLarge),
         const SizedBox(height: 14),
-        if (cards.isEmpty)
+        // Credit that covers the order outright means there is nothing left
+        // for a card to do, so the step stops asking for one.
+        if (ref.watch(checkoutTotalProvider).paidEntirelyByCredit)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+            ),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.account_balance_wallet_outlined,
+                  size: 20,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Your store credit covers this order. No card will be '
+                    'charged.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (cards.isEmpty)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -712,9 +753,10 @@ class _ReviewStep extends StatelessWidget {
           value: payment?.label ?? 'No card selected',
         ),
         const SizedBox(height: 24),
+        const _CreditSection(),
         const _GiftSection(),
         const SizedBox(height: 24),
-        const OrderSummary(title: 'Total'),
+        const OrderSummary(title: 'Total', showCredit: true),
       ],
     );
   }
@@ -833,6 +875,55 @@ class _SelectableTile extends StatelessWidget {
                     : theme.colorScheme.outline,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Store credit, offered on the review step where the total is in view.
+///
+/// Absent entirely when there is no balance — an empty wallet is not something
+/// the shopper needs told about halfway through paying.
+class _CreditSection extends ConsumerWidget {
+  const _CreditSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final double balance = ref.watch(storeCreditProvider);
+    if (balance <= 0) return const SizedBox.shrink();
+
+    final CheckoutTotal checkout = ref.watch(checkoutTotalProvider);
+    final bool use = ref.watch(useStoreCreditProvider);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            secondary: Icon(
+              Icons.account_balance_wallet_outlined,
+              color: theme.colorScheme.primary,
+            ),
+            title: Text('Use store credit', style: theme.textTheme.titleSmall),
+            subtitle: Text(
+              use
+                  ? checkout.paidEntirelyByCredit
+                        ? '${formatPrice(checkout.creditApplied)} covers this '
+                              'order — no card needed'
+                        : '${formatPrice(checkout.creditApplied)} of '
+                              '${formatPrice(balance)} goes on this order'
+                  : '${formatPrice(balance)} available, kept for another time',
+              style: theme.textTheme.bodySmall,
+            ),
+            value: use,
+            onChanged: ref.read(useStoreCreditProvider.notifier).set,
           ),
         ),
       ),

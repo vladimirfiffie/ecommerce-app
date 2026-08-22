@@ -71,7 +71,15 @@ Future<Uint8List> buildInvoicePdf(
             'Shipping',
             order.shipping == 0 ? 'Free' : formatPrice(order.shipping),
           ),
-          _total('Total', formatPrice(order.total), bold: true),
+          _total(
+            'Total',
+            formatPrice(order.total),
+            bold: order.creditApplied <= 0,
+          ),
+          if (order.creditApplied > 0) ...<pw.Widget>[
+            _total('Store credit', '-${formatPrice(order.creditApplied)}'),
+            _total('Charged', formatPrice(order.cardCharged), bold: true),
+          ],
           pw.Spacer(),
           pw.Text(
             'Aster is a demo storefront. No payment was taken.',

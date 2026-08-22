@@ -7,11 +7,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/formatters.dart';
 import '../../state/addresses_provider.dart';
 import '../../state/auth_provider.dart';
 import '../../state/biometrics_provider.dart';
 import '../../state/cart_provider.dart';
 import '../../state/catalog_filter_provider.dart';
+import '../../state/credit_provider.dart';
 import '../../state/favorites_provider.dart';
 import '../../state/haptics_provider.dart';
 import '../../state/notifications_provider.dart';
@@ -26,6 +28,7 @@ import 'widgets/settings_group.dart';
 import 'widgets/theme_picker.dart';
 import 'security_settings_screen.dart';
 import 'payment_methods_screen.dart';
+import 'store_credit_screen.dart';
 import 'notification_settings_screen.dart';
 import 'haptics_settings_screen.dart';
 import 'addresses_screen.dart';
@@ -43,6 +46,7 @@ import '../../core/release_notes.dart';
 enum SettingsPane {
   addresses,
   payments,
+  storeCredit,
   haptics,
   notifications,
   security,
@@ -74,6 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _paneBody(SettingsPane pane) => switch (pane) {
     SettingsPane.addresses => const AddressesScreen(embedded: true),
     SettingsPane.payments => const PaymentMethodsScreen(embedded: true),
+    SettingsPane.storeCredit => const StoreCreditScreen(embedded: true),
     SettingsPane.haptics => const HapticsSettingsScreen(embedded: true),
     SettingsPane.notifications => const NotificationSettingsScreen(
       embedded: true,
@@ -101,6 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final int addressCount = ref.watch(addressesProvider).length;
     final int cardCount = ref.watch(paymentCardsProvider).length;
     final int savedCount = ref.watch(savedForLaterProvider).length;
+    final double credit = ref.watch(storeCreditProvider);
     final int reviewCount = ref.watch(userReviewsProvider).length;
 
     final bool twoPane = useTwoPane(context);
@@ -156,6 +162,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: cardCount == 0 ? 'No cards saved' : '$cardCount saved',
               onTap: () =>
                   _open(SettingsPane.payments, Routes.payments, twoPane),
+            ),
+            SettingsRow(
+              icon: Icons.account_balance_wallet_outlined,
+              title: 'Gift cards & credit',
+              subtitle: credit > 0
+                  ? '${formatPrice(credit)} to spend'
+                  : 'Redeem a gift card',
+              onTap: () =>
+                  _open(SettingsPane.storeCredit, Routes.storeCredit, twoPane),
             ),
             SettingsRow(
               icon: Icons.bookmark_border_rounded,
@@ -343,7 +358,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _DangerRow(
               icon: Icons.delete_sweep_outlined,
               label: 'Reset everything',
-              description: 'Bag, wishlist, orders, cards and history',
+              description: 'Bag, wishlist, orders, cards, credit and history',
               destructive: true,
               onConfirm: () {
                 ref.read(cartProvider.notifier).clear();
@@ -353,6 +368,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ref.read(recentlyViewedProvider.notifier).clear();
                 ref.read(appliedPromoProvider.notifier).clear();
                 ref.read(paymentCardsProvider.notifier).clear();
+                ref.read(creditLedgerProvider.notifier).clear();
               },
             ),
           ],

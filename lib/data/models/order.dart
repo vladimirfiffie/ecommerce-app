@@ -97,6 +97,7 @@ class Order {
     required this.shippingAddress,
     required this.paymentLabel,
     this.deliveryId = 'standard',
+    this.creditApplied = 0,
     this.cancelledAt,
     this.returnRequest,
     this.giftMessage = '',
@@ -119,6 +120,7 @@ class Order {
     shippingAddress: json['shippingAddress'] as String,
     paymentLabel: json['paymentLabel'] as String,
     deliveryId: json['deliveryId'] as String? ?? 'standard',
+    creditApplied: (json['creditApplied'] as num?)?.toDouble() ?? 0,
     cancelledAt: json['cancelledAt'] == null
         ? null
         : DateTime.parse(json['cancelledAt'] as String),
@@ -147,12 +149,21 @@ class Order {
   /// Which [DeliveryOption] was chosen, so the tracker can use its timeline.
   final String deliveryId;
 
+  /// How much of [total] was settled with store credit rather than the card.
+  ///
+  /// Snapshotted like everything else on an order: the balance moves on, and a
+  /// receipt has to keep saying what was paid at the time.
+  final double creditApplied;
+
   final DateTime? cancelledAt;
   final ReturnRequest? returnRequest;
   final String giftMessage;
   final bool giftWrapped;
 
   DeliveryOption get delivery => DeliveryOption.byId(deliveryId);
+
+  /// What the card was charged, once credit had been taken off.
+  double get cardCharged => total - creditApplied;
 
   int get itemCount =>
       lines.fold(0, (int sum, OrderLine l) => sum + l.quantity);
@@ -233,6 +244,7 @@ class Order {
     shippingAddress: shippingAddress ?? this.shippingAddress,
     paymentLabel: paymentLabel,
     deliveryId: deliveryId,
+    creditApplied: creditApplied,
     cancelledAt: cancelledAt ?? this.cancelledAt,
     returnRequest: clearReturn ? null : (returnRequest ?? this.returnRequest),
     giftMessage: giftMessage,
@@ -250,6 +262,7 @@ class Order {
     'shippingAddress': shippingAddress,
     'paymentLabel': paymentLabel,
     'deliveryId': deliveryId,
+    if (creditApplied > 0) 'creditApplied': creditApplied,
     if (cancelledAt != null) 'cancelledAt': cancelledAt!.toIso8601String(),
     if (returnRequest != null) 'returnRequest': returnRequest!.toJson(),
     'giftMessage': giftMessage,

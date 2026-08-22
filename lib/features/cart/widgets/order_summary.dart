@@ -4,19 +4,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../state/cart_provider.dart';
+import '../../../state/credit_provider.dart';
 
 /// Subtotal / discount / shipping / tax / total block, shared by the cart and
 /// the checkout review step.
 class OrderSummary extends ConsumerWidget {
-  const OrderSummary({super.key, this.title = 'Order summary'});
+  const OrderSummary({
+    super.key,
+    this.title = 'Order summary',
+    this.showCredit = false,
+  });
 
   final String title;
+
+  /// Whether to break out store credit and what is left to pay.
+  ///
+  /// Off in the bag: nothing has been settled there yet, and a total that
+  /// already had the balance taken off it would be a price the shopper can't
+  /// find on any other screen.
+  final bool showCredit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final CartSummary summary = ref.watch(cartSummaryProvider);
     final Promo? promo = ref.watch(appliedPromoProvider);
+    final CheckoutTotal checkout = ref.watch(checkoutTotalProvider);
+    final bool credited = showCredit && checkout.usesCredit;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -54,14 +68,40 @@ class OrderSummary extends ConsumerWidget {
           ),
           Row(
             children: <Widget>[
-              Text('Total', style: theme.textTheme.titleMedium),
+              Text(
+                credited ? 'Order total' : 'Total',
+                style: theme.textTheme.titleMedium,
+              ),
               const Spacer(),
               Text(
                 formatPrice(summary.total),
-                style: theme.textTheme.titleLarge,
+                style: credited
+                    ? theme.textTheme.titleMedium
+                    : theme.textTheme.titleLarge,
               ),
             ],
           ),
+          if (credited) ...<Widget>[
+            _Line(
+              label: 'Store credit',
+              value: '−${formatPrice(checkout.creditApplied)}',
+              highlight: AppTheme.success,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1),
+            ),
+            Row(
+              children: <Widget>[
+                Text('To pay', style: theme.textTheme.titleMedium),
+                const Spacer(),
+                Text(
+                  formatPrice(checkout.amountDue),
+                  style: theme.textTheme.titleLarge,
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

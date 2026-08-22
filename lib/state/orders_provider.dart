@@ -40,6 +40,7 @@ class OrdersNotifier extends Notifier<List<Order>> {
     required Address address,
     required String paymentLabel,
     DeliveryOption delivery = DeliveryOption.standard,
+    double creditApplied = 0,
   }) async {
     final GiftOptions gift = ref.read(giftOptionsProvider);
     final CartSummary summary = ref.read(cartSummaryProvider);
@@ -64,6 +65,7 @@ class OrdersNotifier extends Notifier<List<Order>> {
       shippingAddress: '${address.recipient}, ${address.oneLine}',
       paymentLabel: paymentLabel,
       deliveryId: delivery.id,
+      creditApplied: creditApplied,
       giftWrapped: gift.wrapped,
       giftMessage: gift.message.trim(),
     );

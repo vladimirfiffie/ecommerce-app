@@ -156,6 +156,12 @@ class _OrderConfirmationScreenState
                                             label: 'Total paid',
                                             value: formatPrice(order.total),
                                           ),
+                                          if (order.creditApplied > 0)
+                                            _Row(
+                                              label: 'Store credit',
+                                              value:
+                                                  '−${formatPrice(order.creditApplied)}',
+                                            ),
                                           _Row(
                                             label: 'Arrives by',
                                             value: formatDeliveryDate(
