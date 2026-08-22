@@ -36,7 +36,7 @@ jobs:
       prerelease: ${{ steps.resolve.outputs.prerelease }}
       publish: ${{ steps.resolve.outputs.publish }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Resolve version and decide
         id: resolve
@@ -90,9 +90,9 @@ jobs:
     if: needs.decide.outputs.publish == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           # Gradle 9.1 supports Java 17 up to (but not including) 26.
@@ -101,7 +101,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.47.0
+          flutter-version: 3.47.1
           cache: true
 
       - name: Install dependencies
@@ -132,7 +132,7 @@ jobs:
           done
           ls -lh dist
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: aster-apks
           path: dist/*.apk
@@ -151,7 +151,7 @@ jobs:
       # tag_name is what makes that work — the action creates the tag at this
       # commit when it doesn't exist yet, so nobody has to push one.
       - name: Publish release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.decide.outputs.tag }}
           target_commitish: ${{ github.sha }}
