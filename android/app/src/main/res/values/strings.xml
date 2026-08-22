@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Launcher shortcut labels. These are read by the launcher rather than by
+    Flutter, so they can't come from app_en.arb — a res/values-<lang>/ folder
+    is what translates them.
+-->
+<resources>
+    <string name="shortcut_bag_short">Bag</string>
+    <string name="shortcut_bag_long">Open your bag</string>
+    <string name="shortcut_search_short">Search</string>
+    <string name="shortcut_search_long">Search the shop</string>
+    <string name="shortcut_orders_short">Orders</string>
+    <string name="shortcut_orders_long">Track your orders</string>
+    <string name="shortcut_saved_short">Saved</string>
+    <string name="shortcut_saved_long">Open your saved lists</string>
+</resources>

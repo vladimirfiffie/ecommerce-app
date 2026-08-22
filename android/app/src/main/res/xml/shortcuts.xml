@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Long-press the launcher icon. Four static shortcuts, in the order a
+    launcher shows them — bottom-up, nearest the icon first — so the one
+    most likely to be wanted sits closest to the thumb.
+
+    Each targets the app's own custom scheme rather than naming a route, so
+    the destinations go through the same normalizeDeepLink + go_router path
+    a shared link does. There is nothing here for Flutter to register at
+    runtime: static shortcuts exist from the moment the app is installed,
+    including before it has ever been opened.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="orders"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_orders"
+        android:shortcutShortLabel="@string/shortcut_orders_short"
+        android:shortcutLongLabel="@string/shortcut_orders_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="aster://orders"
+            android:targetPackage="com.vladimirfiffie.aster"
+            android:targetClass="com.vladimirfiffie.aster.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="saved"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_saved"
+        android:shortcutShortLabel="@string/shortcut_saved_short"
+        android:shortcutLongLabel="@string/shortcut_saved_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="aster://favorites"
+            android:targetPackage="com.vladimirfiffie.aster"
+            android:targetClass="com.vladimirfiffie.aster.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_search"
+        android:shortcutShortLabel="@string/shortcut_search_short"
+        android:shortcutLongLabel="@string/shortcut_search_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="aster://search"
+            android:targetPackage="com.vladimirfiffie.aster"
+            android:targetClass="com.vladimirfiffie.aster.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="bag"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_bag"
+        android:shortcutShortLabel="@string/shortcut_bag_short"
+        android:shortcutLongLabel="@string/shortcut_bag_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="aster://cart"
+            android:targetPackage="com.vladimirfiffie.aster"
+            android:targetClass="com.vladimirfiffie.aster.MainActivity" />
+    </shortcut>
+</shortcuts>

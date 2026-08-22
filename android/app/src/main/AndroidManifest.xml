@@ -41,6 +41,14 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
+            <!-- Long-press the launcher icon. Static, so they exist from the
+                 moment the app is installed rather than after its first run,
+                 and they aim at aster:// URLs so they arrive through the same
+                 deep-link handling a shared link does. -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
             <!-- Custom scheme: aster://product/<id> -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
