@@ -214,3 +214,13 @@ Future<ProviderContainer> testContainer({
 /// The English strings, for tests that call a copy-building function directly
 /// rather than pumping a widget that could look them up from context.
 AppL10n get testL10n => lookupAppL10n(const Locale('en'));
+
+/// Finds a widget by its tooltip.
+///
+/// [CommonFinders.byTooltip] is written against the framework's `Tooltip`, and
+/// these widgets use `material_ui`'s — a different class, so the built-in
+/// finder can never match one. Same predicate, right type.
+Finder findByTooltip(String message) => find.byWidgetPredicate(
+  (Widget widget) => widget is Tooltip && widget.message == message,
+  description: 'tooltip "$message"',
+);

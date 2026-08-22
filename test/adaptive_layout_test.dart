@@ -134,7 +134,7 @@ void main() {
       // The word goes, the way to reach orders doesn't.
       expect(find.text('Orders'), findsNothing);
       expect(
-        find.byTooltip('Orders'),
+        findByTooltip('Orders'),
         findsOneWidget,
         reason: 'a collapsed shortcut still has to name itself',
       );

@@ -130,7 +130,7 @@ void main() {
     c.read(routerProvider).push('/reviews');
     await settle(tester);
 
-    await tester.tap(find.byTooltip('Delete'));
+    await tester.tap(findByTooltip('Delete'));
     await settle(tester);
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
     await settle(tester);

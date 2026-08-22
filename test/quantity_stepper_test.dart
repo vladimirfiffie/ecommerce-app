@@ -40,7 +40,7 @@ void main() {
     return () => quantity;
   }
 
-  Finder plus() => find.byTooltip('Increase quantity');
+  Finder plus() => findByTooltip('Increase quantity');
 
   /// Holds for [total], drawing frames along the way.
   ///

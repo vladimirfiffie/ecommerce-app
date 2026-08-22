@@ -102,7 +102,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).first, 'refund');
     await settle(tester);
-    await tester.tap(find.byTooltip('Clear'));
+    await tester.tap(findByTooltip('Clear'));
     await settle(tester);
 
     expect(find.text('Nova is a demo storefront'), findsNothing);
