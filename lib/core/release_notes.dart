@@ -30,6 +30,26 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.15.1',
+    headline: 'Same shop, newer foundations',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'palette_outlined',
+        'Built on the new Material',
+        'Flutter is splitting Material Design out of the framework into its '
+            'own package, and Aster now builds on it. Every screen is the '
+            'screen it was — but the theme, including the palette Android '
+            'takes from your wallpaper, is running on the newer foundation.',
+      ),
+      ReleaseHighlight(
+        'animation_outlined',
+        'Steadier loading',
+        'The shimmer that runs while products load keeps its timing when it '
+            'restarts, instead of jumping.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.15.0',
     headline: 'Money you already have, lists you actually keep, and Spanish',
     highlights: <ReleaseHighlight>[
