@@ -1,5 +1,5 @@
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +14,6 @@ import 'state/auth_provider.dart';
 import 'state/settings_provider.dart';
 import 'state/whats_new_provider.dart';
 import 'features/whats_new/whats_new_sheet.dart';
-import 'core/l10n/material_localizations.dart';
 
 /// Router lives in a provider so hot reload and tests get a single instance.
 final Provider<GoRouter> routerProvider = Provider<GoRouter>(
@@ -85,7 +84,7 @@ class _AsterAppState extends ConsumerState<AsterApp> {
         return MaterialApp.router(
           title: 'Aster',
           debugShowCheckedModeBanner: false,
-          localizationsDelegates: asterLocalizationsDelegates,
+          localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           // `formatPrice` and friends are plain functions with no context to
           // read a locale from, so the resolved locale is published to `intl`

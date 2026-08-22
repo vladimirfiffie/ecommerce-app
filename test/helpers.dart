@@ -2,7 +2,7 @@ import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -214,13 +214,3 @@ Future<ProviderContainer> testContainer({
 /// The English strings, for tests that call a copy-building function directly
 /// rather than pumping a widget that could look them up from context.
 AppL10n get testL10n => lookupAppL10n(const Locale('en'));
-
-/// Finds a widget by its tooltip.
-///
-/// [CommonFinders.byTooltip] is written against the framework's `Tooltip`, and
-/// these widgets use `material_ui`'s — a different class, so the built-in
-/// finder can never match one. Same predicate, right type.
-Finder findByTooltip(String message) => find.byWidgetPredicate(
-  (Widget widget) => widget is Tooltip && widget.message == message,
-  description: 'tooltip "$message"',
-);

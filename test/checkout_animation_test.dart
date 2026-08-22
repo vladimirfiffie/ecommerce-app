@@ -1,15 +1,14 @@
 import 'package:ecommerce_app/core/theme/app_theme.dart';
 import 'package:ecommerce_app/shared/widgets/animated_check.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ecommerce_app/core/l10n/material_localizations.dart';
 
 void main() {
   group('animated check', () {
     Future<void> pumpCheck(WidgetTester tester) => tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: asterLocalizationsDelegates,
+        localizationsDelegates: AppL10n.localizationsDelegates,
         supportedLocales: AppL10n.supportedLocales,
         home: Scaffold(
           body: Center(child: AnimatedCheck(color: AppTheme.success)),
@@ -87,7 +86,7 @@ void main() {
     testWidgets('scales with the requested size', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: asterLocalizationsDelegates,
+          localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(
             body: Center(child: AnimatedCheck(color: Colors.green, size: 48)),

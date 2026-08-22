@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 /// Whether a clip can actually be played here.

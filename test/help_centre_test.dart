@@ -4,7 +4,7 @@ import 'package:ecommerce_app/data/models/order.dart';
 import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -102,7 +102,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).first, 'refund');
     await settle(tester);
-    await tester.tap(findByTooltip('Clear'));
+    await tester.tap(find.byTooltip('Clear'));
     await settle(tester);
 
     expect(find.text('Nova is a demo storefront'), findsNothing);

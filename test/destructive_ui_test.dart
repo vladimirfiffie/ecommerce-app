@@ -1,11 +1,10 @@
 import 'package:ecommerce_app/data/models/order.dart';
 import 'package:ecommerce_app/features/orders/orders_screen.dart';
 import 'package:ecommerce_app/shared/widgets/confirm.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ecommerce_app/core/theme/app_theme.dart';
-import 'package:ecommerce_app/core/l10n/material_localizations.dart';
 
 void main() {
   ColorScheme schemeOf(WidgetTester tester, Finder finder) =>
@@ -17,7 +16,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: asterLocalizationsDelegates,
+          localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(
             body: Builder(
@@ -61,7 +60,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: asterLocalizationsDelegates,
+          localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           // The real theme is what makes this go wrong: it sets a 54px
           // minimum height on every filled button, for page CTAs.
@@ -110,7 +109,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: asterLocalizationsDelegates,
+          localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(
             body: Builder(
@@ -141,7 +140,7 @@ void main() {
       bool? result;
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: asterLocalizationsDelegates,
+          localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(
             body: Builder(
@@ -177,7 +176,7 @@ void main() {
       Future<void> open(WidgetTester tester, String tapLabel) async {
         await tester.pumpWidget(
           MaterialApp(
-            localizationsDelegates: asterLocalizationsDelegates,
+            localizationsDelegates: AppL10n.localizationsDelegates,
             supportedLocales: AppL10n.supportedLocales,
             home: Scaffold(
               body: Builder(
@@ -230,7 +229,7 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            localizationsDelegates: asterLocalizationsDelegates,
+            localizationsDelegates: AppL10n.localizationsDelegates,
             supportedLocales: AppL10n.supportedLocales,
             theme: AppTheme.light(null),
             home: Scaffold(
@@ -272,7 +271,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: asterLocalizationsDelegates,
+          localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(
             body: Center(child: OrderStatusPill(status: status)),

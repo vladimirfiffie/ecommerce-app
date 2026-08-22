@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 /// Material 3 window size classes, trimmed to the three the app reacts to.
 enum WindowSize {

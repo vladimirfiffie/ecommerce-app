@@ -8,9 +8,8 @@ import 'package:ecommerce_app/data/models/order.dart';
 import 'package:ecommerce_app/data/models/order_line.dart';
 import 'package:ecommerce_app/features/orders/invoice_screen.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ecommerce_app/core/l10n/material_localizations.dart';
 
 /// Aster shipped in one language for long enough that "translatable" and
 /// "translated" were easy to confuse. These hold the second language to the
@@ -129,7 +128,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           locale: locale,
-          localizationsDelegates: asterLocalizationsDelegates,
+          localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(body: Builder(builder: (BuildContext _) => child)),
         ),

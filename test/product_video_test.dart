@@ -2,17 +2,16 @@ import 'package:ecommerce_app/data/models/product.dart';
 import 'package:ecommerce_app/features/product/widgets/image_gallery.dart';
 import 'package:ecommerce_app/features/product/widgets/product_video.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers.dart';
-import 'package:ecommerce_app/core/l10n/material_localizations.dart';
 
 void main() {
   setUpAll(configureTestEnvironment);
 
   Widget wrap(Widget child) => MaterialApp(
-    localizationsDelegates: asterLocalizationsDelegates,
+    localizationsDelegates: AppL10n.localizationsDelegates,
     supportedLocales: AppL10n.supportedLocales,
     home: Scaffold(body: SizedBox(height: 400, child: child)),
   );

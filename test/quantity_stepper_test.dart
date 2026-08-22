@@ -1,10 +1,9 @@
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
 import 'package:ecommerce_app/shared/widgets/quantity_stepper.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers.dart';
-import 'package:ecommerce_app/core/l10n/material_localizations.dart';
 
 void main() {
   setUpAll(configureTestEnvironment);
@@ -19,7 +18,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: asterLocalizationsDelegates,
+        localizationsDelegates: AppL10n.localizationsDelegates,
         supportedLocales: AppL10n.supportedLocales,
         home: Scaffold(
           body: Center(
@@ -40,7 +39,7 @@ void main() {
     return () => quantity;
   }
 
-  Finder plus() => findByTooltip('Increase quantity');
+  Finder plus() => find.byTooltip('Increase quantity');
 
   /// Holds for [total], drawing frames along the way.
   ///

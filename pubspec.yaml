@@ -9,7 +9,16 @@ environment:
 dependencies:
   cached_network_image: ^3.4.1
   crypto: ^3.0.7
-  dynamic_color: ^2.1.0
+  # Held at 1.x. dynamic_color 2.x is built on the material_ui package, so
+  # taking it means moving the whole app there — which was tried, and reverted.
+  # Localizations were not the problem: material_ui ships its own
+  # GlobalMaterialLocalizations covering 116 locales. go_router is. It builds
+  # the framework's MaterialPage, so every route becomes a framework
+  # MaterialPageRoute that looks up a framework PageTransitionsTheme — and an
+  # app themed by material_ui has none to find. The page transitions simply
+  # stop, which no test catches because none of them assert a transition.
+  # Revisit when go_router builds material_ui's pages.
+  dynamic_color: ^1.9.0
   flutter:
     sdk: flutter
   flutter_animate: ^4.5.2
@@ -33,7 +42,6 @@ dependencies:
   printing: ^5.15.0
   image_picker: ^1.2.3
   path_provider: ^2.1.6
-  material_ui: ^1.0.1
 
 dev_dependencies:
   flutter_test:

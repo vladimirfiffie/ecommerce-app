@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 /// `Featured   ·   See all →` heading used above every home rail.
 class SectionHeader extends StatelessWidget {

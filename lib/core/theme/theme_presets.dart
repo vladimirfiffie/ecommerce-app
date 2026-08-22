@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 /// A named seed color the shopper can pick when they aren't using the
 /// wallpaper palette.

@@ -5,7 +5,7 @@ import 'package:ecommerce_app/data/repositories/dummyjson_product_repository.dar
 import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/shared/widgets/aster_refresh.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;

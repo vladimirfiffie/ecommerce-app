@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/utils/formatters.dart';
 import '../../core/utils/semantic_labels.dart';

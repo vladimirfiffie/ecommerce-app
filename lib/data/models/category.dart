@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 /// Icon names as the repository emits them, resolved here so the data layer
 /// stays free of Flutter types. Kept as a const map for tree-shaking of icons.
