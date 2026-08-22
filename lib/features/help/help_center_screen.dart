@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -71,8 +72,8 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
       if (!searching) const _ContactCard(),
     ];
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Help center')),
+    return AdaptiveScreen(
+      title: 'Help center',
       body: Column(
         children: <Widget>[
           Padding(

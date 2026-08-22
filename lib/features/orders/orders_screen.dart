@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,14 +67,14 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           );
 
     if (!twoPane) {
-      return Scaffold(
-        appBar: AppBar(title: Text(AppL10n.of(context).ordersTitle)),
+      return AdaptiveScreen(
+        title: AppL10n.of(context).ordersTitle,
         body: master,
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(AppL10n.of(context).ordersTitle)),
+    return AdaptiveScreen(
+      title: AppL10n.of(context).ordersTitle,
       body: TwoPane(
         list: master,
         detail: selected == null

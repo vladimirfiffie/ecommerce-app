@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,8 +119,8 @@ class InvoiceScreen extends ConsumerWidget {
     final List<OrderLine> items = ref.watch(orderItemsProvider(orderId));
 
     if (order == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(AppL10n.of(context).receiptTitle)),
+      return AdaptiveScreen(
+        title: AppL10n.of(context).receiptTitle,
         body: EmptyState(
           icon: Icons.receipt_long_outlined,
           title: AppL10n.of(context).receiptUnavailableTitle,

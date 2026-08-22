@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -93,8 +94,8 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
     final List<OrderLine> items = ref.watch(orderItemsProvider(widget.orderId));
 
     if (order == null || items.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: Text(AppL10n.of(context).returnTitleShort)),
+      return AdaptiveScreen(
+        title: AppL10n.of(context).returnTitleShort,
         body: EmptyState(
           icon: Icons.assignment_return_outlined,
           title: AppL10n.of(context).returnNothingTitle,
@@ -117,8 +118,8 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
           lineTotals: lineTotals,
         );
 
-    return Scaffold(
-      appBar: AppBar(title: Text(AppL10n.of(context).returnTitle)),
+    return AdaptiveScreen(
+      title: AppL10n.of(context).returnTitle,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: <Widget>[

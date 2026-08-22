@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -423,14 +424,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
 
     if (!twoPane) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Settings')),
-        body: master,
-      );
+      return AdaptiveScreen(title: 'Settings', body: master);
     }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+    return AdaptiveScreen(
+      title: 'Settings',
       body: TwoPane(
         list: master,
         detail: _pane == null
