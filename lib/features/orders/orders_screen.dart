@@ -42,11 +42,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     final Widget master = orders.isEmpty
         ? EmptyState(
             icon: Icons.receipt_long_outlined,
-            title: 'No orders yet',
-            message:
-                'When you place an order it’ll appear here with its '
-                'delivery status.',
-            actionLabel: 'Browse the shop',
+            title: AppL10n.of(context).ordersEmptyTitle,
+            message: AppL10n.of(context).ordersEmptyMessage,
+            actionLabel: AppL10n.of(context).ordersEmptyAction,
             onAction: () => context.go(Routes.catalog),
           )
         : ListView.separated(
@@ -69,13 +67,13 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
     if (!twoPane) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Your orders')),
+        appBar: AppBar(title: Text(AppL10n.of(context).ordersTitle)),
         body: master,
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Your orders')),
+      appBar: AppBar(title: Text(AppL10n.of(context).ordersTitle)),
       body: TwoPane(
         list: master,
         detail: selected == null
@@ -87,9 +85,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                   embedded: true,
                 ),
               ),
-        placeholder: const TwoPanePlaceholder(
+        placeholder: TwoPanePlaceholder(
           icon: Icons.receipt_long_outlined,
-          message: 'Choose an order to see its details.',
+          message: AppL10n.of(context).ordersPickOne,
         ),
       ),
     );
@@ -184,7 +182,7 @@ class OrderCard extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         Text(
-                          '${order.itemCount} ${order.itemCount == 1 ? 'item' : 'items'}',
+                          AppL10n.of(context).orderItemCount(order.itemCount),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

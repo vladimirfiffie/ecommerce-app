@@ -69,34 +69,58 @@
   },
 
   "authErrorEmailInvalid": "Enter a valid email address",
-  "@authErrorEmailInvalid": {},
+  "@authErrorEmailInvalid": {
+    "description": "Sign-up/sign-in error: the email address is not a valid one."
+  },
   "authErrorEmailTaken": "An account already uses that email",
-  "@authErrorEmailTaken": {},
+  "@authErrorEmailTaken": {
+    "description": "Sign-up error: an account with that email already exists."
+  },
   "authErrorNameRequired": "Tell us your name",
-  "@authErrorNameRequired": {},
+  "@authErrorNameRequired": {
+    "description": "Sign-up error: the name field was left empty."
+  },
   "authErrorPasswordTooShort": "Use at least 8 characters",
-  "@authErrorPasswordTooShort": {},
+  "@authErrorPasswordTooShort": {
+    "description": "Sign-up error: the password is under the minimum length."
+  },
   "authErrorPasswordTooCommon": "That password is too easy to guess",
-  "@authErrorPasswordTooCommon": {},
+  "@authErrorPasswordTooCommon": {
+    "description": "Sign-up error: the password is on the common-password list."
+  },
   "authErrorPasswordMismatch": "Those passwords don’t match",
-  "@authErrorPasswordMismatch": {},
+  "@authErrorPasswordMismatch": {
+    "description": "Sign-up error: the two password fields differ."
+  },
   "authErrorCredentialsWrong": "Email or password is incorrect",
   "@authErrorCredentialsWrong": {
     "description": "Deliberately vague. Saying which half was wrong tells an attacker whether an email is registered, so translations must not name the field either."
   },
 
   "deliveryStandardLabel": "Standard",
-  "@deliveryStandardLabel": {},
+  "@deliveryStandardLabel": {
+    "description": "Name of the cheapest delivery method."
+  },
   "deliveryStandardBlurb": "3–5 business days",
-  "@deliveryStandardBlurb": {},
+  "@deliveryStandardBlurb": {
+    "description": "How long standard delivery takes."
+  },
   "deliveryExpressLabel": "Express",
-  "@deliveryExpressLabel": {},
+  "@deliveryExpressLabel": {
+    "description": "Name of the fastest paid delivery method."
+  },
   "deliveryExpressBlurb": "Next business day",
-  "@deliveryExpressBlurb": {},
+  "@deliveryExpressBlurb": {
+    "description": "How long express delivery takes."
+  },
   "deliveryPickupLabel": "Collect in store",
-  "@deliveryPickupLabel": {},
+  "@deliveryPickupLabel": {
+    "description": "Name of the collect-in-store method."
+  },
   "deliveryPickupBlurb": "Ready in about 2 hours",
-  "@deliveryPickupBlurb": {},
+  "@deliveryPickupBlurb": {
+    "description": "How long a click-and-collect order takes to be ready."
+  },
 
   "priceReducedFrom": "{price}, reduced from {was}, {percent}% off",
   "@priceReducedFrom": {
@@ -123,33 +147,51 @@
     }
   },
   "stockSoldOut": "Sold out",
-  "@stockSoldOut": {},
+  "@stockSoldOut": {
+    "description": "Badge on a product with no stock left."
+  },
   "stockOnlyLeft": "Only {count} left",
   "@stockOnlyLeft": {
+    "description": "Badge warning how few of a product remain.",
     "placeholders": {
       "count": { "type": "int", "example": "3" }
     }
   },
   "badgeNew": "New",
-  "@badgeNew": {},
+  "@badgeNew": {
+    "description": "Badge on a recently added product."
+  },
   "quantityLabel": "Quantity",
-  "@quantityLabel": {},
+  "@quantityLabel": {
+    "description": "Label above the quantity stepper."
+  },
   "decreaseQuantity": "Decrease quantity",
-  "@decreaseQuantity": {},
+  "@decreaseQuantity": {
+    "description": "Spoken label for the minus button on the quantity stepper."
+  },
   "increaseQuantity": "Increase quantity",
-  "@increaseQuantity": {},
+  "@increaseQuantity": {
+    "description": "Spoken label for the plus button on the quantity stepper."
+  },
   "removeItem": "Remove",
   "@removeItem": {
     "description": "Shown in place of a decrement when the line only has one left, so decrementing removes it."
   },
   "saveToWishlist": "Save to wishlist",
-  "@saveToWishlist": {},
+  "@saveToWishlist": {
+    "description": "Spoken label for the heart when the product is not saved."
+  },
   "removeFromWishlist": "Remove from wishlist",
-  "@removeFromWishlist": {},
+  "@removeFromWishlist": {
+    "description": "Spoken label for the heart when the product is saved."
+  },
   "productImage": "Product image",
-  "@productImage": {},
+  "@productImage": {
+    "description": "Spoken label for a product photo with no position to give."
+  },
   "productImageOfCount": "Product image {index} of {total}",
   "@productImageOfCount": {
+    "description": "Spoken label for one photo in a gallery, with its position.",
     "placeholders": {
       "index": { "type": "int", "example": "2" },
       "total": { "type": "int", "example": "5" }
@@ -172,29 +214,1115 @@
     }
   },
   "catalogUnreachableMessage": "Your items are safe — we just can’t reach the shop to look them up.",
-  "@catalogUnreachableMessage": {},
+  "@catalogUnreachableMessage": {
+    "description": "Shown when saved ids cannot be resolved because the shop is unreachable."
+  },
   "couldNotLoadBag": "Couldn’t load your bag",
-  "@couldNotLoadBag": {},
+  "@couldNotLoadBag": {
+    "description": "Title shown when the bag cannot be resolved against the catalog."
+  },
   "couldNotLoadSaves": "Couldn’t load your saves",
-  "@couldNotLoadSaves": {},
+  "@couldNotLoadSaves": {
+    "description": "Title shown when the wishlist cannot be resolved against the catalog."
+  },
   "retry": "Retry",
-  "@retry": {},
+  "@retry": {
+    "description": "Button that tries a failed load again."
+  },
 
   "reorderAdded": "Added back to your bag",
-  "@reorderAdded": {},
+  "@reorderAdded": {
+    "description": "Shown after every line of a past order goes back in the bag."
+  },
   "reorderNoneAvailable": "{count, plural, =1{That item is no longer available} other{None of these are available any more}}",
   "@reorderNoneAvailable": {
+    "description": "Shown when nothing from a past order can be bought again.",
     "placeholders": {
       "count": { "type": "int", "example": "3" }
     }
   },
   "reorderPartial": "{added} added back — {skipped} no longer available",
   "@reorderPartial": {
+    "description": "Shown when only some of a past order could go back in the bag.",
     "placeholders": {
       "added": { "type": "int", "example": "2" },
       "skipped": { "type": "int", "example": "1" }
     }
   },
   "viewBag": "View bag",
-  "@viewBag": {}
+  "@viewBag": {
+    "description": "Button that opens the bag from a snackbar."
+  },
+
+  "@_bag": "  ——— bag ———",
+  "bagTitle": "Your bag",
+  "@bagTitle": {
+    "description": "Title of the shopping bag tab."
+  },
+  "bagClear": "Clear",
+  "@bagClear": {
+    "description": "Button that empties the bag."
+  },
+  "bagEmptyTitle": "Your bag is empty",
+  "@bagEmptyTitle": {
+    "description": "Shown when nothing is in the bag."
+  },
+  "bagEmptyMessage": "Once you add something you like, it’ll show up here.",
+  "@bagEmptyMessage": {
+    "description": "Body of the empty-bag state."
+  },
+  "bagEmptyAction": "Start shopping",
+  "@bagEmptyAction": {
+    "description": "Button on the empty-bag state."
+  },
+  "bagConfirmClearTitle": "Empty your bag?",
+  "@bagConfirmClearTitle": {
+    "description": "Confirmation dialog title before clearing the bag."
+  },
+  "bagConfirmClearMessage": "This removes every item. It can’t be undone.",
+  "@bagConfirmClearMessage": {
+    "description": "Confirmation dialog body before clearing the bag."
+  },
+  "bagConfirmKeep": "Keep them",
+  "@bagConfirmKeep": {
+    "description": "Dismisses the empty-bag confirmation without clearing."
+  },
+  "bagConfirmEmpty": "Empty bag",
+  "@bagConfirmEmpty": {
+    "description": "Confirms clearing the bag."
+  },
+  "bagRemovedItem": "Removed {name}",
+  "@bagRemovedItem": {
+    "description": "Snackbar after swiping an item out of the bag.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Oxford Shirt"
+      }
+    }
+  },
+  "undo": "Undo",
+  "@undo": {
+    "description": "Undoes the action a snackbar is reporting."
+  },
+  "bagSaveForLater": "Save for later",
+  "@bagSaveForLater": {
+    "description": "Moves a bag line into the saved-for-later list."
+  },
+  "bagCheckout": "Checkout",
+  "@bagCheckout": {
+    "description": "Button that starts checkout."
+  },
+  "savedForLaterTitle": "Saved for later",
+  "@savedForLaterTitle": {
+    "description": "Heading of the set-aside items below the bag."
+  },
+  "savedForLaterCount": "{count, plural, =1{1 item waiting} other{{count} items waiting}}",
+  "@savedForLaterCount": {
+    "description": "Subheading counting the set-aside items.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "savedMoveToBag": "Move to bag",
+  "@savedMoveToBag": {
+    "description": "Moves a set-aside item back into the bag."
+  },
+
+  "@_order summary": "  ——— order summary ———",
+  "summaryTitle": "Order summary",
+  "@summaryTitle": {
+    "description": "Heading of the totals block in the bag."
+  },
+  "summarySubtotal": "Subtotal",
+  "@summarySubtotal": {
+    "description": "Line in the totals block: the items before anything else."
+  },
+  "summaryDiscount": "Discount",
+  "@summaryDiscount": {
+    "description": "Line in the totals block for a promo code."
+  },
+  "summaryDiscountWithCode": "Discount ({code})",
+  "@summaryDiscountWithCode": {
+    "description": "Discount line naming the code that produced it.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "ASTER10"
+      }
+    }
+  },
+  "summaryShipping": "Shipping",
+  "@summaryShipping": {
+    "description": "Line in the totals block for delivery cost."
+  },
+  "summaryFree": "Free",
+  "@summaryFree": {
+    "description": "Value shown where a charge would be, when there is none."
+  },
+  "summaryGiftWrap": "Gift wrap",
+  "@summaryGiftWrap": {
+    "description": "Line in the totals block for the gift-wrapping fee."
+  },
+  "summaryTax": "Estimated tax",
+  "@summaryTax": {
+    "description": "Line in the totals block for tax."
+  },
+  "summaryTotal": "Total",
+  "@summaryTotal": {
+    "description": "The final amount, when nothing is being settled with credit."
+  },
+  "summaryOrderTotal": "Order total",
+  "@summaryOrderTotal": {
+    "description": "What the order costs, shown above the credit line when credit is being used."
+  },
+  "summaryStoreCredit": "Store credit",
+  "@summaryStoreCredit": {
+    "description": "Line in the totals block for store credit going onto this order."
+  },
+  "summaryToPay": "To pay",
+  "@summaryToPay": {
+    "description": "What is left to charge the card after store credit."
+  },
+  "promoHint": "Promo code",
+  "@promoHint": {
+    "description": "Placeholder in the promo code field."
+  },
+  "promoApply": "Apply",
+  "@promoApply": {
+    "description": "Button that applies a promo code."
+  },
+  "promoRemove": "Remove code",
+  "@promoRemove": {
+    "description": "Tooltip on the button that takes an applied promo code off."
+  },
+  "promoMinSpend": "Spend {amount} to use this",
+  "@promoMinSpend": {
+    "description": "Why a listed code cannot be applied yet.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$100.00"
+      }
+    }
+  },
+  "promoBestCode": "Best code: {code}",
+  "@promoBestCode": {
+    "description": "Names the code that saves the most on this bag.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "WELCOME20"
+      }
+    }
+  },
+  "promoSaves": "Saves {amount} on this bag",
+  "@promoSaves": {
+    "description": "What the suggested code is worth on the current bag.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$12.40"
+      }
+    }
+  },
+
+  "@_checkout": "  ——— checkout ———",
+  "checkoutTitle": "Checkout",
+  "@checkoutTitle": {
+    "description": "Title of the checkout screen."
+  },
+  "checkoutStepShipping": "Shipping",
+  "@checkoutStepShipping": {
+    "description": "Name of the first checkout step."
+  },
+  "checkoutStepPayment": "Payment",
+  "@checkoutStepPayment": {
+    "description": "Name of the second checkout step."
+  },
+  "checkoutStepReview": "Review",
+  "@checkoutStepReview": {
+    "description": "Name of the third checkout step."
+  },
+  "checkoutBack": "Back",
+  "@checkoutBack": {
+    "description": "Returns to the previous checkout step."
+  },
+  "checkoutContinue": "Continue",
+  "@checkoutContinue": {
+    "description": "Advances to the next checkout step."
+  },
+  "checkoutSlideToPay": "Slide to pay {amount}",
+  "@checkoutSlideToPay": {
+    "description": "Label on the slide-to-confirm control that places the order.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$84.20"
+      }
+    }
+  },
+  "checkoutPay": "Pay {amount}",
+  "@checkoutPay": {
+    "description": "Plain-button fallback where sliding is not available.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$84.20"
+      }
+    }
+  },
+  "checkoutEmptyTitle": "Nothing to check out",
+  "@checkoutEmptyTitle": {
+    "description": "Shown when checkout is opened with an empty bag."
+  },
+  "checkoutEmptyMessage": "Your bag is empty.",
+  "@checkoutEmptyMessage": {
+    "description": "Body of the empty-checkout state."
+  },
+  "checkoutEmptyAction": "Browse the shop",
+  "@checkoutEmptyAction": {
+    "description": "Button on the empty-checkout state."
+  },
+  "checkoutBiometricReason": "Confirm your identity to place this order",
+  "@checkoutBiometricReason": {
+    "description": "Reason shown in the OS biometric prompt before paying."
+  },
+  "checkoutBiometricCancelled": "Payment cancelled — not verified",
+  "@checkoutBiometricCancelled": {
+    "description": "Shown when biometric verification fails or is dismissed."
+  },
+  "checkoutBiometricUnavailable": "Biometrics unavailable — continuing without verification",
+  "@checkoutBiometricUnavailable": {
+    "description": "Shown when the device cannot verify identity at all."
+  },
+  "checkoutPaidByCredit": "Store credit",
+  "@checkoutPaidByCredit": {
+    "description": "Named as the payment method when credit covered the whole order."
+  },
+  "checkoutCardOnFile": "Card on file",
+  "@checkoutCardOnFile": {
+    "description": "Fallback payment label when no specific card is selected."
+  },
+  "checkoutShipTo": "Ship to",
+  "@checkoutShipTo": {
+    "description": "Heading above the saved addresses."
+  },
+  "checkoutAddAddress": "Add a new address",
+  "@checkoutAddAddress": {
+    "description": "Opens the new-address form."
+  },
+  "checkoutDelivery": "Delivery",
+  "@checkoutDelivery": {
+    "description": "Heading above the delivery speed choices."
+  },
+  "checkoutWhenItArrives": "When it arrives",
+  "@checkoutWhenItArrives": {
+    "description": "Heading of the delivery-instructions section."
+  },
+  "checkoutIfYoureOut": "If you’re out",
+  "@checkoutIfYoureOut": {
+    "description": "Label on the drop-off preference dropdown."
+  },
+  "checkoutCourierNote": "Anything else for the courier (optional)",
+  "@checkoutCourierNote": {
+    "description": "Label on the free-text delivery note field."
+  },
+  "checkoutCourierNoteHint": "Gate code 1234 — the blue door round the side",
+  "@checkoutCourierNoteHint": {
+    "description": "Example of a delivery note."
+  },
+  "checkoutKnockAndWait": "We’ll knock and wait. If nobody answers, it comes back with the courier.",
+  "@checkoutKnockAndWait": {
+    "description": "What happens with the default drop-off choice."
+  },
+  "checkoutUnattendedRisk": "A parcel left unattended is at your own risk once it’s been dropped off.",
+  "@checkoutUnattendedRisk": {
+    "description": "Liability note shown for any non-default drop-off choice."
+  },
+  "checkoutPayWith": "Pay with",
+  "@checkoutPayWith": {
+    "description": "Heading above the saved cards."
+  },
+  "checkoutCreditCoversOrder": "Your store credit covers this order. No card will be charged.",
+  "@checkoutCreditCoversOrder": {
+    "description": "Replaces the card list when credit settles the whole order."
+  },
+  "checkoutNoCards": "No cards saved",
+  "@checkoutNoCards": {
+    "description": "Heading when the wallet is empty at checkout."
+  },
+  "checkoutNoCardsBody": "Add one to continue. Only the last four digits are stored.",
+  "@checkoutNoCardsBody": {
+    "description": "Body when the wallet is empty at checkout."
+  },
+  "checkoutAddCard": "Add a card",
+  "@checkoutAddCard": {
+    "description": "Opens the add-card form."
+  },
+  "checkoutAddAnotherCard": "Add another card",
+  "@checkoutAddAnotherCard": {
+    "description": "Opens the add-card form when cards already exist."
+  },
+  "checkoutCardExpired": "Expired {date}",
+  "@checkoutCardExpired": {
+    "description": "Subtitle on a saved card that can no longer be used.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "04/25"
+      }
+    }
+  },
+  "checkoutCardExpires": "Expires {date}",
+  "@checkoutCardExpires": {
+    "description": "Subtitle on a usable saved card.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "04/29"
+      }
+    }
+  },
+  "checkoutBiometricNotice": "You’ll be asked to verify before this order is placed.",
+  "@checkoutBiometricNotice": {
+    "description": "Warns that biometric verification is switched on."
+  },
+  "checkoutDemoNotice": "Demo checkout — no card is charged and no payment data is collected or stored.",
+  "@checkoutDemoNotice": {
+    "description": "Says plainly that this build takes no real payment."
+  },
+  "checkoutReviewTitle": "Review your order",
+  "@checkoutReviewTitle": {
+    "description": "Heading of the final checkout step."
+  },
+  "checkoutShippingTo": "Shipping to",
+  "@checkoutShippingTo": {
+    "description": "Label on the address row of the review step."
+  },
+  "checkoutNoAddress": "No address selected",
+  "@checkoutNoAddress": {
+    "description": "Shown where the address would be, when none is chosen."
+  },
+  "checkoutPayingWith": "Paying with",
+  "@checkoutPayingWith": {
+    "description": "Label on the payment row of the review step."
+  },
+  "checkoutNoCard": "No card selected",
+  "@checkoutNoCard": {
+    "description": "Shown where the card would be, when none is chosen."
+  },
+  "checkoutQuantityShort": "Qty {count}",
+  "@checkoutQuantityShort": {
+    "description": "Compact quantity on a review-step line.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "checkoutItemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@checkoutItemCount": {
+    "description": "Counts what is being bought, in the checkout side pane.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "creditUseSwitch": "Use store credit",
+  "@creditUseSwitch": {
+    "description": "Switch that puts the balance towards this order."
+  },
+  "creditCoversOrder": "{amount} covers this order — no card needed",
+  "@creditCoversOrder": {
+    "description": "Subtitle when credit settles the order outright.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$25.00"
+      }
+    }
+  },
+  "creditPartOfOrder": "{applied} of {balance} goes on this order",
+  "@creditPartOfOrder": {
+    "description": "Subtitle when credit covers part of the order.",
+    "placeholders": {
+      "applied": {
+        "type": "String",
+        "example": "$25.00"
+      },
+      "balance": {
+        "type": "String",
+        "example": "$40.00"
+      }
+    }
+  },
+  "creditKeptForLater": "{balance} available, kept for another time",
+  "@creditKeptForLater": {
+    "description": "Subtitle when the shopper has switched credit off.",
+    "placeholders": {
+      "balance": {
+        "type": "String",
+        "example": "$40.00"
+      }
+    }
+  },
+  "giftWrapTitle": "Gift wrap",
+  "@giftWrapTitle": {
+    "description": "Switch that adds gift wrapping."
+  },
+  "giftWrapSubtitle": "Wrapped in tissue and ribbon · {price}",
+  "@giftWrapSubtitle": {
+    "description": "What gift wrapping is and what it costs.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$4.50"
+      }
+    }
+  },
+  "giftMessageLabel": "Gift message (optional)",
+  "@giftMessageLabel": {
+    "description": "Label on the gift message field."
+  },
+  "giftMessageHint": "Happy birthday!",
+  "@giftMessageHint": {
+    "description": "Example gift message."
+  },
+  "giftPricesHidden": "Prices are left off the packing slip for gifts.",
+  "@giftPricesHidden": {
+    "description": "Reassurance shown once the order is marked as a gift."
+  },
+  "promoAutoApplied": "{code} applied for you",
+  "@promoAutoApplied": {
+    "description": "Says a promo code was chosen on the shopper's behalf.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "ASTER10"
+      }
+    }
+  },
+  "promoAutoAppliedBody": "The best code for this order — {description}",
+  "@promoAutoAppliedBody": {
+    "description": "Explains why that code was chosen.",
+    "placeholders": {
+      "description": {
+        "type": "String",
+        "example": "10% off your order"
+      }
+    }
+  },
+  "promoAutoAppliedRemove": "Remove",
+  "@promoAutoAppliedRemove": {
+    "description": "Takes the auto-applied code back off."
+  },
+
+  "@_confirmation and orders": "  ——— confirmation and orders ———",
+  "confirmationNotFoundTitle": "Order not found",
+  "@confirmationNotFoundTitle": {
+    "description": "Shown when a confirmation is opened for an order that does not exist."
+  },
+  "confirmationNotFoundMessage": "We couldn’t find order {id}.",
+  "@confirmationNotFoundMessage": {
+    "description": "Body of the order-not-found state.",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "NV-1A2B3C"
+      }
+    }
+  },
+  "confirmationBackToShop": "Back to shop",
+  "@confirmationBackToShop": {
+    "description": "Button on the order-not-found state."
+  },
+  "confirmationTitle": "Order confirmed",
+  "@confirmationTitle": {
+    "description": "Headline of the order confirmation screen."
+  },
+  "confirmationThanks": "Thanks! We’re getting order {id} ready to ship.",
+  "@confirmationThanks": {
+    "description": "Subhead of the order confirmation screen.",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "NV-1A2B3C"
+      }
+    }
+  },
+  "confirmationItems": "Items",
+  "@confirmationItems": {
+    "description": "Label on the item-count row of the confirmation summary."
+  },
+  "confirmationTotalPaid": "Total paid",
+  "@confirmationTotalPaid": {
+    "description": "Label on the total row of the confirmation summary."
+  },
+  "confirmationArrivesBy": "Arrives by",
+  "@confirmationArrivesBy": {
+    "description": "Label on the estimated-delivery row of the confirmation summary."
+  },
+  "confirmationPaidWith": "Paid with",
+  "@confirmationPaidWith": {
+    "description": "Label on the payment row of the confirmation summary."
+  },
+  "confirmationTrack": "Track this order",
+  "@confirmationTrack": {
+    "description": "Opens the order detail screen."
+  },
+  "confirmationKeepShopping": "Keep shopping",
+  "@confirmationKeepShopping": {
+    "description": "Returns to the home tab."
+  },
+  "confirmationCancelTitle": "Cancel this order?",
+  "@confirmationCancelTitle": {
+    "description": "Confirmation dialog title for cancelling inside the change window."
+  },
+  "confirmationCancelMessage": "Nothing was charged, and the items go back to your bag.",
+  "@confirmationCancelMessage": {
+    "description": "Confirmation dialog body for cancelling inside the change window."
+  },
+  "confirmationCancelConfirm": "Cancel order",
+  "@confirmationCancelConfirm": {
+    "description": "Confirms cancelling the order."
+  },
+  "confirmationCancelled": "Order cancelled",
+  "@confirmationCancelled": {
+    "description": "Shown after a successful cancellation."
+  },
+  "confirmationTooLateToCancel": "Too late to cancel — track it instead",
+  "@confirmationTooLateToCancel": {
+    "description": "Shown when the change window closed before the tap landed."
+  },
+  "confirmationAddressChanged": "Sending it to {label} instead",
+  "@confirmationAddressChanged": {
+    "description": "Shown after redirecting an order inside the change window.",
+    "placeholders": {
+      "label": {
+        "type": "String",
+        "example": "Work"
+      }
+    }
+  },
+  "confirmationTooLateToChange": "Too late to change that",
+  "@confirmationTooLateToChange": {
+    "description": "Shown when the change window closed before the address change landed."
+  },
+  "confirmationChangeAddress": "Change address",
+  "@confirmationChangeAddress": {
+    "description": "Opens the address picker inside the change window."
+  },
+  "ordersTitle": "Your orders",
+  "@ordersTitle": {
+    "description": "Title of the orders screen."
+  },
+  "ordersEmptyTitle": "No orders yet",
+  "@ordersEmptyTitle": {
+    "description": "Shown when nothing has been ordered."
+  },
+  "ordersEmptyMessage": "When you place an order it’ll appear here with its delivery status.",
+  "@ordersEmptyMessage": {
+    "description": "Body of the no-orders state."
+  },
+  "ordersEmptyAction": "Browse the shop",
+  "@ordersEmptyAction": {
+    "description": "Button on the no-orders state."
+  },
+  "ordersPickOne": "Choose an order to see its details.",
+  "@ordersPickOne": {
+    "description": "Placeholder in the tablet detail pane before an order is picked."
+  },
+  "orderItemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@orderItemCount": {
+    "description": "Counts the lines on an order.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "@_order detail": "  ——— order detail ———",
+  "orderNotFoundTitle": "Order not found",
+  "@orderNotFoundTitle": {
+    "description": "Shown when an order detail screen is opened for an order that does not exist."
+  },
+  "orderNotFoundMessage": "We couldn’t find order {id}.",
+  "@orderNotFoundMessage": {
+    "description": "Body of the order-not-found state.",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "NV-1A2B3C"
+      }
+    }
+  },
+  "orderAllOrders": "All orders",
+  "@orderAllOrders": {
+    "description": "Button back to the orders list."
+  },
+  "orderItems": "Items",
+  "@orderItems": {
+    "description": "Heading above what was bought."
+  },
+  "orderCharged": "Charged",
+  "@orderCharged": {
+    "description": "What the card was charged after store credit came off."
+  },
+  "orderDelivery": "Delivery",
+  "@orderDelivery": {
+    "description": "Heading above the shipping address and instructions."
+  },
+  "orderGift": "Gift",
+  "@orderGift": {
+    "description": "Heading above the gift wrapping and message."
+  },
+  "orderGiftWrapped": "Gift wrapped",
+  "@orderGiftWrapped": {
+    "description": "Says the order was gift wrapped."
+  },
+  "orderPayment": "Payment",
+  "@orderPayment": {
+    "description": "Heading above how the order was paid for."
+  },
+  "orderCancelAction": "Cancel this order",
+  "@orderCancelAction": {
+    "description": "Button that cancels an order that has not shipped."
+  },
+  "orderReturnAction": "{days, plural, =1{Return items · 1 day left} other{Return items · {days} days left}}",
+  "@orderReturnAction": {
+    "description": "Button that starts a return, with how long the window has left.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "orderViewReceipt": "View receipt",
+  "@orderViewReceipt": {
+    "description": "Opens the receipt."
+  },
+  "orderBuyAgain": "Buy these again",
+  "@orderBuyAgain": {
+    "description": "Puts the order back in the bag at today’s prices."
+  },
+  "orderCancelConfirm": "Cancel order",
+  "@orderCancelConfirm": {
+    "description": "Confirms cancelling."
+  },
+  "orderCancelKeep": "Keep it",
+  "@orderCancelKeep": {
+    "description": "Dismisses the cancel confirmation."
+  },
+  "orderCancelled": "Order cancelled",
+  "@orderCancelled": {
+    "description": "Shown after a successful cancellation."
+  },
+  "orderTooLateToCancel": "Too late to cancel — it has already shipped",
+  "@orderTooLateToCancel": {
+    "description": "Shown when the order shipped before the cancel landed."
+  },
+  "orderRefundedNothingComing": "This order was refunded. Nothing is on its way.",
+  "@orderRefundedNothingComing": {
+    "description": "Replaces the delivery tracker on a refunded order."
+  },
+  "orderCancelledNothingComing": "This order was cancelled and won’t be delivered.",
+  "@orderCancelledNothingComing": {
+    "description": "Replaces the delivery tracker on a cancelled order."
+  },
+  "orderDeliveredReturnInProgress": "Delivered · return in progress",
+  "@orderDeliveredReturnInProgress": {
+    "description": "Tracker caption while a return is open."
+  },
+  "orderArrivingBy": "Arriving by {date}",
+  "@orderArrivingBy": {
+    "description": "Tracker caption with the estimated delivery date.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Thu, Aug 14"
+      }
+    }
+  },
+  "orderReturnInProgress": "Return in progress",
+  "@orderReturnInProgress": {
+    "description": "Heading of the return block before the refund lands."
+  },
+  "orderRefundedToCardAndCredit": "refunded to your card and store credit",
+  "@orderRefundedToCardAndCredit": {
+    "description": "Where a refund went when the order was part-paid with credit. Follows the return reason in a sentence."
+  },
+  "orderRefundedTo": "refunded to {method}",
+  "@orderRefundedTo": {
+    "description": "Where a refund went. Follows the return reason in a sentence.",
+    "placeholders": {
+      "method": {
+        "type": "String",
+        "example": "Visa ····4242"
+      }
+    }
+  },
+  "orderRefundExpectedBy": "expect your refund by {date}",
+  "@orderRefundExpectedBy": {
+    "description": "When a filed refund is due. Follows the return reason in a sentence.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Thu, Aug 14"
+      }
+    }
+  },
+  "orderWithdrawReturn": "Withdraw return",
+  "@orderWithdrawReturn": {
+    "description": "Cancels a return that has not been refunded yet."
+  },
+
+  "@_returns": "  ——— returns ———",
+  "returnTitle": "Return items",
+  "@returnTitle": {
+    "description": "Title of the return request screen."
+  },
+  "returnTitleShort": "Return",
+  "@returnTitleShort": {
+    "description": "Title of the return screen when the order could not be loaded."
+  },
+  "returnNoLongerPossible": "This order can no longer be returned",
+  "@returnNoLongerPossible": {
+    "description": "Shown when the return window closed before the request landed."
+  },
+  "returnStarted": "Return started · {amount}",
+  "@returnStarted": {
+    "description": "Shown after a return is filed, with the refund amount.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$42.00"
+      }
+    }
+  },
+  "returnNothingTitle": "Nothing to return",
+  "@returnNothingTitle": {
+    "description": "Shown when the order behind a return cannot be found."
+  },
+  "returnNothingMessage": "We couldn’t find that order.",
+  "@returnNothingMessage": {
+    "description": "Body of the nothing-to-return state."
+  },
+  "returnClearSelection": "Clear selection",
+  "@returnClearSelection": {
+    "description": "Deselects every line."
+  },
+  "returnSelectEverything": "Select everything",
+  "@returnSelectEverything": {
+    "description": "Selects every line."
+  },
+  "returnWhy": "Why?",
+  "@returnWhy": {
+    "description": "Heading above the return reasons."
+  },
+  "returnNoteLabel": "Anything else? (optional)",
+  "@returnNoteLabel": {
+    "description": "Label on the free-text return note."
+  },
+  "returnChooseItems": "Choose items to return",
+  "@returnChooseItems": {
+    "description": "Disabled submit button, when nothing is selected."
+  },
+  "returnRequestRefund": "Request {amount} refund",
+  "@returnRequestRefund": {
+    "description": "Submit button, with what would come back.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$42.00"
+      }
+    }
+  },
+  "returnEstimate": "Refund estimate",
+  "@returnEstimate": {
+    "description": "Heading of the refund breakdown."
+  },
+  "returnBackOnCard": "Back on your card",
+  "@returnBackOnCard": {
+    "description": "The total that would be refunded."
+  },
+  "returnPostageOnUs": "We got this wrong, so return postage is on us.",
+  "@returnPostageOnUs": {
+    "description": "Shown for return reasons that are the shop’s fault."
+  },
+
+  "@_receipt": "  ——— receipt ———",
+  "receiptTitle": "Receipt",
+  "@receiptTitle": {
+    "description": "Title of the receipt screen."
+  },
+  "receiptUnavailableTitle": "Receipt unavailable",
+  "@receiptUnavailableTitle": {
+    "description": "Shown when the order behind a receipt cannot be found."
+  },
+  "receiptCopy": "Copy",
+  "@receiptCopy": {
+    "description": "Tooltip on the button that copies the receipt text."
+  },
+  "receiptCopied": "Receipt copied",
+  "@receiptCopied": {
+    "description": "Shown after the receipt is copied."
+  },
+  "receiptShare": "Share",
+  "@receiptShare": {
+    "description": "Tooltip on the share button."
+  },
+  "receiptShareSubject": "Aster receipt {id}",
+  "@receiptShareSubject": {
+    "description": "Subject line when a receipt is shared.",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "NV-1A2B3C"
+      }
+    }
+  },
+  "receiptExportPdf": "Export PDF",
+  "@receiptExportPdf": {
+    "description": "Tooltip on the button that renders the receipt as a PDF."
+  },
+  "receiptHeading": "ASTER — RECEIPT",
+  "@receiptHeading": {
+    "description": "First line of the plain-text receipt. Kept in capitals."
+  },
+  "receiptOrderLine": "Order {id}",
+  "@receiptOrderLine": {
+    "description": "Names the order on the receipt.",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "NV-1A2B3C"
+      }
+    }
+  },
+  "receiptStatus": "Status",
+  "@receiptStatus": {
+    "description": "Row label for the order status on the receipt."
+  },
+  "receiptItemsHeading": "ITEMS",
+  "@receiptItemsHeading": {
+    "description": "Section heading on the plain-text receipt. Kept in capitals."
+  },
+  "receiptTotalCaps": "TOTAL",
+  "@receiptTotalCaps": {
+    "description": "Total row on the plain-text receipt. Kept in capitals."
+  },
+  "receiptChargedCaps": "CHARGED",
+  "@receiptChargedCaps": {
+    "description": "What the card was charged, on the plain-text receipt. Kept in capitals."
+  },
+  "receiptDeliveryLabel": "Delivery",
+  "@receiptDeliveryLabel": {
+    "description": "Row label for the delivery method on the receipt."
+  },
+  "receiptShipTo": "Ship to",
+  "@receiptShipTo": {
+    "description": "Row label for the address on the receipt."
+  },
+  "receiptPaidWith": "Paid with",
+  "@receiptPaidWith": {
+    "description": "Row label for the payment method on the receipt."
+  },
+  "receiptCourier": "Courier",
+  "@receiptCourier": {
+    "description": "Row label for the delivery instructions on the receipt."
+  },
+  "receiptNote": "Note",
+  "@receiptNote": {
+    "description": "Row label for the delivery note on the receipt."
+  },
+  "receiptGiftMessage": "Message",
+  "@receiptGiftMessage": {
+    "description": "Row label for the gift message on the receipt."
+  },
+  "receiptReturnLine": "RETURN: {reason} — refund {amount}",
+  "@receiptReturnLine": {
+    "description": "Return summary on the plain-text receipt.",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "Changed my mind"
+      },
+      "amount": {
+        "type": "String",
+        "example": "$42.00"
+      }
+    }
+  },
+  "receiptDemoFooter": "Aster is a demo storefront. No payment was taken.",
+  "@receiptDemoFooter": {
+    "description": "Footer on the receipt."
+  },
+
+  "@_refund breakdown": "  ——— refund breakdown ———",
+  "returnPickSomething": "Pick at least one item to see what comes back.",
+  "@returnPickSomething": {
+    "description": "Shown in the refund estimate before anything is selected."
+  },
+  "returnLineItems": "Items",
+  "@returnLineItems": {
+    "description": "Refund breakdown row: the value of what is going back."
+  },
+  "returnLineOriginalShipping": "Original shipping",
+  "@returnLineOriginalShipping": {
+    "description": "Refund breakdown row: outbound postage, refunded only on a full return."
+  },
+  "returnLineTax": "Tax",
+  "@returnLineTax": {
+    "description": "Refund breakdown row: tax on what is being refunded."
+  },
+  "returnPostageDeducted": "Return postage is deducted from your refund unless the item arrived damaged or incorrect.",
+  "@returnPostageDeducted": {
+    "description": "Shown for return reasons that are not the shop’s fault."
+  },
+
+  "@_receipt rows": "  ——— receipt rows ———",
+  "receiptOrder": "Order",
+  "@receiptOrder": {
+    "description": "Row label naming the order on the receipt."
+  },
+  "receiptPlaced": "Placed",
+  "@receiptPlaced": {
+    "description": "Row label for when the order was placed."
+  },
+  "receiptShipsTo": "Ships to",
+  "@receiptShipsTo": {
+    "description": "Row label for the address on the PDF receipt."
+  },
+  "receiptReturn": "Return",
+  "@receiptReturn": {
+    "description": "Row label for the return reason on the receipt."
+  },
+  "receiptRefund": "Refund",
+  "@receiptRefund": {
+    "description": "Row label for the refunded amount on the receipt."
+  },
+  "receiptQty": "Qty",
+  "@receiptQty": {
+    "description": "Column header for quantity in the PDF receipt table."
+  },
+  "receiptItem": "Item",
+  "@receiptItem": {
+    "description": "Column header for the product in the PDF receipt table."
+  },
+  "receiptLineTotal": "Total",
+  "@receiptLineTotal": {
+    "description": "Column header for a line total in the PDF receipt table."
+  },
+  "receiptPdfTitle": "Aster receipt {id}",
+  "@receiptPdfTitle": {
+    "description": "Document title of the exported PDF.",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "NV-1A2B3C"
+      }
+    }
+  },
+
+  "@_buy path leftovers": "  ——— buy path leftovers ———",
+  "bagCheckoutWithTotal": "Checkout · {amount}",
+  "@bagCheckoutWithTotal": {
+    "description": "Checkout button with the order total on it.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$84.20"
+      }
+    }
+  },
+  "bagFreeShippingNudge": "Add {amount} for free shipping",
+  "@bagFreeShippingNudge": {
+    "description": "How much more to spend before standard delivery is free.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$12.00"
+      }
+    }
+  },
+  "changeWindowLeft": "Changed your mind? {time} left",
+  "@changeWindowLeft": {
+    "description": "Countdown on the confirmation screen, while the order can still be undone.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "4:12"
+      }
+    }
+  },
+  "changeWindowBody": "Until then this order can be cancelled or sent somewhere else.",
+  "@changeWindowBody": {
+    "description": "What the change window allows."
+  },
+  "orderCancelMessage": "It hasn’t shipped yet, so it can still be stopped. This can’t be undone.",
+  "@orderCancelMessage": {
+    "description": "Confirmation body before cancelling an order from its detail screen."
+  },
+  "orderPlacedOn": "Placed {date}",
+  "@orderPlacedOn": {
+    "description": "When the order was placed, on its detail screen.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Aug 15, 2026"
+      }
+    }
+  },
+  "returnWhatHeading": "What are you sending back?",
+  "@returnWhatHeading": {
+    "description": "Heading above the lines that can be returned."
+  },
+  "returnDaysLeft": "{days, plural, =1{1 day left to return this order.} other{{days} days left to return this order.}}",
+  "@returnDaysLeft": {
+    "description": "How long the return window has left.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "addressLabelField": "Label",
+  "@addressLabelField": {
+    "description": "Name the shopper gives an address, like Home or Work."
+  },
+  "addressFullName": "Full name",
+  "@addressFullName": {
+    "description": "Who the parcel is addressed to."
+  },
+  "addressStreet": "Street address",
+  "@addressStreet": {
+    "description": "Street line of an address."
+  },
+  "addressCity": "City",
+  "@addressCity": {
+    "description": "City line of an address."
+  },
+  "addressCountry": "Country",
+  "@addressCountry": {
+    "description": "Country line of an address."
+  },
+  "addressSave": "Save address",
+  "@addressSave": {
+    "description": "Button that saves the address form."
+  },
+
+  "@_address form": "  ——— address form ———",
+  "addressPostcodeUs": "ZIP",
+  "@addressPostcodeUs": {
+    "description": "Postal code field, labelled the way the chosen country labels it. This is the United States form."
+  },
+  "addressPostcodeOther": "Postcode",
+  "@addressPostcodeOther": {
+    "description": "Postal code field for countries that do not call it a ZIP."
+  }
 }

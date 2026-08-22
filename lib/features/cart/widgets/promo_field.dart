@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -71,7 +73,7 @@ class _PromoFieldState extends ConsumerState<PromoField> {
               ),
             ),
             IconButton(
-              tooltip: 'Remove code',
+              tooltip: AppL10n.of(context).promoRemove,
               onPressed: () {
                 ref.read(appliedPromoProvider.notifier).clear();
                 setState(() => _error = null);
@@ -112,7 +114,7 @@ class _PromoFieldState extends ConsumerState<PromoField> {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _apply(),
                 decoration: InputDecoration(
-                  hintText: 'Promo code',
+                  hintText: AppL10n.of(context).promoHint,
                   prefixIcon: const Icon(Icons.local_offer_outlined, size: 20),
                   errorText: _error,
                 ),
@@ -126,7 +128,7 @@ class _PromoFieldState extends ConsumerState<PromoField> {
               width: 96,
               child: OutlinedButton(
                 onPressed: _apply,
-                child: const Text('Apply'),
+                child: Text(AppL10n.of(context).promoApply),
               ),
             ),
           ],
@@ -149,8 +151,9 @@ class _PromoFieldState extends ConsumerState<PromoField> {
                 // Offering a code the bag can't use yet, and rejecting it on
                 // tap, is a worse introduction than saying what it needs.
                 Tooltip(
-                  message:
-                      'Spend ${formatPrice(promo.minSubtotal)} to use this',
+                  message: AppL10n.of(
+                    context,
+                  ).promoMinSpend(formatPrice(promo.minSubtotal)),
                   child: Chip(
                     label: Text(promo.code),
                     avatar: const Icon(Icons.lock_outline_rounded, size: 15),
@@ -193,13 +196,13 @@ class _BestOffer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Best code: ${offer.promo.code}',
+                  AppL10n.of(context).promoBestCode(offer.promo.code),
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                   ),
                 ),
                 Text(
-                  'Saves ${formatPrice(offer.saving)} on this bag',
+                  AppL10n.of(context).promoSaves(formatPrice(offer.saving)),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                   ),
@@ -207,7 +210,10 @@ class _BestOffer extends StatelessWidget {
               ],
             ),
           ),
-          TextButton(onPressed: onApply, child: const Text('Apply')),
+          TextButton(
+            onPressed: onApply,
+            child: Text(AppL10n.of(context).promoApply),
+          ),
         ],
       ),
     );

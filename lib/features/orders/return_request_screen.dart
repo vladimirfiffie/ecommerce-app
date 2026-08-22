@@ -70,7 +70,7 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
-          const SnackBar(content: Text('This order can no longer be returned')),
+          SnackBar(content: Text(AppL10n.of(context).returnNoLongerPossible)),
         );
       return;
     }
@@ -78,7 +78,11 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(
-        SnackBar(content: Text('Return started · ${formatPrice(quote.total)}')),
+        SnackBar(
+          content: Text(
+            AppL10n.of(context).returnStarted(formatPrice(quote.total)),
+          ),
+        ),
       );
   }
 
@@ -90,12 +94,12 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
 
     if (order == null || items.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Return')),
+        appBar: AppBar(title: Text(AppL10n.of(context).returnTitleShort)),
         body: EmptyState(
           icon: Icons.assignment_return_outlined,
-          title: 'Nothing to return',
-          message: 'We couldn’t find that order.',
-          actionLabel: 'All orders',
+          title: AppL10n.of(context).returnNothingTitle,
+          message: AppL10n.of(context).returnNothingMessage,
+          actionLabel: AppL10n.of(context).orderAllOrders,
           onAction: () => context.go(Routes.orders),
         ),
       );
@@ -114,17 +118,17 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
         );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Return items')),
+      appBar: AppBar(title: Text(AppL10n.of(context).returnTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: <Widget>[
           Text(
-            'What are you sending back?',
+            AppL10n.of(context).returnWhatHeading,
             style: theme.textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
           Text(
-            '${order.returnDaysLeft} days left to return this order.',
+            AppL10n.of(context).returnDaysLeft(order.returnDaysLeft),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -161,14 +165,17 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
                 }),
                 child: Text(
                   _selected.length == items.length
-                      ? 'Clear selection'
-                      : 'Select everything',
+                      ? AppL10n.of(context).returnClearSelection
+                      : AppL10n.of(context).returnSelectEverything,
                 ),
               ),
             ),
 
           const SizedBox(height: 18),
-          Text('Why?', style: theme.textTheme.titleMedium),
+          Text(
+            AppL10n.of(context).returnWhy,
+            style: theme.textTheme.titleMedium,
+          ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
@@ -197,8 +204,8 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
             keyboardType: TextInputType.multiline,
             textInputAction: TextInputAction.newline,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
-              labelText: 'Anything else? (optional)',
+            decoration: InputDecoration(
+              labelText: AppL10n.of(context).returnNoteLabel,
               alignLabelWithHint: true,
             ),
           ),
@@ -218,8 +225,10 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
                   )
                 : Text(
                     _selected.isEmpty
-                        ? 'Choose items to return'
-                        : 'Request ${formatPrice(quote.total)} refund',
+                        ? AppL10n.of(context).returnChooseItems
+                        : AppL10n.of(
+                            context,
+                          ).returnRequestRefund(formatPrice(quote.total)),
                   ),
           ),
         ],
@@ -322,25 +331,37 @@ class _RefundBreakdown extends StatelessWidget {
         children: <Widget>[
           Align(
             alignment: Alignment.centerLeft,
-            child: Text('Refund estimate', style: theme.textTheme.titleSmall),
+            child: Text(
+              AppL10n.of(context).returnEstimate,
+              style: theme.textTheme.titleSmall,
+            ),
           ),
           const SizedBox(height: 10),
           if (empty)
             Text(
-              'Pick at least one item to see what comes back.',
+              AppL10n.of(context).returnPickSomething,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             )
           else ...<Widget>[
-            _Line('Items', formatPrice(quote.items)),
+            _Line(
+              AppL10n.of(context).returnLineItems,
+              formatPrice(quote.items),
+            ),
             if (quote.shipping > 0)
-              _Line('Original shipping', formatPrice(quote.shipping)),
-            _Line('Tax', formatPrice(quote.tax)),
+              _Line(
+                AppL10n.of(context).returnLineOriginalShipping,
+                formatPrice(quote.shipping),
+              ),
+            _Line(AppL10n.of(context).returnLineTax, formatPrice(quote.tax)),
             const Divider(height: 20),
             Row(
               children: <Widget>[
-                Text('Back on your card', style: theme.textTheme.titleSmall),
+                Text(
+                  AppL10n.of(context).returnBackOnCard,
+                  style: theme.textTheme.titleSmall,
+                ),
                 const Spacer(),
                 Text(
                   formatPrice(quote.total),
@@ -363,9 +384,8 @@ class _RefundBreakdown extends StatelessWidget {
                 Expanded(
                   child: Text(
                     quote.returnPostagePaidByShop
-                        ? 'We got this wrong, so return postage is on us.'
-                        : 'Return postage is deducted from your refund unless '
-                              'the item arrived damaged or incorrect.',
+                        ? AppL10n.of(context).returnPostageOnUs
+                        : AppL10n.of(context).returnPostageDeducted,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

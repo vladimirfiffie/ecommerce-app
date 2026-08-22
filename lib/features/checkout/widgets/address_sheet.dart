@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+
 import '../../../data/models/address.dart';
 import '../../../state/addresses_provider.dart';
 
@@ -115,7 +117,9 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
                       inputFormatters: _limit(24),
-                      decoration: const InputDecoration(labelText: 'Label'),
+                      decoration: InputDecoration(
+                        labelText: AppL10n.of(context).addressLabelField,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -129,7 +133,9 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                       textInputAction: TextInputAction.next,
                       autofillHints: const <String>[AutofillHints.name],
                       inputFormatters: _limit(AddressValidator.maxShortField),
-                      decoration: const InputDecoration(labelText: 'Full name'),
+                      decoration: InputDecoration(
+                        labelText: AppL10n.of(context).addressFullName,
+                      ),
                     ),
                   ),
                 ],
@@ -144,7 +150,9 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                 keyboardType: TextInputType.streetAddress,
                 autofillHints: const <String>[AutofillHints.fullStreetAddress],
                 inputFormatters: _limit(AddressValidator.maxLine),
-                decoration: const InputDecoration(labelText: 'Street address'),
+                decoration: InputDecoration(
+                  labelText: AppL10n.of(context).addressStreet,
+                ),
               ),
               const SizedBox(height: 12),
               Row(
@@ -159,7 +167,9 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                       textInputAction: TextInputAction.next,
                       autofillHints: const <String>[AutofillHints.addressCity],
                       inputFormatters: _limit(AddressValidator.maxShortField),
-                      decoration: const InputDecoration(labelText: 'City'),
+                      decoration: InputDecoration(
+                        labelText: AppL10n.of(context).addressCity,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -177,7 +187,15 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                       textInputAction: TextInputAction.next,
                       autofillHints: const <String>[AutofillHints.postalCode],
                       inputFormatters: _limit(AddressValidator.maxPostcode),
-                      decoration: const InputDecoration(labelText: 'ZIP'),
+                      // The validator already switches on the country; the
+                      // label had not, so a UK address asked for a ZIP and
+                      // then rejected it for not being one.
+                      decoration: InputDecoration(
+                        labelText:
+                            AddressValidator.isUnitedStates(_country.text)
+                            ? AppL10n.of(context).addressPostcodeUs
+                            : AppL10n.of(context).addressPostcodeOther,
+                      ),
                     ),
                   ),
                 ],
@@ -192,10 +210,15 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                 autofillHints: const <String>[AutofillHints.countryName],
                 inputFormatters: _limit(AddressValidator.maxShortField),
                 onFieldSubmitted: (_) => _save(),
-                decoration: const InputDecoration(labelText: 'Country'),
+                decoration: InputDecoration(
+                  labelText: AppL10n.of(context).addressCountry,
+                ),
               ),
               const SizedBox(height: 24),
-              FilledButton(onPressed: _save, child: const Text('Save address')),
+              FilledButton(
+                onPressed: _save,
+                child: Text(AppL10n.of(context).addressSave),
+              ),
             ],
           ),
         ),

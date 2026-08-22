@@ -28,6 +28,7 @@ class CartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
+    final AppL10n l10n = AppL10n.of(context);
     final List<CartItem> items = ref.watch(cartItemsProvider);
     final CartSummary summary = ref.watch(cartSummaryProvider);
     final bool wide = Breakpoints.of(context).isWide;
@@ -54,14 +55,14 @@ class CartScreen extends ConsumerWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      'Your bag',
+                      l10n.bagTitle,
                       style: theme.textTheme.headlineMedium,
                     ),
                   ),
                   if (stored.isNotEmpty)
                     TextButton(
                       onPressed: () => _confirmClear(context, ref),
-                      child: const Text('Clear'),
+                      child: Text(l10n.bagClear),
                     ),
                 ],
               ),
@@ -79,11 +80,9 @@ class CartScreen extends ConsumerWidget {
                 child: saved.isEmpty
                     ? EmptyState(
                         icon: Icons.shopping_bag_outlined,
-                        title: 'Your bag is empty',
-                        message:
-                            'Once you add something you like, it’ll show up '
-                            'here.',
-                        actionLabel: 'Start shopping',
+                        title: l10n.bagEmptyTitle,
+                        message: l10n.bagEmptyMessage,
+                        actionLabel: l10n.bagEmptyAction,
                         onAction: () => context.go(Routes.catalog),
                       )
                     // An empty bag with things put aside is not an empty
@@ -150,7 +149,9 @@ class CartScreen extends ConsumerWidget {
                                 size: 18,
                               ),
                               label: Text(
-                                'Checkout · ${formatPrice(summary.total)}',
+                                AppL10n.of(context).bagCheckoutWithTotal(
+                                  formatPrice(summary.total),
+                                ),
                               ),
                             ),
                           ],
@@ -202,16 +203,16 @@ class CartScreen extends ConsumerWidget {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Empty your bag?'),
-        content: const Text('This removes every item. It can’t be undone.'),
+        title: Text(AppL10n.of(context).bagConfirmClearTitle),
+        content: Text(AppL10n.of(context).bagConfirmClearMessage),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep them'),
+            child: Text(AppL10n.of(context).bagConfirmKeep),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Empty bag'),
+            child: Text(AppL10n.of(context).bagConfirmEmpty),
           ),
         ],
       ),
@@ -255,7 +256,9 @@ class _FreeShippingBar extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Add ${formatPrice(summary.amountToFreeShipping)} for free shipping',
+                  AppL10n.of(context).bagFreeShippingNudge(
+                    formatPrice(summary.amountToFreeShipping),
+                  ),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.w600,
@@ -313,9 +316,11 @@ class _CartLine extends ConsumerWidget {
           ..clearSnackBars()
           ..showSnackBar(
             SnackBar(
-              content: Text('Removed ${item.product.name}'),
+              content: Text(
+                AppL10n.of(context).bagRemovedItem(item.product.name),
+              ),
               action: SnackBarAction(
-                label: 'Undo',
+                label: AppL10n.of(context).undo,
                 onPressed: () => cart.restore(removed, index),
               ),
             ),
@@ -347,7 +352,7 @@ class _CartLine extends ConsumerWidget {
                       visualDensity: VisualDensity.compact,
                     ),
                     icon: const Icon(Icons.bookmark_border_rounded, size: 17),
-                    label: const Text('Save for later'),
+                    label: Text(AppL10n.of(context).bagSaveForLater),
                   ),
                 ),
               ],
@@ -406,7 +411,7 @@ class _CheckoutBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(
-                    '${summary.itemCount} ${summary.itemCount == 1 ? 'item' : 'items'}',
+                    AppL10n.of(context).orderItemCount(summary.itemCount),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -422,7 +427,7 @@ class _CheckoutBar extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: () => context.push(Routes.checkout),
                   icon: const Icon(Icons.lock_outline_rounded, size: 18),
-                  label: const Text('Checkout'),
+                  label: Text(AppL10n.of(context).bagCheckout),
                 ),
               ),
             ],
@@ -453,10 +458,8 @@ class _SavedForLaterSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: SectionHeader(
-            title: 'Saved for later',
-            subtitle: saved.length == 1
-                ? '1 item waiting'
-                : '${saved.length} items waiting',
+            title: AppL10n.of(context).savedForLaterTitle,
+            subtitle: AppL10n.of(context).savedForLaterCount(saved.length),
             padding: EdgeInsets.zero,
           ),
         ),
@@ -484,7 +487,7 @@ class _SavedForLaterSection extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         IconButton(
-                          tooltip: 'Remove',
+                          tooltip: AppL10n.of(context).removeItem,
                           visualDensity: VisualDensity.compact,
                           icon: const Icon(Icons.close_rounded, size: 18),
                           onPressed: () => ref
@@ -500,7 +503,7 @@ class _SavedForLaterSection extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 14),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: const Text('Move to bag'),
+                          child: Text(AppL10n.of(context).savedMoveToBag),
                         ),
                       ],
                     ),

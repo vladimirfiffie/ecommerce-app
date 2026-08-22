@@ -23,12 +23,12 @@ import 'invoice_pdf.dart';
 /// a screen.
 String buildInvoiceText(Order order, List<OrderLine> items, AppL10n l10n) {
   final StringBuffer out = StringBuffer()
-    ..writeln('ASTER — RECEIPT')
-    ..writeln('Order ${order.id}')
+    ..writeln(l10n.receiptHeading)
+    ..writeln(l10n.receiptOrderLine(order.id))
     ..writeln(formatDate(order.placedAt))
-    ..writeln('Status: ${order.status.labelIn(l10n)}')
+    ..writeln('${l10n.receiptStatus}: ${order.status.labelIn(l10n)}')
     ..writeln()
-    ..writeln('ITEMS');
+    ..writeln(l10n.receiptItemsHeading);
 
   for (final OrderLine item in items) {
     final String variant = item.variantLabel == null
@@ -40,41 +40,52 @@ String buildInvoiceText(Order order, List<OrderLine> items, AppL10n l10n) {
     );
   }
 
+  // The totals used to be padded by hand, which lines up in exactly one
+  // language: the moment "Subtotal" becomes "Zwischensumme" the column walks
+  // off the page. Padding is computed from the labels actually in play.
+  final List<(String, String)> totals = <(String, String)>[
+    (l10n.summarySubtotal, formatPrice(order.subtotal)),
+    if (order.discount > 0)
+      (l10n.summaryDiscount, '-${formatPrice(order.discount)}'),
+    (
+      l10n.summaryShipping,
+      order.shipping == 0 ? l10n.summaryFree : formatPrice(order.shipping),
+    ),
+    (l10n.receiptTotalCaps, formatPrice(order.total)),
+    if (order.creditApplied > 0) ...<(String, String)>[
+      (l10n.summaryStoreCredit, '-${formatPrice(order.creditApplied)}'),
+      (l10n.receiptChargedCaps, formatPrice(order.cardCharged)),
+    ],
+  ];
+  final int column = totals.fold(
+    0,
+    (int widest, (String, String) row) =>
+        row.$1.length > widest ? row.$1.length : widest,
+  );
+
+  out.writeln();
+  for (final (String label, String value) in totals) {
+    out.writeln('${label.padRight(column + 3)}$value');
+  }
+
   out
     ..writeln()
-    ..writeln('Subtotal        ${formatPrice(order.subtotal)}');
-  if (order.discount > 0) {
-    out.writeln('Discount       -${formatPrice(order.discount)}');
-  }
-  out
-    ..writeln(
-      'Shipping        '
-      '${order.shipping == 0 ? 'Free' : formatPrice(order.shipping)}',
-    )
-    ..writeln('TOTAL           ${formatPrice(order.total)}');
-  if (order.creditApplied > 0) {
-    out
-      ..writeln('Store credit   -${formatPrice(order.creditApplied)}')
-      ..writeln('CHARGED         ${formatPrice(order.cardCharged)}');
-  }
-  out
-    ..writeln()
-    ..writeln('Delivery: ${order.delivery.labelIn(l10n)}')
-    ..writeln('Ship to: ${order.shippingAddress}')
-    ..writeln('Paid with: ${order.paymentLabel}');
+    ..writeln('${l10n.receiptDeliveryLabel}: ${order.delivery.labelIn(l10n)}')
+    ..writeln('${l10n.receiptShipTo}: ${order.shippingAddress}')
+    ..writeln('${l10n.receiptPaidWith}: ${order.paymentLabel}');
 
   if (order.hasDeliveryInstructions) {
-    out.writeln('Courier: ${order.dropOff.labelIn(l10n)}');
+    out.writeln('${l10n.receiptCourier}: ${order.dropOff.labelIn(l10n)}');
     if (order.deliveryNote.isNotEmpty) {
-      out.writeln('Note: ${order.deliveryNote}');
+      out.writeln('${l10n.receiptNote}: ${order.deliveryNote}');
     }
   }
 
   if (order.giftWrapped || order.giftMessage.isNotEmpty) {
     out.writeln();
-    if (order.giftWrapped) out.writeln('Gift wrapped');
+    if (order.giftWrapped) out.writeln(l10n.orderGiftWrapped);
     if (order.giftMessage.isNotEmpty) {
-      out.writeln('Message: ${order.giftMessage}');
+      out.writeln('${l10n.receiptGiftMessage}: ${order.giftMessage}');
     }
   }
 
@@ -82,14 +93,16 @@ String buildInvoiceText(Order order, List<OrderLine> items, AppL10n l10n) {
     out
       ..writeln()
       ..writeln(
-        'RETURN: ${r.reason.labelIn(l10n)} — '
-        'refund ${formatPrice(r.refundAmount)}',
+        l10n.receiptReturnLine(
+          r.reason.labelIn(l10n),
+          formatPrice(r.refundAmount),
+        ),
       );
   }
 
   out
     ..writeln()
-    ..writeln('Aster is a demo storefront. No payment was taken.');
+    ..writeln(l10n.receiptDemoFooter);
   return out.toString();
 }
 
@@ -106,12 +119,12 @@ class InvoiceScreen extends ConsumerWidget {
 
     if (order == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Receipt')),
+        appBar: AppBar(title: Text(AppL10n.of(context).receiptTitle)),
         body: EmptyState(
           icon: Icons.receipt_long_outlined,
-          title: 'Receipt unavailable',
-          message: 'We couldn’t find order $orderId.',
-          actionLabel: 'All orders',
+          title: AppL10n.of(context).receiptUnavailableTitle,
+          message: AppL10n.of(context).orderNotFoundMessage(orderId),
+          actionLabel: AppL10n.of(context).orderAllOrders,
           onAction: () => context.go(Routes.orders),
         ),
       );
@@ -121,28 +134,33 @@ class InvoiceScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Receipt'),
+        title: Text(AppL10n.of(context).receiptTitle),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Copy',
+            tooltip: AppL10n.of(context).receiptCopy,
             icon: const Icon(Icons.copy_rounded),
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: text));
               if (!context.mounted) return;
               ScaffoldMessenger.of(context)
                 ..clearSnackBars()
-                ..showSnackBar(const SnackBar(content: Text('Receipt copied')));
+                ..showSnackBar(
+                  SnackBar(content: Text(AppL10n.of(context).receiptCopied)),
+                );
             },
           ),
           IconButton(
-            tooltip: 'Share',
+            tooltip: AppL10n.of(context).receiptShare,
             icon: const Icon(Icons.ios_share_rounded),
             onPressed: () => SharePlus.instance.share(
-              ShareParams(text: text, subject: 'Aster receipt ${order.id}'),
+              ShareParams(
+                text: text,
+                subject: AppL10n.of(context).receiptShareSubject(order.id),
+              ),
             ),
           ),
           IconButton(
-            tooltip: 'Export PDF',
+            tooltip: AppL10n.of(context).receiptExportPdf,
             icon: const Icon(Icons.picture_as_pdf_outlined),
             // Handed to the platform's own share and print sheet, which is
             // where a receipt actually needs to go: a mail app, a cloud
@@ -186,7 +204,7 @@ class InvoiceScreen extends ConsumerWidget {
                       const SizedBox(height: 6),
                       Text('ASTER', style: theme.textTheme.titleLarge),
                       Text(
-                        'Receipt',
+                        AppL10n.of(context).receiptTitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -195,10 +213,19 @@ class InvoiceScreen extends ConsumerWidget {
                   ),
                 ),
                 const Divider(height: 28),
-                _Row('Order', order.id),
-                _Row('Placed', formatDate(order.placedAt)),
-                _Row('Status', order.status.labelIn(AppL10n.of(context))),
-                _Row('Delivery', order.delivery.labelIn(AppL10n.of(context))),
+                _Row(AppL10n.of(context).receiptOrder, order.id),
+                _Row(
+                  AppL10n.of(context).receiptPlaced,
+                  formatDate(order.placedAt),
+                ),
+                _Row(
+                  AppL10n.of(context).receiptStatus,
+                  order.status.labelIn(AppL10n.of(context)),
+                ),
+                _Row(
+                  AppL10n.of(context).receiptDeliveryLabel,
+                  order.delivery.labelIn(AppL10n.of(context)),
+                ),
                 const Divider(height: 28),
 
                 for (final OrderLine item in items)
@@ -243,9 +270,15 @@ class InvoiceScreen extends ConsumerWidget {
                   ),
 
                 const Divider(height: 28),
-                _Row('Subtotal', formatPrice(order.subtotal)),
+                _Row(
+                  AppL10n.of(context).summarySubtotal,
+                  formatPrice(order.subtotal),
+                ),
                 if (order.discount > 0)
-                  _Row('Discount', '−${formatPrice(order.discount)}'),
+                  _Row(
+                    AppL10n.of(context).summaryDiscount,
+                    '−${formatPrice(order.discount)}',
+                  ),
                 _Row(
                   'Shipping',
                   order.shipping == 0 ? 'Free' : formatPrice(order.shipping),
@@ -253,7 +286,10 @@ class InvoiceScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: <Widget>[
-                    Text('Total', style: theme.textTheme.titleMedium),
+                    Text(
+                      AppL10n.of(context).summaryTotal,
+                      style: theme.textTheme.titleMedium,
+                    ),
                     const Spacer(),
                     Text(
                       formatPrice(order.total),
@@ -262,12 +298,22 @@ class InvoiceScreen extends ConsumerWidget {
                   ],
                 ),
                 const Divider(height: 28),
-                _Row('Ship to', order.shippingAddress, wrap: true),
+                _Row(
+                  AppL10n.of(context).receiptShipTo,
+                  order.shippingAddress,
+                  wrap: true,
+                ),
                 if (order.creditApplied > 0) ...<Widget>[
-                  _Row('Store credit', '−${formatPrice(order.creditApplied)}'),
-                  _Row('Charged', formatPrice(order.cardCharged)),
+                  _Row(
+                    AppL10n.of(context).summaryStoreCredit,
+                    '−${formatPrice(order.creditApplied)}',
+                  ),
+                  _Row(
+                    AppL10n.of(context).orderCharged,
+                    formatPrice(order.cardCharged),
+                  ),
                 ],
-                _Row('Paid with', order.paymentLabel),
+                _Row(AppL10n.of(context).receiptPaidWith, order.paymentLabel),
                 if (order.hasDeliveryInstructions)
                   _Row(
                     'Courier',
@@ -278,13 +324,19 @@ class InvoiceScreen extends ConsumerWidget {
                   ),
                 if (order.returnRequest case final ReturnRequest r) ...<Widget>[
                   const Divider(height: 28),
-                  _Row('Return', r.reason.labelIn(AppL10n.of(context))),
-                  _Row('Refund', formatPrice(r.refundAmount)),
+                  _Row(
+                    AppL10n.of(context).receiptReturn,
+                    r.reason.labelIn(AppL10n.of(context)),
+                  ),
+                  _Row(
+                    AppL10n.of(context).receiptRefund,
+                    formatPrice(r.refundAmount),
+                  ),
                 ],
                 const SizedBox(height: 18),
                 Center(
                   child: Text(
-                    'Aster is a demo storefront. No payment was taken.',
+                    AppL10n.of(context).receiptDemoFooter,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,

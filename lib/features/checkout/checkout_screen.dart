@@ -78,6 +78,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _placeOrder() async {
+    final AppL10n l10n = AppL10n.of(context);
     final Address? address = ref.read(selectedAddressProvider);
     if (address == null) {
       setState(() => _step = 0);
@@ -88,7 +89,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (ref.read(requireBiometricsProvider)) {
       final AuthOutcome outcome = await ref
           .read(biometricsProvider)
-          .authenticate(reason: 'Confirm your identity to place this order');
+          .authenticate(reason: l10n.checkoutBiometricReason);
       if (!mounted) return;
       if (outcome == AuthOutcome.failed) {
         unawaited(
@@ -97,7 +98,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(
-            const SnackBar(content: Text('Payment cancelled — not verified')),
+            SnackBar(content: Text(l10n.checkoutBiometricCancelled)),
           );
         return;
       }
@@ -105,11 +106,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Biometrics unavailable — continuing without verification',
-              ),
-            ),
+            SnackBar(content: Text(l10n.checkoutBiometricUnavailable)),
           );
       }
     }
@@ -130,8 +127,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           // naming one on the receipt would be a receipt for something that
           // didn't happen.
           paymentLabel: checkout.paidEntirelyByCredit
-              ? 'Store credit'
-              : card?.label ?? 'Card on file',
+              ? l10n.checkoutPaidByCredit
+              : card?.label ?? l10n.checkoutCardOnFile,
           delivery: ref.read(deliveryOptionProvider),
           creditApplied: checkout.creditApplied,
         );
@@ -157,6 +154,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppL10n l10n = AppL10n.of(context);
     final List<CartItem> items = ref.watch(cartItemsProvider);
     final CheckoutTotal checkout = ref.watch(checkoutTotalProvider);
     final double due = checkout.amountDue;
@@ -165,12 +163,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     if (items.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Checkout')),
+        appBar: AppBar(title: Text(l10n.checkoutTitle)),
         body: EmptyState(
           icon: Icons.shopping_bag_outlined,
-          title: 'Nothing to check out',
-          message: 'Your bag is empty.',
-          actionLabel: 'Browse the shop',
+          title: l10n.checkoutEmptyTitle,
+          message: l10n.checkoutEmptyMessage,
+          actionLabel: l10n.checkoutEmptyAction,
           onAction: () => context.go(Routes.catalog),
         ),
       );
@@ -209,7 +207,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Checkout'),
+        title: Text(l10n.checkoutTitle),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
           child: _StepIndicator(step: _step),
@@ -256,7 +254,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         onPressed: _placing
                             ? null
                             : () => setState(() => _step -= 1),
-                        child: const Text('Back'),
+                        child: Text(l10n.checkoutBack),
                       ),
                     ),
                   ),
@@ -273,13 +271,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       : _step < 2
                       ? FilledButton(
                           onPressed: () => setState(() => _step += 1),
-                          child: const Text('Continue'),
+                          child: Text(l10n.checkoutContinue),
                         )
                       // The last step is the irreversible one, so it asks for
                       // a deliberate gesture rather than a single tap.
                       : AsterSlideToConfirm(
-                          label: 'Slide to pay ${formatPrice(due)}',
-                          fallbackLabel: 'Pay ${formatPrice(due)}',
+                          label: l10n.checkoutSlideToPay(formatPrice(due)),
+                          fallbackLabel: l10n.checkoutPay(formatPrice(due)),
                           onConfirmed: _placeOrder,
                         ),
                 ),
@@ -297,17 +295,23 @@ class _StepIndicator extends StatelessWidget {
 
   final int step;
 
-  static const List<String> _labels = <String>['Shipping', 'Payment', 'Review'];
   static const Duration _duration = Duration(milliseconds: 320);
+
+  static List<String> labelsIn(AppL10n l10n) => <String>[
+    l10n.checkoutStepShipping,
+    l10n.checkoutStepPayment,
+    l10n.checkoutStepReview,
+  ];
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final List<String> labels = _StepIndicator.labelsIn(AppL10n.of(context));
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
       child: Row(
         children: <Widget>[
-          for (int i = 0; i < _labels.length; i++) ...<Widget>[
+          for (int i = 0; i < labels.length; i++) ...<Widget>[
             _StepDot(index: i, step: step),
 
             // Only the current step is labelled — three labels plus their
@@ -321,7 +325,7 @@ class _StepIndicator extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 8),
                       child:
                           Text(
-                                _labels[i],
+                                labels[i],
                                 style: theme.textTheme.labelMedium?.copyWith(
                                   color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w700,
@@ -338,7 +342,7 @@ class _StepIndicator extends StatelessWidget {
                   : const SizedBox.shrink(),
             ),
 
-            if (i < _labels.length - 1)
+            if (i < labels.length - 1)
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -472,7 +476,10 @@ class _ShippingStep extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Ship to', style: theme.textTheme.titleLarge),
+        Text(
+          AppL10n.of(context).checkoutShipTo,
+          style: theme.textTheme.titleLarge,
+        ),
         const SizedBox(height: 14),
         for (final Address a in all)
           Padding(
@@ -492,10 +499,13 @@ class _ShippingStep extends ConsumerWidget {
         OutlinedButton.icon(
           onPressed: onEdit,
           icon: const Icon(Icons.add_rounded, size: 20),
-          label: const Text('Add a new address'),
+          label: Text(AppL10n.of(context).checkoutAddAddress),
         ),
         const SizedBox(height: 26),
-        Text('Delivery', style: theme.textTheme.titleLarge),
+        Text(
+          AppL10n.of(context).checkoutDelivery,
+          style: theme.textTheme.titleLarge,
+        ),
         const SizedBox(height: 14),
         for (final DeliveryOption option in DeliveryOption.values)
           Padding(
@@ -561,15 +571,18 @@ class _DeliveryInstructionsState extends ConsumerState<_DeliveryInstructions> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('When it arrives', style: theme.textTheme.titleLarge),
+        Text(
+          AppL10n.of(context).checkoutWhenItArrives,
+          style: theme.textTheme.titleLarge,
+        ),
         const SizedBox(height: 14),
         DropdownButtonFormField<DropOff>(
           initialValue: instructions.dropOff,
           isExpanded: true,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
             isDense: true,
-            labelText: 'If you’re out',
+            labelText: AppL10n.of(context).checkoutIfYoureOut,
           ),
           items: <DropdownMenuItem<DropOff>>[
             for (final DropOff option in DropOff.values)
@@ -606,9 +619,9 @@ class _DeliveryInstructionsState extends ConsumerState<_DeliveryInstructions> {
           keyboardType: TextInputType.multiline,
           textCapitalization: TextCapitalization.sentences,
           onChanged: notifier.setNote,
-          decoration: const InputDecoration(
-            labelText: 'Anything else for the courier (optional)',
-            hintText: 'Gate code 1234 — the blue door round the side',
+          decoration: InputDecoration(
+            labelText: AppL10n.of(context).checkoutCourierNote,
+            hintText: AppL10n.of(context).checkoutCourierNoteHint,
             alignLabelWithHint: true,
           ),
         ),
@@ -616,10 +629,8 @@ class _DeliveryInstructionsState extends ConsumerState<_DeliveryInstructions> {
           // Said once, because the alternative is a shopper who thinks the
           // shop is liable for a parcel they asked to have left outside.
           instructions.dropOff.isDefault
-              ? 'We’ll knock and wait. If nobody answers, it comes back with '
-                    'the courier.'
-              : 'A parcel left unattended is at your own risk once it’s '
-                    'been dropped off.',
+              ? AppL10n.of(context).checkoutKnockAndWait
+              : AppL10n.of(context).checkoutUnattendedRisk,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -642,7 +653,10 @@ class _PaymentStep extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Pay with', style: theme.textTheme.titleLarge),
+        Text(
+          AppL10n.of(context).checkoutPayWith,
+          style: theme.textTheme.titleLarge,
+        ),
         const SizedBox(height: 14),
         // Credit that covers the order outright means there is nothing left
         // for a card to do, so the step stops asking for one.
@@ -663,8 +677,7 @@ class _PaymentStep extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Your store credit covers this order. No card will be '
-                    'charged.',
+                    AppL10n.of(context).checkoutCreditCoversOrder,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                     ),
@@ -685,10 +698,13 @@ class _PaymentStep extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('No cards saved', style: theme.textTheme.titleSmall),
+                Text(
+                  AppL10n.of(context).checkoutNoCards,
+                  style: theme.textTheme.titleSmall,
+                ),
                 const SizedBox(height: 4),
                 Text(
-                  'Add one to continue. Only the last four digits are stored.',
+                  AppL10n.of(context).checkoutNoCardsBody,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -697,7 +713,7 @@ class _PaymentStep extends ConsumerWidget {
                 FilledButton.icon(
                   onPressed: () => showAddCardSheet(context),
                   icon: const Icon(Icons.add_rounded, size: 20),
-                  label: const Text('Add a card'),
+                  label: Text(AppL10n.of(context).checkoutAddCard),
                 ),
               ],
             ),
@@ -716,8 +732,8 @@ class _PaymentStep extends ConsumerWidget {
                 leading: Icon(card.brand.icon),
                 title: card.label,
                 subtitle: card.isExpired
-                    ? 'Expired ${card.expiryLabel}'
-                    : 'Expires ${card.expiryLabel}',
+                    ? AppL10n.of(context).checkoutCardExpired(card.expiryLabel)
+                    : AppL10n.of(context).checkoutCardExpires(card.expiryLabel),
               ),
             ),
           Align(
@@ -725,7 +741,7 @@ class _PaymentStep extends ConsumerWidget {
             child: TextButton.icon(
               onPressed: () => showAddCardSheet(context),
               icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Add another card'),
+              label: Text(AppL10n.of(context).checkoutAddAnotherCard),
             ),
           ),
         ],
@@ -743,7 +759,7 @@ class _PaymentStep extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'You\u2019ll be asked to verify before this order is placed.',
+                    AppL10n.of(context).checkoutBiometricNotice,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -770,8 +786,7 @@ class _PaymentStep extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Demo checkout — no card is charged and no payment data is '
-                  'collected or stored.',
+                  AppL10n.of(context).checkoutDemoNotice,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -809,7 +824,10 @@ class _ReviewStep extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Review your order', style: theme.textTheme.titleLarge),
+        Text(
+          AppL10n.of(context).checkoutReviewTitle,
+          style: theme.textTheme.titleLarge,
+        ),
         const SizedBox(height: 16),
         for (final CartItem item in items)
           Padding(
@@ -838,7 +856,9 @@ class _ReviewStep extends ConsumerWidget {
                       ),
                       Text(
                         <String>[
-                          'Qty ${item.quantity}',
+                          AppL10n.of(
+                            context,
+                          ).checkoutQuantityShort(item.quantity),
                           if (item.variantLabel != null) item.variantLabel!,
                         ].join('  ·  '),
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -858,16 +878,16 @@ class _ReviewStep extends ConsumerWidget {
         const Divider(height: 28),
         _ReviewRow(
           icon: Icons.location_on_outlined,
-          label: 'Shipping to',
+          label: AppL10n.of(context).checkoutShippingTo,
           value: address == null
-              ? 'No address selected'
+              ? AppL10n.of(context).checkoutNoAddress
               : '${address!.recipient}\n${address!.oneLine}',
         ),
         if (doorstep && !instructions.isDefault) ...<Widget>[
           const SizedBox(height: 14),
           _ReviewRow(
             icon: instructions.dropOff.icon,
-            label: 'When it arrives',
+            label: AppL10n.of(context).checkoutWhenItArrives,
             value: <String>[
               instructions.dropOff.labelIn(AppL10n.of(context)),
               if (instructions.note.trim().isNotEmpty) instructions.note.trim(),
@@ -877,14 +897,14 @@ class _ReviewStep extends ConsumerWidget {
         const SizedBox(height: 14),
         _ReviewRow(
           icon: Icons.credit_card_rounded,
-          label: 'Paying with',
-          value: payment?.label ?? 'No card selected',
+          label: AppL10n.of(context).checkoutPayingWith,
+          value: payment?.label ?? AppL10n.of(context).checkoutNoCard,
         ),
         const SizedBox(height: 24),
         const _CreditSection(),
         const _GiftSection(),
         const SizedBox(height: 24),
-        const OrderSummary(title: 'Total', showCredit: true),
+        OrderSummary(title: AppL10n.of(context).summaryTotal, showCredit: true),
       ],
     );
   }
@@ -1039,15 +1059,23 @@ class _CreditSection extends ConsumerWidget {
               Icons.account_balance_wallet_outlined,
               color: theme.colorScheme.primary,
             ),
-            title: Text('Use store credit', style: theme.textTheme.titleSmall),
+            title: Text(
+              AppL10n.of(context).creditUseSwitch,
+              style: theme.textTheme.titleSmall,
+            ),
             subtitle: Text(
               use
                   ? checkout.paidEntirelyByCredit
-                        ? '${formatPrice(checkout.creditApplied)} covers this '
-                              'order — no card needed'
-                        : '${formatPrice(checkout.creditApplied)} of '
-                              '${formatPrice(balance)} goes on this order'
-                  : '${formatPrice(balance)} available, kept for another time',
+                        ? AppL10n.of(context).creditCoversOrder(
+                            formatPrice(checkout.creditApplied),
+                          )
+                        : AppL10n.of(context).creditPartOfOrder(
+                            formatPrice(checkout.creditApplied),
+                            formatPrice(balance),
+                          )
+                  : AppL10n.of(
+                      context,
+                    ).creditKeptForLater(formatPrice(balance)),
               style: theme.textTheme.bodySmall,
             ),
             value: use,
@@ -1102,10 +1130,14 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
                 Icons.card_giftcard_rounded,
                 color: theme.colorScheme.primary,
               ),
-              title: Text('Gift wrap', style: theme.textTheme.titleSmall),
+              title: Text(
+                AppL10n.of(context).giftWrapTitle,
+                style: theme.textTheme.titleSmall,
+              ),
               subtitle: Text(
-                'Wrapped in tissue and ribbon · '
-                '${formatPrice(GiftOptions.wrapFee)}',
+                AppL10n.of(
+                  context,
+                ).giftWrapSubtitle(formatPrice(GiftOptions.wrapFee)),
                 style: theme.textTheme.bodySmall,
               ),
               value: gift.wrapped,
@@ -1120,9 +1152,9 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
               textInputAction: TextInputAction.newline,
               textCapitalization: TextCapitalization.sentences,
               onChanged: notifier.setMessage,
-              decoration: const InputDecoration(
-                labelText: 'Gift message (optional)',
-                hintText: 'Happy birthday!',
+              decoration: InputDecoration(
+                labelText: AppL10n.of(context).giftMessageLabel,
+                hintText: AppL10n.of(context).giftMessageHint,
                 alignLabelWithHint: true,
               ),
             ),
@@ -1138,7 +1170,7 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Prices are left off the packing slip for gifts.',
+                      AppL10n.of(context).giftPricesHidden,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -1166,7 +1198,7 @@ class _BagPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          '${items.length} ${items.length == 1 ? 'item' : 'items'}',
+          AppL10n.of(context).checkoutItemCount(items.length),
           style: theme.textTheme.titleMedium,
         ),
         const SizedBox(height: 12),
@@ -1239,11 +1271,11 @@ class _AutoAppliedNotice extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  '${promo.code} applied for you',
+                  AppL10n.of(context).promoAutoApplied(promo.code),
                   style: theme.textTheme.titleSmall,
                 ),
                 Text(
-                  'The best code for this order — ${promo.description}',
+                  AppL10n.of(context).promoAutoAppliedBody(promo.description),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -1251,7 +1283,10 @@ class _AutoAppliedNotice extends StatelessWidget {
               ],
             ),
           ),
-          TextButton(onPressed: onRemove, child: const Text('Remove')),
+          TextButton(
+            onPressed: onRemove,
+            child: Text(AppL10n.of(context).promoAutoAppliedRemove),
+          ),
         ],
       ),
     );

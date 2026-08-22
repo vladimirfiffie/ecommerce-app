@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/models/order.dart';
@@ -63,9 +64,9 @@ class _OrderConfirmationScreenState
         appBar: AppBar(),
         body: EmptyState(
           icon: Icons.receipt_long_outlined,
-          title: 'Order not found',
-          message: 'We couldn’t find order $orderId.',
-          actionLabel: 'Back to shop',
+          title: AppL10n.of(context).confirmationNotFoundTitle,
+          message: AppL10n.of(context).confirmationNotFoundMessage(orderId),
+          actionLabel: AppL10n.of(context).confirmationBackToShop,
           onAction: () => context.go(Routes.home),
         ),
       );
@@ -106,7 +107,7 @@ class _OrderConfirmationScreenState
                                 const AnimatedCheck(color: AppTheme.success),
                                 const SizedBox(height: 28),
                                 Text(
-                                      'Order confirmed',
+                                      AppL10n.of(context).confirmationTitle,
                                       style: theme.textTheme.headlineMedium,
                                       textAlign: TextAlign.center,
                                     )
@@ -115,7 +116,9 @@ class _OrderConfirmationScreenState
                                     .moveY(begin: 12, end: 0),
                                 const SizedBox(height: 10),
                                 Text(
-                                  'Thanks! We’re getting order ${order.id} ready to ship.',
+                                  AppL10n.of(
+                                    context,
+                                  ).confirmationThanks(order.id),
                                   textAlign: TextAlign.center,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
@@ -148,28 +151,39 @@ class _OrderConfirmationScreenState
                                             const SizedBox(height: 8),
                                           ],
                                           _Row(
-                                            label: 'Items',
-                                            value:
-                                                '${order.itemCount} ${order.itemCount == 1 ? 'item' : 'items'}',
+                                            label: AppL10n.of(
+                                              context,
+                                            ).confirmationItems,
+                                            value: AppL10n.of(
+                                              context,
+                                            ).orderItemCount(order.itemCount),
                                           ),
                                           _Row(
-                                            label: 'Total paid',
+                                            label: AppL10n.of(
+                                              context,
+                                            ).confirmationTotalPaid,
                                             value: formatPrice(order.total),
                                           ),
                                           if (order.creditApplied > 0)
                                             _Row(
-                                              label: 'Store credit',
+                                              label: AppL10n.of(
+                                                context,
+                                              ).summaryStoreCredit,
                                               value:
                                                   '−${formatPrice(order.creditApplied)}',
                                             ),
                                           _Row(
-                                            label: 'Arrives by',
+                                            label: AppL10n.of(
+                                              context,
+                                            ).confirmationArrivesBy,
                                             value: formatDeliveryDate(
                                               order.estimatedDelivery,
                                             ),
                                           ),
                                           _Row(
-                                            label: 'Paid with',
+                                            label: AppL10n.of(
+                                              context,
+                                            ).confirmationPaidWith,
                                             value: order.paymentLabel,
                                           ),
                                         ],
@@ -185,7 +199,9 @@ class _OrderConfirmationScreenState
                                       onPressed: () => context.pushReplacement(
                                         Routes.order(order.id),
                                       ),
-                                      child: const Text('Track this order'),
+                                      child: Text(
+                                        AppL10n.of(context).confirmationTrack,
+                                      ),
                                     )
                                     .animate(delay: 780.ms)
                                     .fadeIn()
@@ -193,7 +209,11 @@ class _OrderConfirmationScreenState
                                 const SizedBox(height: 10),
                                 OutlinedButton(
                                       onPressed: () => context.go(Routes.home),
-                                      child: const Text('Keep shopping'),
+                                      child: Text(
+                                        AppL10n.of(
+                                          context,
+                                        ).confirmationKeepShopping,
+                                      ),
                                     )
                                     .animate(delay: 860.ms)
                                     .fadeIn()
@@ -409,9 +429,9 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
     unawaited(ref.read(hapticsProvider).impact());
     final bool yes = await confirmDestructive(
       context,
-      title: 'Cancel this order?',
-      message: 'Nothing was charged, and the items go back to your bag.',
-      confirmLabel: 'Cancel order',
+      title: AppL10n.of(context).confirmationCancelTitle,
+      message: AppL10n.of(context).confirmationCancelMessage,
+      confirmLabel: AppL10n.of(context).confirmationCancelConfirm,
     );
     if (!yes || !mounted) return;
 
@@ -424,7 +444,9 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
       ..showSnackBar(
         SnackBar(
           content: Text(
-            done ? 'Order cancelled' : 'Too late to cancel — track it instead',
+            done
+                ? AppL10n.of(context).confirmationCancelled
+                : AppL10n.of(context).confirmationTooLateToCancel,
           ),
         ),
       );
@@ -448,7 +470,11 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
       ..showSnackBar(
         SnackBar(
           content: Text(
-            done ? 'Sending it to $picked instead' : 'Too late to change that',
+            done
+                // .label, not the Address itself: interpolating the object
+                // printed "Instance of 'Address'" into the snackbar.
+                ? AppL10n.of(context).confirmationAddressChanged(picked.label)
+                : AppL10n.of(context).confirmationTooLateToChange,
           ),
         ),
       );
@@ -488,7 +514,7 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Changed your mind? $clock left',
+                  AppL10n.of(context).changeWindowLeft(clock),
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.onTertiaryContainer,
                   ),
@@ -500,7 +526,7 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
           Padding(
             padding: const EdgeInsets.only(left: 28),
             child: Text(
-              'Until then this order can be cancelled or sent somewhere else.',
+              AppL10n.of(context).changeWindowBody,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onTertiaryContainer,
               ),
@@ -513,7 +539,7 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
               Expanded(
                 child: TextButton(
                   onPressed: _changeAddress,
-                  child: const Text('Change address'),
+                  child: Text(AppL10n.of(context).confirmationChangeAddress),
                 ),
               ),
               Expanded(
@@ -522,7 +548,7 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                   ),
-                  child: const Text('Cancel order'),
+                  child: Text(AppL10n.of(context).confirmationCancelConfirm),
                 ),
               ),
             ],

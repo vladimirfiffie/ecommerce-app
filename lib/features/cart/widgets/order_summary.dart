@@ -3,19 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../state/cart_provider.dart';
 import '../../../state/credit_provider.dart';
 
 /// Subtotal / discount / shipping / tax / total block, shared by the cart and
 /// the checkout review step.
 class OrderSummary extends ConsumerWidget {
-  const OrderSummary({
-    super.key,
-    this.title = 'Order summary',
-    this.showCredit = false,
-  });
+  const OrderSummary({super.key, this.title, this.showCredit = false});
 
-  final String title;
+  /// Null takes the default heading, which has to be looked up from a
+  /// context this constructor doesn't have.
+  final String? title;
 
   /// Whether to break out store credit and what is left to pay.
   ///
@@ -31,6 +30,7 @@ class OrderSummary extends ConsumerWidget {
     final Promo? promo = ref.watch(appliedPromoProvider);
     final CheckoutTotal checkout = ref.watch(checkoutTotalProvider);
     final bool credited = showCredit && checkout.usesCredit;
+    final AppL10n l10n = AppL10n.of(context);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -42,26 +42,37 @@ class OrderSummary extends ConsumerWidget {
         children: <Widget>[
           Align(
             alignment: Alignment.centerLeft,
-            child: Text(title, style: theme.textTheme.titleMedium),
+            child: Text(
+              title ?? l10n.summaryTitle,
+              style: theme.textTheme.titleMedium,
+            ),
           ),
           const SizedBox(height: 16),
-          _Line(label: 'Subtotal', value: formatPrice(summary.subtotal)),
+          _Line(
+            label: l10n.summarySubtotal,
+            value: formatPrice(summary.subtotal),
+          ),
           if (summary.discount > 0)
             _Line(
-              label: 'Discount${promo == null ? '' : ' (${promo.code})'}',
+              label: promo == null
+                  ? l10n.summaryDiscount
+                  : l10n.summaryDiscountWithCode(promo.code),
               value: '−${formatPrice(summary.discount)}',
               highlight: AppTheme.success,
             ),
           _Line(
-            label: 'Shipping',
+            label: l10n.summaryShipping,
             value: summary.shipping == 0
-                ? 'Free'
+                ? l10n.summaryFree
                 : formatPrice(summary.shipping),
             highlight: summary.shipping == 0 ? AppTheme.success : null,
           ),
           if (summary.giftFee > 0)
-            _Line(label: 'Gift wrap', value: formatPrice(summary.giftFee)),
-          _Line(label: 'Estimated tax', value: formatPrice(summary.tax)),
+            _Line(
+              label: l10n.summaryGiftWrap,
+              value: formatPrice(summary.giftFee),
+            ),
+          _Line(label: l10n.summaryTax, value: formatPrice(summary.tax)),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(height: 1),
@@ -69,7 +80,7 @@ class OrderSummary extends ConsumerWidget {
           Row(
             children: <Widget>[
               Text(
-                credited ? 'Order total' : 'Total',
+                credited ? l10n.summaryOrderTotal : l10n.summaryTotal,
                 style: theme.textTheme.titleMedium,
               ),
               const Spacer(),
@@ -83,7 +94,7 @@ class OrderSummary extends ConsumerWidget {
           ),
           if (credited) ...<Widget>[
             _Line(
-              label: 'Store credit',
+              label: l10n.summaryStoreCredit,
               value: '−${formatPrice(checkout.creditApplied)}',
               highlight: AppTheme.success,
             ),
@@ -93,7 +104,7 @@ class OrderSummary extends ConsumerWidget {
             ),
             Row(
               children: <Widget>[
-                Text('To pay', style: theme.textTheme.titleMedium),
+                Text(l10n.summaryToPay, style: theme.textTheme.titleMedium),
                 const Spacer(),
                 Text(
                   formatPrice(checkout.amountDue),

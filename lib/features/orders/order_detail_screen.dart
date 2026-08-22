@@ -43,9 +43,9 @@ class OrderDetailScreen extends ConsumerWidget {
         appBar: AppBar(),
         body: EmptyState(
           icon: Icons.receipt_long_outlined,
-          title: 'Order not found',
-          message: 'We couldn’t find order $orderId.',
-          actionLabel: 'All orders',
+          title: AppL10n.of(context).orderNotFoundTitle,
+          message: AppL10n.of(context).orderNotFoundMessage(orderId),
+          actionLabel: AppL10n.of(context).orderAllOrders,
           onAction: () => context.go(Routes.orders),
         ),
       );
@@ -69,7 +69,7 @@ class OrderDetailScreen extends ConsumerWidget {
               const SizedBox(width: 12),
               Flexible(
                 child: Text(
-                  'Placed ${formatDate(order.placedAt)}',
+                  AppL10n.of(context).orderPlacedOn(formatDate(order.placedAt)),
                   textAlign: TextAlign.right,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -83,7 +83,10 @@ class OrderDetailScreen extends ConsumerWidget {
           const SizedBox(height: 22),
           _Tracker(status: order.status, eta: order.estimatedDelivery),
           const SizedBox(height: 28),
-          Text('Items', style: theme.textTheme.titleMedium),
+          Text(
+            AppL10n.of(context).orderItems,
+            style: theme.textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           for (final OrderLine item in items)
             Padding(
@@ -130,20 +133,28 @@ class OrderDetailScreen extends ConsumerWidget {
               ),
             ),
           const Divider(height: 28),
-          _SummaryRow(label: 'Subtotal', value: formatPrice(order.subtotal)),
+          _SummaryRow(
+            label: AppL10n.of(context).summarySubtotal,
+            value: formatPrice(order.subtotal),
+          ),
           if (order.discount > 0)
             _SummaryRow(
-              label: 'Discount',
+              label: AppL10n.of(context).summaryDiscount,
               value: '−${formatPrice(order.discount)}',
             ),
           _SummaryRow(
-            label: 'Shipping',
-            value: order.shipping == 0 ? 'Free' : formatPrice(order.shipping),
+            label: AppL10n.of(context).summaryShipping,
+            value: order.shipping == 0
+                ? AppL10n.of(context).summaryFree
+                : formatPrice(order.shipping),
           ),
           const SizedBox(height: 6),
           Row(
             children: <Widget>[
-              Text('Total', style: theme.textTheme.titleMedium),
+              Text(
+                AppL10n.of(context).summaryTotal,
+                style: theme.textTheme.titleMedium,
+              ),
               const Spacer(),
               Text(
                 formatPrice(order.total),
@@ -155,13 +166,16 @@ class OrderDetailScreen extends ConsumerWidget {
           ),
           if (order.creditApplied > 0) ...<Widget>[
             _SummaryRow(
-              label: 'Store credit',
+              label: AppL10n.of(context).summaryStoreCredit,
               value: '−${formatPrice(order.creditApplied)}',
             ),
             const SizedBox(height: 6),
             Row(
               children: <Widget>[
-                Text('Charged', style: theme.textTheme.titleMedium),
+                Text(
+                  AppL10n.of(context).orderCharged,
+                  style: theme.textTheme.titleMedium,
+                ),
                 const Spacer(),
                 Text(
                   formatPrice(order.cardCharged),
@@ -171,7 +185,10 @@ class OrderDetailScreen extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 26),
-          Text('Delivery', style: theme.textTheme.titleMedium),
+          Text(
+            AppL10n.of(context).orderDelivery,
+            style: theme.textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           Text(
             order.shippingAddress,
@@ -206,11 +223,14 @@ class OrderDetailScreen extends ConsumerWidget {
           ],
           if (order.giftWrapped || order.giftMessage.isNotEmpty) ...<Widget>[
             const SizedBox(height: 16),
-            Text('Gift', style: theme.textTheme.titleMedium),
+            Text(
+              AppL10n.of(context).orderGift,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Text(
               <String>[
-                if (order.giftWrapped) 'Gift wrapped',
+                if (order.giftWrapped) AppL10n.of(context).orderGiftWrapped,
                 if (order.giftMessage.isNotEmpty) '“${order.giftMessage}”',
               ].join('\n'),
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -219,7 +239,10 @@ class OrderDetailScreen extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 16),
-          Text('Payment', style: theme.textTheme.titleMedium),
+          Text(
+            AppL10n.of(context).orderPayment,
+            style: theme.textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           Text(
             order.paymentLabel,
@@ -241,7 +264,7 @@ class OrderDetailScreen extends ConsumerWidget {
                 foregroundColor: theme.colorScheme.error,
               ),
               icon: const Icon(Icons.cancel_outlined, size: 20),
-              label: const Text('Cancel this order'),
+              label: Text(AppL10n.of(context).orderCancelAction),
             ),
             const SizedBox(height: 10),
           ],
@@ -249,14 +272,16 @@ class OrderDetailScreen extends ConsumerWidget {
             OutlinedButton.icon(
               onPressed: () => context.push(Routes.returnRequest(order.id)),
               icon: const Icon(Icons.assignment_return_outlined, size: 20),
-              label: Text('Return items · ${order.returnDaysLeft} days left'),
+              label: Text(
+                AppL10n.of(context).orderReturnAction(order.returnDaysLeft),
+              ),
             ),
             const SizedBox(height: 10),
           ],
           OutlinedButton.icon(
             onPressed: () => context.push(Routes.invoice(order.id)),
             icon: const Icon(Icons.receipt_outlined, size: 20),
-            label: const Text('View receipt'),
+            label: Text(AppL10n.of(context).orderViewReceipt),
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
@@ -264,7 +289,7 @@ class OrderDetailScreen extends ConsumerWidget {
                 ? null
                 : () => _reorder(context, ref, items),
             icon: const Icon(Icons.refresh_rounded, size: 20),
-            label: const Text('Buy these again'),
+            label: Text(AppL10n.of(context).orderBuyAgain),
           ),
         ],
       ),
@@ -274,12 +299,10 @@ class OrderDetailScreen extends ConsumerWidget {
   Future<void> _cancel(BuildContext context, WidgetRef ref, Order order) async {
     final bool yes = await confirmDestructive(
       context,
-      title: 'Cancel this order?',
-      message:
-          'It hasn’t shipped yet, so it can still be stopped. This '
-          'can’t be undone.',
-      confirmLabel: 'Cancel order',
-      cancelLabel: 'Keep it',
+      title: AppL10n.of(context).confirmationCancelTitle,
+      message: AppL10n.of(context).orderCancelMessage,
+      confirmLabel: AppL10n.of(context).orderCancelConfirm,
+      cancelLabel: AppL10n.of(context).orderCancelKeep,
     );
     if (!yes || !context.mounted) return;
 
@@ -291,8 +314,8 @@ class OrderDetailScreen extends ConsumerWidget {
         SnackBar(
           content: Text(
             ok
-                ? 'Order cancelled'
-                : 'Too late to cancel — it has already shipped',
+                ? AppL10n.of(context).orderCancelled
+                : AppL10n.of(context).orderTooLateToCancel,
           ),
         ),
       );
@@ -419,8 +442,8 @@ class _ClosedNotice extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   refunded
-                      ? 'This order was refunded. Nothing is on its way.'
-                      : 'This order was cancelled and won’t be delivered.',
+                      ? AppL10n.of(context).orderRefundedNothingComing
+                      : AppL10n.of(context).orderCancelledNothingComing,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onErrorContainer,
                   ),
@@ -472,9 +495,11 @@ class _Tracker extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(switch (status) {
-            OrderStatus.delivered => 'Delivered',
-            OrderStatus.returnRequested => 'Delivered · return in progress',
-            _ => 'Arriving by ${formatDeliveryDate(eta)}',
+            OrderStatus.delivered => AppL10n.of(context).orderStatusDelivered,
+            OrderStatus.returnRequested => AppL10n.of(
+              context,
+            ).orderDeliveredReturnInProgress,
+            _ => AppL10n.of(context).orderArrivingBy(formatDeliveryDate(eta)),
           }, style: theme.textTheme.titleSmall),
           const SizedBox(height: 18),
           Row(
@@ -599,7 +624,9 @@ class _ReturnBanner extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  refunded ? 'Refunded' : 'Return in progress',
+                  refunded
+                      ? AppL10n.of(context).orderStatusRefunded
+                      : AppL10n.of(context).orderReturnInProgress,
                   style: theme.textTheme.titleSmall,
                 ),
               ),
@@ -611,14 +638,19 @@ class _ReturnBanner extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            refunded
-                ? '${request.reason.labelIn(AppL10n.of(context))} · '
-                      // A refund goes back the way it was paid, so an order
-                      // part-settled with credit gets part of it back there.
-                      '${order.creditApplied > 0 ? 'refunded to your card and store credit' : 'refunded to ${order.paymentLabel}'}'
-                : '${request.reason.labelIn(AppL10n.of(context))} · '
-                      'expect your refund by '
-                      '${formatDeliveryDate(request.expectedRefundBy)}',
+            <String>[
+              request.reason.labelIn(AppL10n.of(context)),
+              if (refunded)
+                // A refund goes back the way it was paid, so an order
+                // part-settled with credit gets part of it back there.
+                order.creditApplied > 0
+                    ? AppL10n.of(context).orderRefundedToCardAndCredit
+                    : AppL10n.of(context).orderRefundedTo(order.paymentLabel)
+              else
+                AppL10n.of(context).orderRefundExpectedBy(
+                  formatDeliveryDate(request.expectedRefundBy),
+                ),
+            ].join(' · '),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -637,7 +669,7 @@ class _ReturnBanner extends ConsumerWidget {
                       .read(ordersProvider.notifier)
                       .cancelReturn(order.id);
                 },
-                child: const Text('Withdraw return'),
+                child: Text(AppL10n.of(context).orderWithdrawReturn),
               ),
             ),
           ],

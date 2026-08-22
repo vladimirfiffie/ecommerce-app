@@ -15,13 +15,15 @@ just Flutter widgets and pub plugins.
 | **Home** | Auto-advancing promo carousel, category tiles, deals / new-arrivals / recently-viewed rails, popular grid, pull to refresh |
 | **Shop** | The live catalog folded into 6 categories, category strip, grid/list toggle, filter & sort sheet (type, max price, min rating, on-sale, in-stock) |
 | **Search** | Debounced live results, persisted recent searches, trending chips |
-| **Product** | Swipeable gallery with pinch and double-tap zoom, size guide, variants, specifications table, Q&A, rating histogram, reviews, related rail, back-in-stock alerts |
+| **Product** | Swipeable gallery with pinch and double-tap zoom, size guide with a chart picker, size dropdown, specifications table, Q&A, rating histogram, reviews, related rail, back-in-stock alerts, and a price history of what the app has actually watched it cost |
 | **Brand** | Tap the brand on any product for everything it sells, with product count, average rating, cheapest price and how many are on sale |
 | **Bag** | Per-variant lines, swipe to delete with undo, promo codes, free-shipping progress, live order maths |
-| **Checkout** | Shipping → payment → review stepper, validated address and card forms (Luhn, expiry, per-brand CVV, US ZIP), saved addresses and cards, three delivery speeds, gift wrap and message, order confirmation |
+| **Checkout** | Shipping → payment → review stepper, validated address and card forms (Luhn, expiry, per-brand CVV, US ZIP), saved addresses and cards, three delivery speeds, drop-off instructions for the courier, gift wrap and message, store credit, order confirmation |
 | **Orders** | Status tracker that advances over time, cancel before dispatch, partial returns with refund maths, shareable receipt, reorder at today's prices |
-| **Saved** | Wishlist with bulk add-to-bag |
-| **Reviews** | Verified buyers can write, edit and delete a review; it pins to the top of the list and folds into the rating average |
+| **Notifications** | An inbox behind the bell on Home, derived from the orders themselves rather than from what was posted, so nothing is lost to a swiped-away notification |
+| **Gift cards** | Redeem a code into store credit, spent before the card is charged; cancel an order and it comes straight back |
+| **Saved** | Named lists — hold the heart to choose where something goes — with bulk add-to-bag |
+| **Reviews** | Verified buyers can write, edit and delete a review, with up to four photos; it pins to the top of the list and folds into the rating average |
 | **Profile** | Live "your orders" summary (newest order, its status, when it lands), editable name, light/dark/auto, 8 theme presets, AMOLED black, Material You, haptics, notifications, biometrics, data reset |
 
 ### Device integration
@@ -35,9 +37,10 @@ just Flutter widgets and pub plugins.
 | **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
 | **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
 | **Deep links** | `aster://product/<id>` and https App Links resolve to in-app routes |
+| **App shortcuts** | Long-press the launcher icon for Orders, Saved, Search and Bag — static, so they work before the app's first run |
 | **Personalization** | Time-aware greeting using your name, and 8 seed-color presets that Material 3 expands into full light/dark schemes |
 | **Accounts** | Local sign-up / sign-in with PBKDF2-hashed passwords. Optional — everything works as a guest |
-| **Wallet** | Add/remove cards with Luhn validation and brand detection; only the last four digits are stored, never the CVV |
+| **Wallet** | Add/remove cards with Luhn validation and brand detection; only the last four digits are stored, never the CVV. Gift cards redeem into a store-credit ledger beside them |
 | **Settings** | Grouped by concern: account, shopping, appearance, feedback, security, data |
 
 Everything the shopper does — bag, wishlist, orders, addresses, search history,
@@ -133,9 +136,22 @@ words somewhere a `BuildContext` can never reach. Those enums now carry only
 what's true in any language — ids, prices, timings, who pays return postage —
 and the words moved to `lib/core/l10n/enum_labels.dart`.
 
-Adding a language means dropping `app_<code>.arb` beside the English one and
-running `flutter gen-l10n`; no screen changes. Screens outside the buy path
-still hold their copy inline and want the same treatment.
+The app ships in **English and Spanish**. Adding a third means dropping
+`app_<code>.arb` beside the other two and running `flutter gen-l10n`; no screen
+changes.
+
+The whole buy path — bag, checkout, order confirmation, orders, order detail,
+returns and both receipts — is looked up rather than inline, which is what
+having a second language actually tests: the ARB tests prove the strings
+exist, and a `Text('Checkout')` left in a widget would pass every one of them.
+Screens outside that path (settings, profile, product, help, search) still hold
+their copy inline — around 380 strings — and want the same treatment.
+
+One thing the second language forced out into the open: the plain-text receipt
+padded its totals column by hand, which lines up in exactly one language.
+`Zwischensumme` walks it off the page. The padding is now computed from
+whichever labels are actually in play, and a test holds every totals row in
+both languages to the same column.
 
 ## Running it
 
