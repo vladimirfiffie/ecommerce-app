@@ -163,8 +163,15 @@ void main() {
     expect(container.read(cartCountProvider), 0);
     await clearSnackBars(tester);
 
-    // The size chips sit under the sticky buy bar until the page is scrolled.
-    await revealAndTap(tester, find.text('M'));
+    // The size dropdown sits under the sticky buy bar until the page is
+    // scrolled, and its options only exist once it is open.
+    await revealAndTap(
+      tester,
+      find.byType(DropdownButtonFormField<String>),
+    );
+    await tester.tap(find.text('M').last);
+    await settle(tester);
+
     await tester.tap(find.text('Add to bag'));
     await settle(tester);
 

@@ -6,8 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/product.dart';
 import '../../../state/haptics_provider.dart';
 
-/// Size chips. Nothing is preselected — the shopper has to choose, which is
-/// what the add-to-bag validation checks for.
+/// The size, as a dropdown. Nothing is preselected — the shopper has to
+/// choose, which is what the add-to-bag validation checks for.
+///
+/// This was a wrap of chips. Chips read well for three or four sizes and
+/// badly for a shoe run, where a dozen of them take four lines and push the
+/// price and the buy button off the screen. A dropdown is one line whatever
+/// the product offers, and it is the control the platform already gives a
+/// screen reader and a keyboard a way through.
 class SizeSelector extends ConsumerWidget {
   const SizeSelector({
     required this.sizes,
@@ -27,78 +33,35 @@ class SizeSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            Text('Size', style: theme.textTheme.titleSmall),
-            const Spacer(),
-            Text(
-              selected == null ? 'Select one' : selected!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: selected == null
-                    ? theme.colorScheme.onSurfaceVariant
-                    : theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: <Widget>[
-            for (final String size in sizes)
-              _SizeChip(
-                label: size,
-                selected: size == selected,
-                onTap: () {
-                  unawaited(ref.read(hapticsProvider).selection());
-                  onSelected(size);
-                },
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _SizeChip extends StatelessWidget {
-  const _SizeChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Material(
-      color: selected
-          ? theme.colorScheme.primary
-          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          constraints: const BoxConstraints(minWidth: 54),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: selected
-                  ? theme.colorScheme.onPrimary
-                  : theme.colorScheme.onSurface,
+        Text('Size', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          // Null until chosen, so the field shows its hint rather than
+          // quietly standing behind a size nobody picked.
+          initialValue: selected,
+          isExpanded: true,
+          decoration: InputDecoration(
+            isDense: true,
+            border: const OutlineInputBorder(),
+            hintText: 'Select a size',
+            // The one thing the chips said that a dropdown doesn't: that
+            // this is a choice still to be made.
+            helperText: selected == null ? 'Needed before adding to bag' : null,
+            helperStyle: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+          items: <DropdownMenuItem<String>>[
+            for (final String size in sizes)
+              DropdownMenuItem<String>(value: size, child: Text(size)),
+          ],
+          onChanged: (String? value) {
+            if (value == null) return;
+            unawaited(ref.read(hapticsProvider).selection());
+            onSelected(value);
+          },
         ),
-      ),
+      ],
     );
   }
 }
