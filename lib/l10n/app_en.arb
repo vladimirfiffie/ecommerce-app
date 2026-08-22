@@ -26,6 +26,23 @@
     "description": "The refund has been paid back."
   },
 
+  "dropOffHandToMe": "Hand it to me",
+  "@dropOffHandToMe": {
+    "description": "Delivery drop-off choice: the courier waits for someone to answer."
+  },
+  "dropOffAtDoor": "Leave at my door",
+  "@dropOffAtDoor": {
+    "description": "Delivery drop-off choice: the parcel is left on the doorstep."
+  },
+  "dropOffWithNeighbour": "Leave with a neighbour",
+  "@dropOffWithNeighbour": {
+    "description": "Delivery drop-off choice. Spelling follows the app's American English elsewhere; the label is the shopper-facing wording."
+  },
+  "dropOffSafePlace": "Leave in a safe place",
+  "@dropOffSafePlace": {
+    "description": "Delivery drop-off choice: a porch, a shed, behind a gate."
+  },
+
   "returnReasonWrongSize": "Wrong size or fit",
   "@returnReasonWrongSize": {
     "description": "Return reason. The shopper does not pay return postage for reasons that are the shop's fault; this one is not."

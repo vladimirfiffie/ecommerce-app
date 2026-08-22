@@ -129,6 +129,30 @@ abstract class AppL10n {
   /// **'Refunded'**
   String get orderStatusRefunded;
 
+  /// Delivery drop-off choice: the courier waits for someone to answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand it to me'**
+  String get dropOffHandToMe;
+
+  /// Delivery drop-off choice: the parcel is left on the doorstep.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave at my door'**
+  String get dropOffAtDoor;
+
+  /// Delivery drop-off choice. Spelling follows the app's American English elsewhere; the label is the shopper-facing wording.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave with a neighbour'**
+  String get dropOffWithNeighbour;
+
+  /// Delivery drop-off choice: a porch, a shed, behind a gate.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave in a safe place'**
+  String get dropOffSafePlace;
+
   /// Return reason. The shopper does not pay return postage for reasons that are the shop's fault; this one is not.
   ///
   /// In en, this message translates to:

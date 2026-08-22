@@ -16,6 +16,8 @@ import '../../shared/widgets/empty_state.dart';
 import '../../state/addresses_provider.dart';
 import '../../state/cart_provider.dart';
 import '../../state/credit_provider.dart';
+import '../../state/delivery_instructions_provider.dart';
+import '../../data/models/drop_off.dart';
 import '../../state/orders_provider.dart';
 import '../cart/widgets/order_summary.dart';
 import 'widgets/address_sheet.dart';
@@ -513,6 +515,115 @@ class _ShippingStep extends ConsumerWidget {
                         '${formatDeliveryDate(option.estimatedArrival(DateTime.now()))}',
             ),
           ),
+        // Nobody leaves a click-and-collect parcel on a doorstep, so the
+        // question isn't asked when there is no doorstep in it.
+        if (DropOff.appliesTo(
+          ref.watch(deliveryOptionProvider).id,
+        )) ...<Widget>[
+          const SizedBox(height: 26),
+          const _DeliveryInstructions(),
+        ],
+      ],
+    );
+  }
+}
+
+/// Where to leave it, and anything the courier needs to know to get there.
+class _DeliveryInstructions extends ConsumerStatefulWidget {
+  const _DeliveryInstructions();
+
+  @override
+  ConsumerState<_DeliveryInstructions> createState() =>
+      _DeliveryInstructionsState();
+}
+
+class _DeliveryInstructionsState extends ConsumerState<_DeliveryInstructions> {
+  late final TextEditingController _note = TextEditingController(
+    text: ref.read(deliveryInstructionsProvider).note,
+  );
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final DeliveryInstructions instructions = ref.watch(
+      deliveryInstructionsProvider,
+    );
+    final DeliveryInstructionsNotifier notifier = ref.read(
+      deliveryInstructionsProvider.notifier,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('When it arrives', style: theme.textTheme.titleLarge),
+        const SizedBox(height: 14),
+        DropdownButtonFormField<DropOff>(
+          initialValue: instructions.dropOff,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            isDense: true,
+            labelText: 'If you’re out',
+          ),
+          items: <DropdownMenuItem<DropOff>>[
+            for (final DropOff option in DropOff.values)
+              DropdownMenuItem<DropOff>(
+                value: option,
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      option.icon,
+                      size: 19,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        option.labelIn(AppL10n.of(context)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          onChanged: (DropOff? next) {
+            if (next != null) notifier.setDropOff(next);
+          },
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _note,
+          minLines: 2,
+          maxLines: 3,
+          maxLength: DropOff.maxNoteLength,
+          keyboardType: TextInputType.multiline,
+          textCapitalization: TextCapitalization.sentences,
+          onChanged: notifier.setNote,
+          decoration: const InputDecoration(
+            labelText: 'Anything else for the courier (optional)',
+            hintText: 'Gate code 1234 — the blue door round the side',
+            alignLabelWithHint: true,
+          ),
+        ),
+        Text(
+          // Said once, because the alternative is a shopper who thinks the
+          // shop is liable for a parcel they asked to have left outside.
+          instructions.dropOff.isDefault
+              ? 'We’ll knock and wait. If nobody answers, it comes back with '
+                    'the courier.'
+              : 'A parcel left unattended is at your own risk once it’s '
+                    'been dropped off.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
       ],
     );
   }
@@ -674,7 +785,7 @@ class _PaymentStep extends ConsumerWidget {
   }
 }
 
-class _ReviewStep extends StatelessWidget {
+class _ReviewStep extends ConsumerWidget {
   const _ReviewStep({
     required this.items,
     required this.address,
@@ -686,8 +797,14 @@ class _ReviewStep extends StatelessWidget {
   final PaymentCard? payment;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
+    final DeliveryInstructions instructions = ref.watch(
+      deliveryInstructionsProvider,
+    );
+    final bool doorstep = DropOff.appliesTo(
+      ref.watch(deliveryOptionProvider).id,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -746,6 +863,17 @@ class _ReviewStep extends StatelessWidget {
               ? 'No address selected'
               : '${address!.recipient}\n${address!.oneLine}',
         ),
+        if (doorstep && !instructions.isDefault) ...<Widget>[
+          const SizedBox(height: 14),
+          _ReviewRow(
+            icon: instructions.dropOff.icon,
+            label: 'When it arrives',
+            value: <String>[
+              instructions.dropOff.labelIn(AppL10n.of(context)),
+              if (instructions.note.trim().isNotEmpty) instructions.note.trim(),
+            ].join('\n'),
+          ),
+        ],
         const SizedBox(height: 14),
         _ReviewRow(
           icon: Icons.credit_card_rounded,

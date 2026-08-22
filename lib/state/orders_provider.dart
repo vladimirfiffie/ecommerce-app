@@ -12,6 +12,8 @@ import '../data/repositories/product_repository.dart';
 import 'app_providers.dart';
 import 'cart_provider.dart';
 import '../data/models/delivery_option.dart';
+import '../data/models/drop_off.dart';
+import 'delivery_instructions_provider.dart';
 
 /// Order history, newest first.
 class OrdersNotifier extends Notifier<List<Order>> {
@@ -42,6 +44,9 @@ class OrdersNotifier extends Notifier<List<Order>> {
     DeliveryOption delivery = DeliveryOption.standard,
     double creditApplied = 0,
   }) async {
+    final DeliveryInstructions instructions = ref.read(
+      deliveryInstructionsProvider,
+    );
     final GiftOptions gift = ref.read(giftOptionsProvider);
     final CartSummary summary = ref.read(cartSummaryProvider);
     final DateTime now = DateTime.now();
@@ -66,6 +71,14 @@ class OrdersNotifier extends Notifier<List<Order>> {
       paymentLabel: paymentLabel,
       deliveryId: delivery.id,
       creditApplied: creditApplied,
+      // Pickup has no doorstep, so an instruction about one would be a
+      // promise to nobody — see [DropOff.appliesTo].
+      dropOffId: DropOff.appliesTo(delivery.id)
+          ? instructions.dropOff.id
+          : DropOff.handToMe.id,
+      deliveryNote: DropOff.appliesTo(delivery.id)
+          ? instructions.note.trim()
+          : '',
       giftWrapped: gift.wrapped,
       giftMessage: gift.message.trim(),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'delivery_option.dart';
+import 'drop_off.dart';
 import 'order_line.dart';
 
 enum OrderStatus {
@@ -98,6 +99,8 @@ class Order {
     required this.paymentLabel,
     this.deliveryId = 'standard',
     this.creditApplied = 0,
+    this.dropOffId = 'hand',
+    this.deliveryNote = '',
     this.cancelledAt,
     this.returnRequest,
     this.giftMessage = '',
@@ -121,6 +124,8 @@ class Order {
     paymentLabel: json['paymentLabel'] as String,
     deliveryId: json['deliveryId'] as String? ?? 'standard',
     creditApplied: (json['creditApplied'] as num?)?.toDouble() ?? 0,
+    dropOffId: json['dropOffId'] as String? ?? 'hand',
+    deliveryNote: json['deliveryNote'] as String? ?? '',
     cancelledAt: json['cancelledAt'] == null
         ? null
         : DateTime.parse(json['cancelledAt'] as String),
@@ -155,12 +160,24 @@ class Order {
   /// receipt has to keep saying what was paid at the time.
   final double creditApplied;
 
+  /// What the courier was asked to do on arrival, and anything else they were
+  /// told. Snapshotted like the rest of an order: an instruction that only
+  /// lived in the checkout screen would be gone by the time the parcel was.
+  final String dropOffId;
+  final String deliveryNote;
+
   final DateTime? cancelledAt;
   final ReturnRequest? returnRequest;
   final String giftMessage;
   final bool giftWrapped;
 
   DeliveryOption get delivery => DeliveryOption.byId(deliveryId);
+
+  DropOff get dropOff => DropOff.byId(dropOffId);
+
+  /// True when the courier was told anything beyond the default.
+  bool get hasDeliveryInstructions =>
+      !dropOff.isDefault || deliveryNote.isNotEmpty;
 
   /// What the card was charged, once credit had been taken off.
   double get cardCharged => total - creditApplied;
@@ -249,6 +266,8 @@ class Order {
     paymentLabel: paymentLabel,
     deliveryId: deliveryId,
     creditApplied: creditApplied,
+    dropOffId: dropOffId,
+    deliveryNote: deliveryNote,
     cancelledAt: cancelledAt ?? this.cancelledAt,
     returnRequest: clearReturn ? null : (returnRequest ?? this.returnRequest),
     giftMessage: giftMessage,
@@ -267,6 +286,8 @@ class Order {
     'paymentLabel': paymentLabel,
     'deliveryId': deliveryId,
     if (creditApplied > 0) 'creditApplied': creditApplied,
+    if (dropOffId != 'hand') 'dropOffId': dropOffId,
+    if (deliveryNote.isNotEmpty) 'deliveryNote': deliveryNote,
     if (cancelledAt != null) 'cancelledAt': cancelledAt!.toIso8601String(),
     if (returnRequest != null) 'returnRequest': returnRequest!.toJson(),
     'giftMessage': giftMessage,

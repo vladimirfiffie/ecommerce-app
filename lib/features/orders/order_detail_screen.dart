@@ -179,6 +179,31 @@ class OrderDetailScreen extends ConsumerWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+          if (order.hasDeliveryInstructions) ...<Widget>[
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(
+                  order.dropOff.icon,
+                  size: 18,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    <String>[
+                      order.dropOff.labelIn(AppL10n.of(context)),
+                      if (order.deliveryNote.isNotEmpty) order.deliveryNote,
+                    ].join('\n'),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (order.giftWrapped || order.giftMessage.isNotEmpty) ...<Widget>[
             const SizedBox(height: 16),
             Text('Gift', style: theme.textTheme.titleMedium),

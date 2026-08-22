@@ -1,4 +1,5 @@
 import '../../data/models/delivery_option.dart';
+import '../../data/models/drop_off.dart';
 import '../../data/models/order.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../state/auth_provider.dart';
@@ -43,6 +44,15 @@ extension DeliveryOptionL10n on DeliveryOption {
     DeliveryOption.standard => l10n.deliveryStandardBlurb,
     DeliveryOption.express => l10n.deliveryExpressBlurb,
     DeliveryOption.pickup => l10n.deliveryPickupBlurb,
+  };
+}
+
+extension DropOffL10n on DropOff {
+  String labelIn(AppL10n l10n) => switch (this) {
+    DropOff.handToMe => l10n.dropOffHandToMe,
+    DropOff.atDoor => l10n.dropOffAtDoor,
+    DropOff.withNeighbour => l10n.dropOffWithNeighbour,
+    DropOff.safePlace => l10n.dropOffSafePlace,
   };
 }
 

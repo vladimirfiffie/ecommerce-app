@@ -42,6 +42,16 @@ Future<Uint8List> buildInvoicePdf(
           _line('Status', order.status.labelIn(l10n)),
           _line('Ships to', order.shippingAddress),
           _line('Paid with', _drawable(order.paymentLabel)),
+          if (order.hasDeliveryInstructions)
+            _line(
+              'Courier',
+              _drawable(
+                <String>[
+                  order.dropOff.labelIn(l10n),
+                  if (order.deliveryNote.isNotEmpty) order.deliveryNote,
+                ].join(' — '),
+              ),
+            ),
           pw.SizedBox(height: 18),
           pw.TableHelper.fromTextArray(
             headers: <String>['Qty', 'Item', 'Total'],

@@ -27,6 +27,18 @@ class AppL10nEn extends AppL10n {
   String get orderStatusRefunded => 'Refunded';
 
   @override
+  String get dropOffHandToMe => 'Hand it to me';
+
+  @override
+  String get dropOffAtDoor => 'Leave at my door';
+
+  @override
+  String get dropOffWithNeighbour => 'Leave with a neighbour';
+
+  @override
+  String get dropOffSafePlace => 'Leave in a safe place';
+
+  @override
   String get returnReasonWrongSize => 'Wrong size or fit';
 
   @override

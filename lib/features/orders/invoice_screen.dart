@@ -63,6 +63,13 @@ String buildInvoiceText(Order order, List<OrderLine> items, AppL10n l10n) {
     ..writeln('Ship to: ${order.shippingAddress}')
     ..writeln('Paid with: ${order.paymentLabel}');
 
+  if (order.hasDeliveryInstructions) {
+    out.writeln('Courier: ${order.dropOff.labelIn(l10n)}');
+    if (order.deliveryNote.isNotEmpty) {
+      out.writeln('Note: ${order.deliveryNote}');
+    }
+  }
+
   if (order.giftWrapped || order.giftMessage.isNotEmpty) {
     out.writeln();
     if (order.giftWrapped) out.writeln('Gift wrapped');
@@ -261,6 +268,14 @@ class InvoiceScreen extends ConsumerWidget {
                   _Row('Charged', formatPrice(order.cardCharged)),
                 ],
                 _Row('Paid with', order.paymentLabel),
+                if (order.hasDeliveryInstructions)
+                  _Row(
+                    'Courier',
+                    <String>[
+                      order.dropOff.labelIn(AppL10n.of(context)),
+                      if (order.deliveryNote.isNotEmpty) order.deliveryNote,
+                    ].join(' — '),
+                  ),
                 if (order.returnRequest case final ReturnRequest r) ...<Widget>[
                   const Divider(height: 28),
                   _Row('Return', r.reason.labelIn(AppL10n.of(context))),
