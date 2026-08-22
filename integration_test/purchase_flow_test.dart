@@ -28,7 +28,8 @@ import 'package:ecommerce_app/features/home/widgets/hero_carousel.dart';
 /// that exercise haptics, notifications and biometrics as actually registered
 /// on the platform.
 ///
-///   flutter test integration_test -d linux
+/// Android only — they need a connected device or a running emulator:
+///
 ///   flutter test integration_test -d `<android-device-id>`
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

@@ -141,16 +141,19 @@ still hold their copy inline and want the same treatment.
 
 ```bash
 flutter pub get
-flutter run                 # attached device
-flutter run -d linux        # desktop
+flutter run                 # attached Android device or emulator
 ```
+
+Android is the only platform this ships to. There is no desktop or web target
+to keep working, so a plugin decision that differs by platform is decided for
+Android.
 
 ## Checks
 
 ```bash
 flutter analyze --fatal-infos
 flutter test                     # 411 tests
-flutter test integration_test -d linux   # 4 end-to-end, real plugins
+flutter test integration_test    # 4 end-to-end, real plugins, needs a device
 ```
 
 Coverage spans cart maths (variant merging, stock caps, promos, shipping

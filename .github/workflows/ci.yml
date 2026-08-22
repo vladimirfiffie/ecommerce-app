@@ -59,35 +59,3 @@ jobs:
           name: coverage
           path: coverage/lcov.info
           if-no-files-found: warn
-
-  integration:
-    name: Integration (Linux desktop)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: 3.47.0
-          cache: true
-
-      # The Linux desktop target needs GTK and the usual build chain.
-      - name: Install Linux build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev \
-            libstdc++-12-dev xvfb
-
-      - name: Enable Linux desktop
-        run: flutter config --enable-linux-desktop
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      # These run the real app against the real bundled catalog. On this
-      # platform the plugin guards are what keep haptics, notifications and
-      # biometrics from throwing — which is exactly what's being checked.
-      - name: Integration tests
-        run: xvfb-run -a flutter test integration_test -d linux
