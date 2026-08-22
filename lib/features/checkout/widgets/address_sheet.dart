@@ -119,6 +119,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                       inputFormatters: _limit(24),
                       decoration: InputDecoration(
                         labelText: AppL10n.of(context).addressLabelField,
+                        prefixIcon: const Icon(Icons.label_outline_rounded),
                       ),
                     ),
                   ),
@@ -136,6 +137,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                       inputFormatters: _limit(AddressValidator.maxShortField),
                       decoration: InputDecoration(
                         labelText: AppL10n.of(context).addressFullName,
+                        prefixIcon: const Icon(Icons.person_outline_rounded),
                       ),
                     ),
                   ),
@@ -153,6 +155,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                 inputFormatters: _limit(AddressValidator.maxLine),
                 decoration: InputDecoration(
                   labelText: AppL10n.of(context).addressStreet,
+                  prefixIcon: const Icon(Icons.home_outlined),
                 ),
               ),
               const SizedBox(height: 12),
@@ -170,6 +173,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                       inputFormatters: _limit(AddressValidator.maxShortField),
                       decoration: InputDecoration(
                         labelText: AppL10n.of(context).addressCity,
+                        prefixIcon: const Icon(Icons.location_city_rounded),
                       ),
                     ),
                   ),
@@ -203,6 +207,9 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                             AddressValidator.isUnitedStates(_country.text)
                             ? AppL10n.of(context).addressPostcodeUs
                             : AppL10n.of(context).addressPostcodeOther,
+                        prefixIcon: const Icon(
+                          Icons.markunread_mailbox_outlined,
+                        ),
                       ),
                     ),
                   ),
@@ -220,6 +227,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                 onFieldSubmitted: (_) => _save(),
                 decoration: InputDecoration(
                   labelText: AppL10n.of(context).addressCountry,
+                  prefixIcon: const Icon(Icons.public_rounded),
                 ),
               ),
               const SizedBox(height: 24),

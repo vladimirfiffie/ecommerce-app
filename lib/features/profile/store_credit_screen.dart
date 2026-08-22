@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:haptic_kit/haptic_kit.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +9,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/models/credit_entry.dart';
 import '../../state/credit_provider.dart';
+import '../../state/haptics_provider.dart';
 
 /// The balance, a place to redeem a gift card, and where every penny of it
 /// came from and went.
@@ -41,7 +45,15 @@ class _StoreCreditScreenState extends ConsumerState<StoreCreditScreen> {
       _redeeming = false;
       _error = refused;
     });
-    if (refused != null) return;
+
+    // Money arriving is worth feeling, and so is a code being turned down —
+    // the error text sits under a field the keyboard may well be covering.
+    final HapticService haptics = ref.read(hapticsProvider);
+    if (refused != null) {
+      unawaited(haptics.notification(HapticNotificationStyle.error));
+      return;
+    }
+    unawaited(haptics.success());
 
     final String added = _code.text.trim().toUpperCase();
     _code.clear();
@@ -80,7 +92,9 @@ class _StoreCreditScreenState extends ConsumerState<StoreCreditScreen> {
             autocorrect: false,
             textCapitalization: TextCapitalization.characters,
             textInputAction: TextInputAction.done,
-            inputFormatters: <TextInputFormatter>[UpperCaseTextFormatter()],
+            inputFormatters: const <TextInputFormatter>[
+              GiftCardTextFormatter(),
+            ],
             onSubmitted: (_) => _redeem(),
             onChanged: (_) {
               if (_error != null) setState(() => _error = null);
@@ -143,17 +157,27 @@ class _StoreCreditScreenState extends ConsumerState<StoreCreditScreen> {
   }
 }
 
-/// Forces the code to upper case as it is typed, so the field shows what the
-/// ledger will actually store.
-class UpperCaseTextFormatter extends TextInputFormatter {
+/// Punctuates a gift card code as it is typed.
+///
+/// Upper-cases it and puts the dashes in, so a shopper reading `ASTER-GIFT-25`
+/// off a card can type it however they like — lower case, no dashes, spaces —
+/// and watch it become the thing on the card. The caret is parked at the end
+/// rather than tracked through the inserted dashes, which is what the card
+/// number field does and for the same reason.
+class GiftCardTextFormatter extends TextInputFormatter {
+  const GiftCardTextFormatter();
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
-  ) => TextEditingValue(
-    text: newValue.text.toUpperCase(),
-    selection: newValue.selection,
-  );
+  ) {
+    final String formatted = GiftCardFormat.format(newValue.text);
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
 }
 
 class _BalanceCard extends StatelessWidget {

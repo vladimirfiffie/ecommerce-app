@@ -64,3 +64,57 @@ const Map<String, double> kGiftCards = <String, double>{
   'ASTER-GIFT-50': 50,
   'ASTER-GIFT-100': 100,
 };
+
+/// Punctuation and layout of a gift card code, worked out from the codes the
+/// shop actually issues rather than written down twice.
+abstract final class GiftCardFormat {
+  /// The sizes of each dash-separated group, taken from the issued codes.
+  ///
+  /// Every code shares a shape — five letters, four letters, then the value —
+  /// so a code being typed can be punctuated before it is complete. Derived
+  /// so that adding a differently shaped code to [kGiftCards] can't leave the
+  /// field formatting to a pattern the shop no longer uses.
+  static final List<int> groupSizes = _groupSizes();
+
+  static List<int> _groupSizes() {
+    final Set<String> shapes = <String>{
+      for (final String code in kGiftCards.keys)
+        code
+            .split('-')
+            // The last group is the value and varies in length, so the shape
+            // is only the fixed groups in front of it.
+            .take(code.split('-').length - 1)
+            .map((String part) => part.length.toString())
+            .join(','),
+    };
+    if (shapes.length != 1 || shapes.single.isEmpty) return const <int>[];
+    return shapes.single.split(',').map(int.parse).toList();
+  }
+
+  /// Strips a code back to the characters that carry meaning.
+  static String bare(String value) =>
+      value.toUpperCase().replaceAll(RegExp('[^A-Z0-9]'), '');
+
+  /// Punctuates [value] as it is typed: upper case, dashes where the issued
+  /// codes put them, and no trailing dash until there is something after it.
+  static String format(String value) {
+    final String bareValue = bare(value);
+    if (bareValue.isEmpty || groupSizes.isEmpty) return bareValue;
+
+    final StringBuffer out = StringBuffer();
+    int index = 0;
+    for (final int size in groupSizes) {
+      if (index >= bareValue.length) break;
+      if (out.isNotEmpty) out.write('-');
+      final int end = (index + size).clamp(0, bareValue.length);
+      out.write(bareValue.substring(index, end));
+      index = end;
+    }
+    if (index < bareValue.length) {
+      out
+        ..write('-')
+        ..write(bareValue.substring(index));
+    }
+    return out.toString();
+  }
+}
