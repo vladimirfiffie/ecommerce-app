@@ -141,6 +141,25 @@ class _MyReviewCard extends ConsumerWidget {
                 ),
               ),
             ],
+            if (review.photos.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 64,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: review.photos.length,
+                  separatorBuilder: (BuildContext _, int _) =>
+                      const SizedBox(width: 8),
+                  itemBuilder: (BuildContext _, int i) => SizedBox(
+                    width: 64,
+                    child: AppImage(
+                      url: review.photos[i],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 10),
             Row(
               children: <Widget>[

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -6,6 +8,12 @@ import 'package:shimmer/shimmer.dart';
 ///
 /// Every remote image in the app goes through here so caching, placeholders and
 /// failure states never drift between screens.
+///
+/// A photo the shopper attached to their own review is a file on this device
+/// rather than a URL, and arrives here by the same field. It is told apart by
+/// its path rather than by the caller, so nothing upstream has to know which
+/// kind of picture it is holding — and a file that has since been deleted
+/// falls back to the same placeholder a dead URL does.
 class AppImage extends StatelessWidget {
   const AppImage({
     required this.url,
@@ -28,6 +36,13 @@ class AppImage extends StatelessWidget {
     Widget child;
     if (url.isEmpty) {
       child = _Fallback(background: bg);
+    } else if (isLocalImagePath(url)) {
+      child = Image.file(
+        File(url),
+        fit: fit,
+        errorBuilder: (BuildContext context, Object _, StackTrace? _) =>
+            _Fallback(background: bg),
+      );
     } else {
       child = CachedNetworkImage(
         imageUrl: url,
@@ -48,6 +63,10 @@ class AppImage extends StatelessWidget {
     );
   }
 }
+
+/// Whether [url] names a file on this device rather than something to fetch.
+bool isLocalImagePath(String url) =>
+    url.startsWith('/') || url.startsWith('file:');
 
 /// The shimmering block shown while an image loads.
 class ImageSkeleton extends StatelessWidget {

@@ -10,6 +10,7 @@ import '../data/models/product.dart';
 import '../data/models/review.dart';
 import 'app_providers.dart';
 import 'orders_provider.dart';
+import 'review_photos_provider.dart';
 
 /// A review the shopper wrote, stored on this device.
 @immutable
@@ -20,6 +21,7 @@ class UserReview {
     required this.body,
     required this.writtenAt,
     this.title = '',
+    this.photos = const <String>[],
   });
 
   factory UserReview.fromJson(Map<String, dynamic> json) => UserReview(
@@ -28,6 +30,10 @@ class UserReview {
     title: json['title'] as String? ?? '',
     body: json['body'] as String? ?? '',
     writtenAt: DateTime.parse(json['writtenAt'] as String),
+    photos: <String>[
+      for (final Object? p in json['photos'] as List<dynamic>? ?? <dynamic>[])
+        p! as String,
+    ],
   );
 
   final String productId;
@@ -36,12 +42,17 @@ class UserReview {
   final String body;
   final DateTime writtenAt;
 
+  /// Paths to images on this device. Not URLs: a review photo never leaves
+  /// the phone, because there is nowhere for it to go.
+  final List<String> photos;
+
   Map<String, dynamic> toJson() => <String, dynamic>{
     'productId': productId,
     'rating': rating,
     'title': title,
     'body': body,
     'writtenAt': writtenAt.toIso8601String(),
+    if (photos.isNotEmpty) 'photos': photos,
   };
 
   /// Rendered into the same [Review] shape the bundled catalog uses, so the
@@ -56,6 +67,7 @@ class UserReview {
     // should have to file their own review under a heading.
     verified: true,
     tags: Review.tagsIn(title.isEmpty ? body : '$title $body'),
+    photos: photos,
   );
 }
 
@@ -82,24 +94,49 @@ class UserReviewsNotifier extends Notifier<List<UserReview>> {
 
   /// Adds or replaces this device's review for a product — one per product,
   /// like every real storefront.
+  ///
+  /// A rewrite drops the photos the old version carried and the new one
+  /// doesn't, so editing a review doesn't quietly leave its pictures on disk
+  /// with nothing pointing at them.
   Future<void> save(UserReview review) async {
+    final UserReview? previous = _forProduct(review.productId);
     final List<UserReview> next = <UserReview>[
       review,
       ...state.where((UserReview r) => r.productId != review.productId),
     ];
     await _persist(next);
+
+    if (previous != null) {
+      await ref
+          .read(reviewPhotosProvider)
+          .discard(
+            previous.photos.where((String p) => !review.photos.contains(p)),
+          );
+    }
   }
 
   Future<void> delete(String productId) async {
+    final UserReview? going = _forProduct(productId);
     await _persist(<UserReview>[
       for (final UserReview r in state)
         if (r.productId != productId) r,
     ]);
+    if (going != null) {
+      await ref.read(reviewPhotosProvider).discard(going.photos);
+    }
   }
 
   Future<void> clear() async {
     state = const <UserReview>[];
     await _prefs.remove(_key);
+    await ref.read(reviewPhotosProvider).discardAll();
+  }
+
+  UserReview? _forProduct(String productId) {
+    for (final UserReview r in state) {
+      if (r.productId == productId) return r;
+    }
+    return null;
   }
 
   Future<void> _persist(List<UserReview> next) async {

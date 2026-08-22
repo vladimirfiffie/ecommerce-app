@@ -31,6 +31,8 @@ dependencies:
   video_player: ^2.14.0
   pdf: ^3.13.0
   printing: ^5.15.0
+  image_picker: ^1.2.3
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haptic_kit/haptic_kit.dart';
@@ -8,6 +9,8 @@ import '../../../data/models/product.dart';
 import '../../../shared/widgets/haptic_controls.dart';
 import '../../../state/haptics_provider.dart';
 import '../../../state/reviews_provider.dart';
+import '../../../state/review_photos_provider.dart';
+import '../../../shared/widgets/app_image.dart';
 import '../../../shared/widgets/confirm.dart';
 
 /// Opens the write/edit review sheet.
@@ -37,6 +40,13 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
   late final TextEditingController _title;
   late final TextEditingController _body;
   late int _rating;
+  late List<String> _photos;
+
+  /// The photos this sheet copied to disk but hasn't attached to a saved
+  /// review. Discarding the sheet has to take them with it, or a cancelled
+  /// review leaves its pictures behind with nothing pointing at them.
+  final List<String> _added = <String>[];
+  bool _picking = false;
 
   @override
   void initState() {
@@ -45,17 +55,19 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
     _rating = existing?.rating.round() ?? 0;
     _title = TextEditingController(text: existing?.title ?? '');
     _body = TextEditingController(text: existing?.body ?? '');
+    _photos = <String>[...?existing?.photos];
 
     // Snapshot the opening state so "unsaved changes" means changed, not
     // merely non-empty — editing an existing review starts populated.
-    _openedWith = (_rating, _title.text, _body.text);
+    _openedWith = (_rating, _title.text, _body.text, <String>[..._photos]);
   }
 
-  late final (int, String, String) _openedWith;
+  late final (int, String, String, List<String>) _openedWith;
 
   bool get _dirty =>
       (_rating, _title.text.trim(), _body.text.trim()) !=
-      (_openedWith.$1, _openedWith.$2.trim(), _openedWith.$3.trim());
+          (_openedWith.$1, _openedWith.$2.trim(), _openedWith.$3.trim()) ||
+      !listEquals(_photos, _openedWith.$4);
 
   @override
   void dispose() {
@@ -96,8 +108,12 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
             title: _title.text.trim(),
             body: _body.text.trim(),
             writtenAt: DateTime.now(),
+            photos: _photos,
           ),
         );
+    // Saved: anything this sheet copied is now the review's problem, not
+    // the sheet's.
+    _added.clear();
     unawaited(
       ref.read(hapticsProvider).notification(HapticNotificationStyle.success),
     );
@@ -178,8 +194,33 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
       message: 'What you’ve written here won’t be saved.',
       confirmLabel: 'Discard',
     );
-    if (discard && mounted) Navigator.of(context).pop();
+    if (!discard || !mounted) return;
+    unawaited(ref.read(reviewPhotosProvider).discard(_added));
+    Navigator.of(context).pop();
   }
+
+  Future<void> _addPhotos() async {
+    setState(() => _picking = true);
+    final List<String> picked = await ref
+        .read(reviewPhotosProvider)
+        .pick(remaining: ReviewPhotoService.maxPerReview - _photos.length);
+    if (!mounted) return;
+    setState(() {
+      _picking = false;
+      _photos = <String>[..._photos, ...picked];
+      _added.addAll(picked);
+    });
+  }
+
+  /// Takes a photo off the review. The file only goes when the review is
+  /// saved without it — dropping it here would strand an edit the shopper
+  /// then backs out of.
+  void _removePhoto(String path) => setState(
+    () => _photos = <String>[
+      for (final String p in _photos)
+        if (p != path) p,
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -264,6 +305,15 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
                     return null;
                   },
                 ),
+                if (ReviewPhotoService.platformSupported) ...<Widget>[
+                  const SizedBox(height: 4),
+                  _PhotoRow(
+                    photos: _photos,
+                    picking: _picking,
+                    onAdd: _addPhotos,
+                    onRemove: _removePhoto,
+                  ),
+                ],
                 const SizedBox(height: 8),
                 FilledButton(
                   onPressed: _submit,
@@ -282,6 +332,120 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Thumbnails of what's attached, with a way to add more and drop one.
+class _PhotoRow extends StatelessWidget {
+  const _PhotoRow({
+    required this.photos,
+    required this.picking,
+    required this.onAdd,
+    required this.onRemove,
+  });
+
+  final List<String> photos;
+  final bool picking;
+  final VoidCallback onAdd;
+  final ValueChanged<String> onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool room = photos.length < ReviewPhotoService.maxPerReview;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Text('Photos', style: theme.textTheme.titleSmall),
+            const SizedBox(width: 8),
+            Text(
+              '${photos.length} of ${ReviewPhotoService.maxPerReview}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 76,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              for (final String path in photos)
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: SizedBox(
+                    width: 76,
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned.fill(
+                          child: AppImage(
+                            url: path,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        Positioned(
+                          top: -6,
+                          right: -6,
+                          child: IconButton(
+                            iconSize: 16,
+                            tooltip: 'Remove photo',
+                            onPressed: () => onRemove(path),
+                            icon: CircleAvatar(
+                              radius: 11,
+                              backgroundColor: theme.colorScheme.surface,
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: 14,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (room)
+                SizedBox(
+                  width: 76,
+                  height: 76,
+                  child: OutlinedButton(
+                    onPressed: picking ? null : onAdd,
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(76, 76),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: picking
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2.2),
+                          )
+                        : const Icon(Icons.add_a_photo_outlined, size: 20),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          // Worth saying plainly: there is no server, so a review photo has
+          // nowhere to go even if the review reads as public.
+          'Photos stay on this device.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }
