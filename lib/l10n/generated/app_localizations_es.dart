@@ -954,4 +954,10 @@ class AppL10nEs extends AppL10n {
 
   @override
   String get addressPostcodeOther => 'Código postal';
+
+  @override
+  String get addressPickerTitle => '¿A dónde lo enviamos?';
+
+  @override
+  String get addressPickerCurrent => 'Actual';
 }

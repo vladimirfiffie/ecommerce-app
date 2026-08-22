@@ -17,7 +17,7 @@ import '../../state/haptics_provider.dart';
 import 'package:haptic_kit/haptic_kit.dart';
 import '../../shared/widgets/confirm.dart';
 import '../../data/models/address.dart';
-import 'widgets/address_sheet.dart';
+import 'widgets/address_picker_sheet.dart';
 import '../../shared/widgets/animated_check.dart';
 import '../../shared/widgets/app_image.dart';
 import '../../data/models/order_line.dart';
@@ -455,11 +455,17 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
 
   Future<void> _changeAddress() async {
     unawaited(ref.read(hapticsProvider).impact());
-    await showAddressSheet(context);
-    if (!mounted) return;
 
-    final Address? picked = ref.read(selectedAddressProvider);
-    if (picked == null) return;
+    // A picker, not the add-address form. Opening the form to change where
+    // something goes asks the shopper to retype an address they already
+    // have — and, because the selection provider falls back to the first
+    // saved address, backing out of it still read as a choice and
+    // redirected the order anyway. A dismissed sheet returns null.
+    final Address? picked = await showAddressPickerSheet(
+      context,
+      currentId: ref.read(selectedAddressProvider)?.id,
+    );
+    if (!mounted || picked == null) return;
 
     final bool done = await ref
         .read(ordersProvider.notifier)

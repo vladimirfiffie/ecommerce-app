@@ -1650,6 +1650,18 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Postcode'**
   String get addressPostcodeOther;
+
+  /// Title of the bottom sheet for choosing which saved address an order ships to.
+  ///
+  /// In en, this message translates to:
+  /// **'Where should it go?'**
+  String get addressPickerTitle;
+
+  /// Badge on the address an order is currently going to.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get addressPickerCurrent;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

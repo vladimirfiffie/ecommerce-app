@@ -1324,5 +1324,15 @@
   "addressPostcodeOther": "Postcode",
   "@addressPostcodeOther": {
     "description": "Postal code field for countries that do not call it a ZIP."
+  },
+
+  "@_address picker": "  ——— address picker ———",
+  "addressPickerTitle": "Where should it go?",
+  "@addressPickerTitle": {
+    "description": "Title of the bottom sheet for choosing which saved address an order ships to."
+  },
+  "addressPickerCurrent": "Current",
+  "@addressPickerCurrent": {
+    "description": "Badge on the address an order is currently going to."
   }
 }

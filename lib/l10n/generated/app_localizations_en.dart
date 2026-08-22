@@ -950,4 +950,10 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get addressPostcodeOther => 'Postcode';
+
+  @override
+  String get addressPickerTitle => 'Where should it go?';
+
+  @override
+  String get addressPickerCurrent => 'Current';
 }

@@ -281,5 +281,9 @@
 
   "@_address form": "  ——— address form ———",
   "addressPostcodeUs": "Código postal",
-  "addressPostcodeOther": "Código postal"
+  "addressPostcodeOther": "Código postal",
+
+  "@_address picker": "  ——— address picker ———",
+  "addressPickerTitle": "¿A dónde lo enviamos?",
+  "addressPickerCurrent": "Actual"
 }
