@@ -32,6 +32,8 @@ import 'widgets/size_calculator_sheet.dart';
 import 'widgets/size_guide_sheet.dart';
 import '../../state/fit_provider.dart';
 import 'widgets/questions_section.dart';
+import 'widgets/price_history_section.dart';
+import '../../state/price_history_provider.dart';
 import '../../state/alerts_provider.dart';
 import '../home/widgets/deal_countdown.dart';
 import '../../state/deals_provider.dart';
@@ -72,6 +74,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(recentlyViewedProvider.notifier).record(widget.productId);
+
+      // The only moment the app can honestly see a price is when the shopper
+      // is looking at it, so that is when it is written down.
+      final Product? product = ref
+          .read(catalogDataProvider)
+          .byId(widget.productId);
+      if (product != null) {
+        ref.read(priceHistoryProvider.notifier).record(product);
+      }
     });
   }
 
@@ -542,6 +553,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 child: Text(_descriptionExpanded ? 'Show less' : 'Read more'),
               ),
             ),
+          PriceHistorySection(product: product),
           const SizedBox(height: 26),
           SpecsSection(product: product),
           const SizedBox(height: 20),

@@ -18,6 +18,7 @@ import '../../state/wishlists_provider.dart';
 import '../../state/haptics_provider.dart';
 import '../../state/inbox_provider.dart';
 import '../../state/notifications_provider.dart';
+import '../../state/price_history_provider.dart';
 import '../../state/orders_provider.dart';
 import '../../state/payments_provider.dart';
 import '../../state/profile_provider.dart';
@@ -361,10 +362,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _DangerRow(
               icon: Icons.history_rounded,
               label: 'Clear browsing history',
-              description: 'Recent searches and recently viewed items',
+              description:
+                  'Recent searches, recently viewed items and price history',
               onConfirm: () {
                 ref.read(searchHistoryProvider.notifier).clear();
                 ref.read(recentlyViewedProvider.notifier).clear();
+                ref.read(priceHistoryProvider.notifier).clear();
               },
             ),
             _DangerRow(
@@ -382,6 +385,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ref.read(paymentCardsProvider.notifier).clear();
                 ref.read(creditLedgerProvider.notifier).clear();
                 ref.read(readNotificationsProvider.notifier).clear();
+                ref.read(priceHistoryProvider.notifier).clear();
               },
             ),
           ],
