@@ -1,3 +1,5 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter/cupertino.dart' show CupertinoThemeData;
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,9 +83,28 @@ class _AsterAppState extends ConsumerState<AsterApp> {
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         final bool useDynamic = settings.useDynamicColor;
-        return MaterialApp.router(
+        final ThemeData light = AppTheme.light(
+          useDynamic ? lightDynamic?.harmonized() : null,
+          seedColor: settings.preset.seed,
+          highContrast: highContrast,
+        );
+        final ThemeData dark = AppTheme.dark(
+          useDynamic ? darkDynamic?.harmonized() : null,
+          amoled: settings.amoled,
+          seedColor: settings.preset.seed,
+          highContrast: highContrast,
+        );
+
+        // AdaptiveApp, not MaterialApp: on Android this builds the same
+        // MaterialApp it always did, and on iOS a CupertinoApp instead, so
+        // the app takes the platform's own chrome rather than wearing
+        // Material everywhere.
+        return AdaptiveApp.router(
           title: 'Aster',
-          debugShowCheckedModeBanner: false,
+          material: (BuildContext _, PlatformTarget _) =>
+              const MaterialAppData(debugShowCheckedModeBanner: false),
+          cupertino: (BuildContext _, PlatformTarget _) =>
+              const CupertinoAppData(debugShowCheckedModeBanner: false),
           localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           // `formatPrice` and friends are plain functions with no context to
@@ -106,16 +127,22 @@ class _AsterAppState extends ConsumerState<AsterApp> {
                 return resolved;
               },
           themeMode: settings.themeMode,
-          theme: AppTheme.light(
-            useDynamic ? lightDynamic?.harmonized() : null,
-            seedColor: settings.preset.seed,
-            highContrast: highContrast,
+          materialLightTheme: light,
+          materialDarkTheme: dark,
+          // The Cupertino side takes the same palette rather than Apple's
+          // defaults, so an iOS build is still recognisably this shop —
+          // including whichever preset or wallpaper palette is in force.
+          cupertinoLightTheme: CupertinoThemeData(
+            brightness: Brightness.light,
+            primaryColor: light.colorScheme.primary,
+            scaffoldBackgroundColor: light.scaffoldBackgroundColor,
+            barBackgroundColor: light.colorScheme.surface,
           ),
-          darkTheme: AppTheme.dark(
-            useDynamic ? darkDynamic?.harmonized() : null,
-            amoled: settings.amoled,
-            seedColor: settings.preset.seed,
-            highContrast: highContrast,
+          cupertinoDarkTheme: CupertinoThemeData(
+            brightness: Brightness.dark,
+            primaryColor: dark.colorScheme.primary,
+            scaffoldBackgroundColor: dark.scaffoldBackgroundColor,
+            barBackgroundColor: dark.colorScheme.surface,
           ),
           routerConfig: router,
         );

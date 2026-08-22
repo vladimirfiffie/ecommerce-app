@@ -1,3 +1,5 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
 /// A filled button in the error color, for the action that deletes,
@@ -56,6 +58,38 @@ Future<bool> confirmDestructive(
   required String confirmLabel,
   String cancelLabel = 'Cancel',
 }) async {
+  // iOS gets the platform's own alert: red destructive text, bold cancel,
+  // sheet-style presentation. A Material dialog there is the clearest sign an
+  // app was built somewhere else, and this is the control the shopper meets
+  // at every irreversible moment.
+  //
+  // Android keeps the dialog below rather than handing it to the same
+  // adaptive widget. What is drawn here is deliberate — a red *filled*
+  // confirm button, sized for a dialog rather than a page, with both actions
+  // held on one row — and destructive_ui_test.dart exists to keep it that
+  // way. The adaptive dialog draws none of it.
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    bool confirmed = false;
+    await AdaptiveAlertDialog.show(
+      context: context,
+      title: title,
+      message: message,
+      actions: <AlertAction>[
+        AlertAction(
+          title: cancelLabel,
+          style: AlertActionStyle.cancel,
+          onPressed: () {},
+        ),
+        AlertAction(
+          title: confirmLabel,
+          style: AlertActionStyle.destructive,
+          onPressed: () => confirmed = true,
+        ),
+      ],
+    );
+    return confirmed;
+  }
+
   // Keep both labels short: AlertDialog stacks its actions when they don't
   // fit one row, which put the way out *underneath* the destructive button.
   final ThemeData theme = Theme.of(context);

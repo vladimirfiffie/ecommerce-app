@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "103.0.0"
+  adaptive_platform_ui:
+    dependency: "direct main"
+    description:
+      name: adaptive_platform_ui
+      sha256: da86df434d6fc67175431e29dbf8e3e34cad2a471125c64aec15aed732db02f1
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.111"
   analyzer:
     dependency: transitive
     description:
