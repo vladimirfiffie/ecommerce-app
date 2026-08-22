@@ -8,7 +8,7 @@ import 'package:ecommerce_app/shared/widgets/product_card.dart';
 import 'package:ecommerce_app/shared/widgets/quantity_stepper.dart';
 import 'package:ecommerce_app/shared/widgets/rating_stars.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
@@ -16,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers.dart';
+import 'package:ecommerce_app/core/l10n/material_localizations.dart';
 
 /// Nothing on the way from browsing to buying should be a picture with no
 /// words attached.
@@ -46,7 +47,7 @@ void main() {
 
   Future<void> pumpBare(WidgetTester tester, Widget child) => tester.pumpWidget(
     MaterialApp(
-      localizationsDelegates: AppL10n.localizationsDelegates,
+      localizationsDelegates: asterLocalizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
       home: Scaffold(body: Center(child: child)),
     ),

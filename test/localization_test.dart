@@ -4,12 +4,13 @@ import 'package:ecommerce_app/core/utils/semantic_labels.dart';
 import 'package:ecommerce_app/data/models/delivery_option.dart';
 import 'package:ecommerce_app/data/models/order.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 import 'helpers.dart';
+import 'package:ecommerce_app/core/l10n/material_localizations.dart';
 
 /// Money and dates used to be pinned to `en_US` no matter where the app ran,
 /// and the words for order statuses, return reasons and auth errors lived on
@@ -141,7 +142,7 @@ void main() {
       WidgetTester tester,
     ) async {
       expect(AppL10n.supportedLocales, contains(const Locale('en')));
-      expect(AppL10n.localizationsDelegates, isNotEmpty);
+      expect(asterLocalizationsDelegates, isNotEmpty);
     });
 
     testWidgets('serves strings through the standard lookup', (
@@ -150,7 +151,7 @@ void main() {
       late AppL10n found;
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: AppL10n.localizationsDelegates,
+          localizationsDelegates: asterLocalizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: Builder(
             builder: (BuildContext context) {

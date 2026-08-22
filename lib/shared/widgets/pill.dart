@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Small rounded label used for `-30%`, `NEW`, order status, and similar.
 class Pill extends StatelessWidget {

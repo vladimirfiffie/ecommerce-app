@@ -6,11 +6,12 @@ import 'package:ecommerce_app/shared/widgets/product_card.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/state/compare_provider.dart';
 import 'package:ecommerce_app/l10n/generated/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers.dart';
+import 'package:ecommerce_app/core/l10n/material_localizations.dart';
 
 void main() {
   setUpAll(configureTestEnvironment);
@@ -99,7 +100,7 @@ void main() {
     Widget wrap(ProviderContainer c) => UncontrolledProviderScope(
       container: c,
       child: MaterialApp(
-        localizationsDelegates: AppL10n.localizationsDelegates,
+        localizationsDelegates: asterLocalizationsDelegates,
         supportedLocales: AppL10n.supportedLocales,
         home: const Scaffold(bottomNavigationBar: CompareBar()),
       ),
@@ -171,7 +172,7 @@ void main() {
       UncontrolledProviderScope(
         container: c,
         child: MaterialApp(
-          localizationsDelegates: AppL10n.localizationsDelegates,
+          localizationsDelegates: asterLocalizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(
             body: Center(

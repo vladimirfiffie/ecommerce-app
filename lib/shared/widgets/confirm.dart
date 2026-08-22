@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A filled button in the error color, for the action that deletes,
 /// cancels, or otherwise can't be taken back.
