@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../state/profile_provider.dart';
+import '../../inbox/inbox_screen.dart';
 
 /// Greeting + a tap-through search field.
 ///
@@ -24,11 +25,18 @@ class HomeAppBar extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              greeting,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.headlineMedium,
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    greeting,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.headlineMedium,
+                  ),
+                ),
+                const InboxButton(),
+              ],
             ),
             const SizedBox(height: 18),
             _SearchBarButton(onTap: () => context.push(Routes.search)),

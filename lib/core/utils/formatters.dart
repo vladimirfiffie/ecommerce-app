@@ -18,6 +18,7 @@ String get _locale => Intl.defaultLocale ?? 'en_US';
 final Map<String, NumberFormat> _currencyCache = <String, NumberFormat>{};
 final Map<String, DateFormat> _mediumDateCache = <String, DateFormat>{};
 final Map<String, DateFormat> _dayMonthCache = <String, DateFormat>{};
+final Map<String, DateFormat> _timeCache = <String, DateFormat>{};
 
 NumberFormat get _currency => _currencyCache.putIfAbsent(
   _locale,
@@ -30,6 +31,9 @@ DateFormat get _mediumDate =>
 DateFormat get _dayMonth =>
     _dayMonthCache.putIfAbsent(_locale, () => DateFormat.MMMEd(_locale));
 
+DateFormat get _time =>
+    _timeCache.putIfAbsent(_locale, () => DateFormat.jm(_locale));
+
 /// `$149.00`
 String formatPrice(double value) => _currency.format(value);
 
@@ -38,6 +42,9 @@ String formatDate(DateTime value) => _mediumDate.format(value);
 
 /// `Thu, Aug 14`
 String formatDeliveryDate(DateTime value) => _dayMonth.format(value);
+
+/// `3:04 PM`, or `15:04` where that's how the locale writes it.
+String formatTime(DateTime value) => _time.format(value);
 
 /// Compacts large review counts: `1.2K`.
 ///
@@ -53,4 +60,5 @@ void resetFormatters() {
   _currencyCache.clear();
   _mediumDateCache.clear();
   _dayMonthCache.clear();
+  _timeCache.clear();
 }

@@ -16,6 +16,7 @@ import '../../state/catalog_filter_provider.dart';
 import '../../state/credit_provider.dart';
 import '../../state/favorites_provider.dart';
 import '../../state/haptics_provider.dart';
+import '../../state/inbox_provider.dart';
 import '../../state/notifications_provider.dart';
 import '../../state/orders_provider.dart';
 import '../../state/payments_provider.dart';
@@ -282,6 +283,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () => _open(SettingsPane.haptics, Routes.haptics, twoPane),
             ),
             SettingsRow(
+              icon: Icons.inbox_outlined,
+              title: 'Your notifications',
+              subtitle: () {
+                final int unread = ref.watch(unreadInboxCountProvider);
+                return unread == 0
+                    ? 'Everything the app has told you'
+                    : '$unread unread';
+              }(),
+              onTap: () => context.push(Routes.inbox),
+            ),
+            SettingsRow(
               icon: Icons.notifications_outlined,
               title: 'Notifications',
               subtitle: ref.watch(notificationSettingsProvider).enabled
@@ -369,6 +381,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ref.read(appliedPromoProvider.notifier).clear();
                 ref.read(paymentCardsProvider.notifier).clear();
                 ref.read(creditLedgerProvider.notifier).clear();
+                ref.read(readNotificationsProvider.notifier).clear();
               },
             ),
           ],

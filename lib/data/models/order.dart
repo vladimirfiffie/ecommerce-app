@@ -170,6 +170,13 @@ class Order {
 
   DateTime get estimatedDelivery => delivery.estimatedArrival(placedAt);
 
+  /// How long an order sits with the shop before the courier has it.
+  Duration get _toShipped =>
+      Duration(hours: delivery == DeliveryOption.express ? 2 : 8);
+
+  /// When the courier took it. Derived, like [status] — nothing pushes it.
+  DateTime get shippedAt => placedAt.add(_toShipped);
+
   /// When the parcel actually landed, for return-window maths.
   DateTime get deliveredAt => estimatedDelivery;
 
@@ -186,10 +193,7 @@ class Order {
     }
 
     final Duration age = DateTime.now().difference(placedAt);
-    final Duration toShipped = Duration(
-      hours: delivery == DeliveryOption.express ? 2 : 8,
-    );
-    if (age < toShipped) return OrderStatus.processing;
+    if (age < _toShipped) return OrderStatus.processing;
     if (age < Duration(days: delivery.maxDays)) return OrderStatus.shipped;
     return OrderStatus.delivered;
   }

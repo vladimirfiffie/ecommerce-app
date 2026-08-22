@@ -32,6 +32,7 @@ import '../../features/orders/return_request_screen.dart';
 import '../../features/orders/invoice_screen.dart';
 import '../../features/help/help_center_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/inbox/inbox_screen.dart';
 
 /// Route paths, referenced by name everywhere else.
 abstract final class Routes {
@@ -53,6 +54,7 @@ abstract final class Routes {
   static const String storeCredit = '/settings/credit';
   static const String orders = '/orders';
   static const String help = '/help';
+  static const String inbox = '/notifications';
   static const String myReviews = '/reviews';
   static const String onboarding = '/welcome';
 
@@ -333,6 +335,12 @@ GoRouter createRouter(Ref ref) {
         parentNavigatorKey: _rootKey,
         builder: (BuildContext context, GoRouterState state) =>
             const MyReviewsScreen(),
+      ),
+      GoRoute(
+        path: Routes.inbox,
+        parentNavigatorKey: _rootKey,
+        builder: (BuildContext context, GoRouterState state) =>
+            const InboxScreen(),
       ),
       GoRoute(
         path: Routes.help,
