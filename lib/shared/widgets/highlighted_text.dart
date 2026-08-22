@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A product name with the searched-for words picked out, so it's obvious
 /// why a result matched — particularly when the terms are scattered through

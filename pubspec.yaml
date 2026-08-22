@@ -9,15 +9,7 @@ environment:
 dependencies:
   cached_network_image: ^3.4.1
   crypto: ^3.0.7
-  # Held at 1.x deliberately. dynamic_color 2.x is built on the material_ui
-  # package rather than package:flutter/material.dart, and its ColorScheme is
-  # a different class from the framework's — so taking it means migrating the
-  # whole app onto material_ui. That migration is currently blocked: the SDK's
-  # flutter_localizations still targets package:flutter/material.dart, so
-  # material_ui's widgets can't find a MaterialLocalizations delegate and a
-  # localized app warns "no delegate that supports the es locale was found".
-  # Revisit when the SDK ships localizations for material_ui.
-  dynamic_color: ^1.9.0
+  dynamic_color: ^2.1.0
   flutter:
     sdk: flutter
   flutter_animate: ^4.5.2
@@ -41,6 +33,7 @@ dependencies:
   printing: ^5.15.0
   image_picker: ^1.2.3
   path_provider: ^2.1.6
+  material_ui: ^1.0.1
 
 dev_dependencies:
   flutter_test:

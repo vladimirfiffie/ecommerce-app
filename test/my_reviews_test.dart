@@ -5,7 +5,7 @@ import 'package:ecommerce_app/data/repositories/product_repository.dart';
 import 'package:ecommerce_app/data/models/review.dart';
 import 'package:ecommerce_app/state/app_providers.dart';
 import 'package:ecommerce_app/state/reviews_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -130,7 +130,7 @@ void main() {
     c.read(routerProvider).push('/reviews');
     await settle(tester);
 
-    await tester.tap(find.byTooltip('Delete'));
+    await tester.tap(findByTooltip('Delete'));
     await settle(tester);
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
     await settle(tester);
