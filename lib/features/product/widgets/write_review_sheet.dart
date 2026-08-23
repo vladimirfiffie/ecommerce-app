@@ -83,7 +83,11 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
       unawaited(
         ref.read(hapticsProvider).notification(HapticNotificationStyle.warning),
       );
-      showMessage(context, 'Pick a star rating');
+      showMessage(
+        context,
+        'Pick a star rating',
+        type: AdaptiveSnackBarType.error,
+      );
       return;
     }
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -120,7 +124,11 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
 
     if (!mounted) return;
     Navigator.of(context).pop();
-    showMessage(context, 'Thanks for the review');
+    showMessage(
+      context,
+      'Thanks for the review',
+      type: AdaptiveSnackBarType.success,
+    );
   }
 
   Future<void> _delete() async {

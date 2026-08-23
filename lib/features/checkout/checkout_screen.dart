@@ -98,11 +98,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         unawaited(
           ref.read(hapticsProvider).notification(HapticNotificationStyle.error),
         );
-        showMessage(context, l10n.checkoutBiometricCancelled);
+        showMessage(
+          context,
+          l10n.checkoutBiometricCancelled,
+          type: AdaptiveSnackBarType.error,
+        );
         return;
       }
       if (outcome == AuthOutcome.unavailable) {
-        showMessage(context, l10n.checkoutBiometricUnavailable);
+        showMessage(
+          context,
+          l10n.checkoutBiometricUnavailable,
+          type: AdaptiveSnackBarType.warning,
+        );
       }
     }
 

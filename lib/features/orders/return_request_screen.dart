@@ -70,7 +70,11 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
     );
 
     if (!ok) {
-      showMessage(context, AppL10n.of(context).returnNoLongerPossible);
+      showMessage(
+        context,
+        AppL10n.of(context).returnNoLongerPossible,
+        type: AdaptiveSnackBarType.error,
+      );
       return;
     }
     context.pop();

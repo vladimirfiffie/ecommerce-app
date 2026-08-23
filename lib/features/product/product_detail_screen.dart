@@ -123,7 +123,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       ref.read(hapticsProvider).notification(HapticNotificationStyle.warning),
     );
     _shakeKey.currentState?.shake();
-    showMessage(context, message);
+    // Red, and the same red as every other refusal. This is the one
+    // message that stands between a shopper and the buy button, and it
+    // was the same neutral grey as "Added to your bag".
+    showMessage(context, message, type: AdaptiveSnackBarType.error);
   }
 
   @override

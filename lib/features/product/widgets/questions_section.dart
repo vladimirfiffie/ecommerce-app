@@ -212,7 +212,7 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
         .ask(productId: widget.product.id, body: text);
     if (!mounted) return;
     Navigator.of(context).pop();
-    showMessage(context, 'Question posted');
+    showMessage(context, 'Question posted', type: AdaptiveSnackBarType.success);
   }
 
   @override
