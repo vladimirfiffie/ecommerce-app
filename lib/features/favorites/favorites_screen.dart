@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -230,9 +231,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       (_, 0) => 'Added $added to your bag',
       _ => 'Added $added — $skipped need a size or color',
     };
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    showMessage(context, message);
   }
 }
 

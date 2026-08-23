@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -91,18 +92,12 @@ class _Body extends ConsumerWidget {
         .read(biometricsProvider)
         .authenticate(reason: 'Test Aster’s payment verification');
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(switch (outcome) {
-            AuthOutcome.success => 'Verified',
-            AuthOutcome.failed => 'Not verified',
-            AuthOutcome.unavailable =>
-              'Unavailable on this device — orders would go through unverified',
-          }),
-        ),
-      );
+    showMessage(context, switch (outcome) {
+      AuthOutcome.success => 'Verified',
+      AuthOutcome.failed => 'Not verified',
+      AuthOutcome.unavailable =>
+        'Unavailable on this device — orders would go through unverified',
+    });
   }
 
   @override

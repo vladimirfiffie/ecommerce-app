@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -308,17 +309,12 @@ class OrderDetailScreen extends ConsumerWidget {
 
     final bool ok = await ref.read(ordersProvider.notifier).cancel(order.id);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            ok
-                ? AppL10n.of(context).orderCancelled
-                : AppL10n.of(context).orderTooLateToCancel,
-          ),
-        ),
-      );
+    showMessage(
+      context,
+      ok
+          ? AppL10n.of(context).orderCancelled
+          : AppL10n.of(context).orderTooLateToCancel,
+    );
   }
 
   /// Puts the order back in the bag.
@@ -354,25 +350,16 @@ class OrderDetailScreen extends ConsumerWidget {
     if (!context.mounted) return;
 
     final int added = items.length - unavailable;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            _reorderMessage(
-              AppL10n.of(context),
-              added: added,
-              skipped: unavailable,
-            ),
-          ),
-          action: added == 0
-              ? null
-              : SnackBarAction(
-                  label: AppL10n.of(context).viewBag,
-                  onPressed: () => context.go(Routes.cart),
-                ),
-        ),
-      );
+    showMessage(
+      context,
+      _reorderMessage(AppL10n.of(context), added: added, skipped: unavailable),
+      type: added == 0
+          ? AdaptiveSnackBarType.warning
+          : AdaptiveSnackBarType.success,
+      // Nothing went in the bag, so there is nothing to go and look at.
+      action: added == 0 ? null : AppL10n.of(context).viewBag,
+      onAction: added == 0 ? null : () => context.go(Routes.cart),
+    );
   }
 
   static String _reorderMessage(

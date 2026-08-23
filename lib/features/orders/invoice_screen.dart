@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -143,11 +144,7 @@ class InvoiceScreen extends ConsumerWidget {
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: text));
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context)
-                ..clearSnackBars()
-                ..showSnackBar(
-                  SnackBar(content: Text(AppL10n.of(context).receiptCopied)),
-                );
+              showMessage(context, AppL10n.of(context).receiptCopied);
             },
           ),
           IconButton(

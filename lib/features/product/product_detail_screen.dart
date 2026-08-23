@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -106,18 +107,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('Added ${product.name} to your bag'),
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: 'View bag',
-            onPressed: () => context.go(Routes.cart),
-          ),
-        ),
-      );
+    showMessage(
+      context,
+      'Added ${product.name} to your bag',
+      type: AdaptiveSnackBarType.success,
+      duration: const Duration(seconds: 3),
+      action: 'View bag',
+      onAction: () => context.go(Routes.cart),
+    );
   }
 
   void _nudge(String message) {
@@ -125,9 +122,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       ref.read(hapticsProvider).notification(HapticNotificationStyle.warning),
     );
     _shakeKey.currentState?.shake();
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    showMessage(context, message);
   }
 
   @override
@@ -592,17 +587,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             .read(stockWatchProvider.notifier)
             .toggle(product.id);
         if (!mounted) return;
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(
-                added
-                    ? 'We’ll let you know when it’s back'
-                    : 'Stopped watching this item',
-              ),
-            ),
-          );
+        showMessage(
+          context,
+          added
+              ? 'We’ll let you know when it’s back'
+              : 'Stopped watching this item',
+        );
       },
       icon: Icon(
         watching

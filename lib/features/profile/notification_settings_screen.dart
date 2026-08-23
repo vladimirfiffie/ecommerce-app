@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,9 +29,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
 
     Future<void> toast(String message) async {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(message)));
+      showMessage(context, message);
     }
 
     return Scaffold(

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/messages.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -81,9 +82,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
       unawaited(
         ref.read(hapticsProvider).notification(HapticNotificationStyle.warning),
       );
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(const SnackBar(content: Text('Pick a star rating')));
+      showMessage(context, 'Pick a star rating');
       return;
     }
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -120,9 +119,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
 
     if (!mounted) return;
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(const SnackBar(content: Text('Thanks for the review')));
+    showMessage(context, 'Thanks for the review');
   }
 
   Future<void> _delete() async {
@@ -139,9 +136,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
     await ref.read(userReviewsProvider.notifier).delete(widget.product.id);
     if (!mounted) return;
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(const SnackBar(content: Text('Review removed')));
+    showMessage(context, 'Review removed');
   }
 
   static const List<String> _hints = <String>[

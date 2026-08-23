@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'dart:io' show Platform;
 
@@ -520,9 +521,7 @@ class _DangerRow extends StatelessWidget {
       if (!(confirmed ?? false)) return;
       onConfirm();
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(const SnackBar(content: Text('Done')));
+      showMessage(context, 'Done');
     },
   );
 }

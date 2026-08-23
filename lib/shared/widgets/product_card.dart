@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -75,20 +76,13 @@ class ProductCard extends ConsumerWidget {
                 final CompareResult result = ref
                     .read(compareProvider.notifier)
                     .toggle(product.id);
-                ScaffoldMessenger.of(context)
-                  ..clearSnackBars()
-                  ..showSnackBar(
-                    SnackBar(
-                      duration: const Duration(seconds: 2),
-                      content: Text(switch (result) {
-                        CompareResult.added => 'Comparing ${product.name}',
-                        CompareResult.removed => 'Removed from compare',
-                        CompareResult.full =>
-                          'Comparing ${CompareNotifier.max} already — '
-                              'let one go first',
-                      }),
-                    ),
-                  );
+                showMessage(context, switch (result) {
+                  CompareResult.added => 'Comparing ${product.name}',
+                  CompareResult.removed => 'Removed from compare',
+                  CompareResult.full =>
+                    'Comparing ${CompareNotifier.max} already — '
+                        'let one go first',
+                }, duration: const Duration(seconds: 2));
               },
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               child: Semantics(

@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -57,16 +58,11 @@ class _StoreCreditScreenState extends ConsumerState<StoreCreditScreen> {
 
     final String added = _code.text.trim().toUpperCase();
     _code.clear();
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            '$added added — ${formatPrice(kGiftCards[added] ?? 0)} on your '
-            'account',
-          ),
-        ),
-      );
+    showMessage(
+      context,
+      '$added added — ${formatPrice(kGiftCards[added] ?? 0)} on your '
+      'account',
+    );
   }
 
   @override

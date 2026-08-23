@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -439,17 +440,12 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
         .read(ordersProvider.notifier)
         .cancel(widget.order.id);
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            done
-                ? AppL10n.of(context).confirmationCancelled
-                : AppL10n.of(context).confirmationTooLateToCancel,
-          ),
-        ),
-      );
+    showMessage(
+      context,
+      done
+          ? AppL10n.of(context).confirmationCancelled
+          : AppL10n.of(context).confirmationTooLateToCancel,
+    );
     if (done) context.go(Routes.home);
   }
 
@@ -471,19 +467,14 @@ class _ChangeWindowState extends ConsumerState<_ChangeWindow> {
         .read(ordersProvider.notifier)
         .changeAddress(widget.order.id, picked);
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            done
-                // .label, not the Address itself: interpolating the object
-                // printed "Instance of 'Address'" into the snackbar.
-                ? AppL10n.of(context).confirmationAddressChanged(picked.label)
-                : AppL10n.of(context).confirmationTooLateToChange,
-          ),
-        ),
-      );
+    showMessage(
+      context,
+      done
+          // .label, not the Address itself: interpolating the object
+          // printed "Instance of 'Address'" into the snackbar.
+          ? AppL10n.of(context).confirmationAddressChanged(picked.label)
+          : AppL10n.of(context).confirmationTooLateToChange,
+    );
   }
 
   @override

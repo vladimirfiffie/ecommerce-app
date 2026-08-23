@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -95,19 +96,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         unawaited(
           ref.read(hapticsProvider).notification(HapticNotificationStyle.error),
         );
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(
-            SnackBar(content: Text(l10n.checkoutBiometricCancelled)),
-          );
+        showMessage(context, l10n.checkoutBiometricCancelled);
         return;
       }
       if (outcome == AuthOutcome.unavailable) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(
-            SnackBar(content: Text(l10n.checkoutBiometricUnavailable)),
-          );
+        showMessage(context, l10n.checkoutBiometricUnavailable);
       }
     }
 

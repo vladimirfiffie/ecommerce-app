@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -312,19 +313,12 @@ class _CartLine extends ConsumerWidget {
       onDismissed: (_) {
         final CartEntry removed = item.entry;
         cart.remove(item.lineId);
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(
-                AppL10n.of(context).bagRemovedItem(item.product.name),
-              ),
-              action: SnackBarAction(
-                label: AppL10n.of(context).undo,
-                onPressed: () => cart.restore(removed, index),
-              ),
-            ),
-          );
+        showMessage(
+          context,
+          AppL10n.of(context).bagRemovedItem(item.product.name),
+          action: AppL10n.of(context).undo,
+          onAction: () => cart.restore(removed, index),
+        );
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 6),

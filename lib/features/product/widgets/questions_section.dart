@@ -1,3 +1,4 @@
+import '../../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -210,9 +211,7 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
         .ask(productId: widget.product.id, body: text);
     if (!mounted) return;
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(const SnackBar(content: Text('Question posted')));
+    showMessage(context, 'Question posted');
   }
 
   @override

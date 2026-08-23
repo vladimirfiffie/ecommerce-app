@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'dart:async';
 
@@ -68,23 +69,15 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
     );
 
     if (!ok) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(content: Text(AppL10n.of(context).returnNoLongerPossible)),
-        );
+      showMessage(context, AppL10n.of(context).returnNoLongerPossible);
       return;
     }
     context.pop();
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            AppL10n.of(context).returnStarted(formatPrice(quote.total)),
-          ),
-        ),
-      );
+    showMessage(
+      context,
+      AppL10n.of(context).returnStarted(formatPrice(quote.total)),
+      type: AdaptiveSnackBarType.success,
+    );
   }
 
   @override

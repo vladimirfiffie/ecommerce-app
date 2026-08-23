@@ -1,3 +1,4 @@
+import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -251,9 +252,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
     await ref.read(paymentCardsProvider.notifier).save(card);
     if (!mounted) return;
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text('${card.label} added')));
+    showMessage(context, '${card.label} added');
   }
 
   @override
