@@ -1,3 +1,4 @@
+import '../../data/models/address_label.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
@@ -137,9 +138,7 @@ class _AddressTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Icon(
-                address.label.toLowerCase() == 'work'
-                    ? Icons.business_rounded
-                    : Icons.home_rounded,
+                AddressLabel.iconFor(address.label),
                 color: theme.colorScheme.primary,
               ),
               const SizedBox(width: 14),

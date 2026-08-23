@@ -1,3 +1,4 @@
+import '../../data/models/address_label.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
@@ -495,9 +496,7 @@ class _ShippingStep extends ConsumerWidget {
               selected: a.id == address?.id,
               onTap: () =>
                   ref.read(selectedAddressIdProvider.notifier).select(a.id),
-              leading: Icon(
-                a.label == 'Work' ? Icons.business_rounded : Icons.home_rounded,
-              ),
+              leading: Icon(AddressLabel.iconFor(a.label)),
               title: '${a.label}  ·  ${a.recipient}',
               subtitle: a.oneLine,
             ),

@@ -1,3 +1,4 @@
+import '../../../data/models/address_label.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,7 +106,7 @@ class _AddressTile extends StatelessWidget {
     return AdaptiveListTile(
       onTap: onTap,
       leading: Icon(
-        address.label == 'Work' ? Icons.business_rounded : Icons.home_rounded,
+        AddressLabel.iconFor(address.label),
         color: current
             ? theme.colorScheme.primary
             : theme.colorScheme.onSurfaceVariant,

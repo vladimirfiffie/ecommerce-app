@@ -1,3 +1,4 @@
+import '../../../data/models/address_label.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -118,9 +119,12 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
                       inputFormatters: _limit(24),
+                      onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
                         labelText: AppL10n.of(context).addressLabelField,
-                        prefixIcon: const Icon(Icons.label_outline_rounded),
+                        // The icon this address will be picked out of a list
+                        // by, following whatever the label says.
+                        prefixIcon: Icon(AddressLabel.iconFor(_label.text)),
                       ),
                     ),
                   ),
@@ -143,6 +147,16 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              const SizedBox(height: 12),
+              // Offered, not enforced: the field above still takes anything,
+              // because someone's third address is "The cabin" and no list
+              // will ever have it. Picking one fills the name in and changes
+              // the icon this address is found by.
+              _LabelPicker(
+                selected: _label.text,
+                onPicked: (String label) => setState(() => _label.text = label),
               ),
               const SizedBox(height: 12),
               AdaptiveTextFormField(
@@ -242,4 +256,27 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
       ),
     );
   }
+}
+
+/// The usual names for an address, each with the icon it will be drawn with.
+class _LabelPicker extends StatelessWidget {
+  const _LabelPicker({required this.selected, required this.onPicked});
+
+  final String selected;
+  final ValueChanged<String> onPicked;
+
+  @override
+  Widget build(BuildContext context) => Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: <Widget>[
+      for (final AddressLabel option in AddressLabel.values)
+        ChoiceChip(
+          selected: option.label.toLowerCase() == selected.trim().toLowerCase(),
+          onSelected: (_) => onPicked(option.label),
+          avatar: Icon(option.icon, size: 18),
+          label: Text(option.label),
+        ),
+    ],
+  );
 }
