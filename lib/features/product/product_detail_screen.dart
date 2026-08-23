@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import '../../shared/widgets/messages.dart';
 import 'dart:async';
 
@@ -135,8 +136,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (product == null) {
-      return Scaffold(
-        appBar: AppBar(),
+      return AdaptiveScreen(
+        // Nothing to name: the body says what went wrong, and the bar is
+        // here for the way back out.
+        title: '',
         body: EmptyState(
           icon: Icons.inventory_2_outlined,
           title: 'Product unavailable',

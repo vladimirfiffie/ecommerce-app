@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,8 +41,10 @@ class OrderDetailScreen extends ConsumerWidget {
     ref.watch(orderClockProvider);
 
     if (order == null) {
-      return Scaffold(
-        appBar: AppBar(),
+      return AdaptiveScreen(
+        // Nothing to name: the body says what went wrong, and the bar is
+        // here for the way back out.
+        title: '',
         body: EmptyState(
           icon: Icons.receipt_long_outlined,
           title: AppL10n.of(context).orderNotFoundTitle,
@@ -54,11 +57,9 @@ class OrderDetailScreen extends ConsumerWidget {
 
     final List<OrderLine> items = ref.watch(orderItemsProvider(orderId));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(order.id),
-        automaticallyImplyLeading: !embedded,
-      ),
+    return AdaptiveScreen(
+      title: order.id,
+      automaticallyImplyLeading: !embedded,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: <Widget>[

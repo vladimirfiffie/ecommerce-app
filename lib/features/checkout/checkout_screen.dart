@@ -199,6 +199,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ],
     );
 
+    // A Scaffold, not AdaptiveScreen: checkout keeps a pay bar pinned to the
+    // bottom for the whole flow, and AdaptiveScaffold's bottom slot only
+    // takes its own AdaptiveBottomNavigationBar — there is nowhere to put a
+    // persistent action bar that stays above the keyboard.
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.checkoutTitle),

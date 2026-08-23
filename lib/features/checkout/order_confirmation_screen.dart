@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import '../../shared/widgets/messages.dart';
 import 'dart:async';
 
@@ -61,8 +62,10 @@ class _OrderConfirmationScreenState
     final List<OrderLine> items = ref.watch(orderItemsProvider(orderId));
 
     if (order == null) {
-      return Scaffold(
-        appBar: AppBar(),
+      return AdaptiveScreen(
+        // Nothing to name: the body says what went wrong, and the bar is
+        // here for the way back out.
+        title: '',
         body: EmptyState(
           icon: Icons.receipt_long_outlined,
           title: AppL10n.of(context).confirmationNotFoundTitle,
