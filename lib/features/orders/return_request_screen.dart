@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'dart:async';
@@ -257,7 +258,7 @@ class _ItemChoice extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           child: Row(
             children: <Widget>[
-              Checkbox(
+              AdaptiveCheckbox(
                 value: selected,
                 onChanged: (bool? v) => onChanged(v ?? false),
               ),

@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haptic_kit/haptic_kit.dart';
@@ -63,7 +64,7 @@ class AsterSlider extends ConsumerWidget {
     final double safeValue = value.clamp(min, max);
 
     if (!haptics.isOn(HapticChannel.selection)) {
-      return Slider(
+      return AdaptiveSlider(
         value: safeValue,
         min: min,
         max: max,

@@ -433,15 +433,12 @@ class _FaqTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
 
-    return ExpansionTile(
+    return AdaptiveExpansionTile(
       // A tick as the answer opens, the same as every other control that
       // reveals something. Routed through the service, so the shopper's
       // channel and intensity settings apply here as anywhere else.
       onExpansionChanged: (bool _) =>
           unawaited(ref.read(hapticsProvider).selection()),
-      // The default outline draws a box inside the card it already sits in.
-      shape: const Border(),
-      collapsedShape: const Border(),
       tilePadding: const EdgeInsets.symmetric(horizontal: 16),
       childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       expandedCrossAxisAlignment: CrossAxisAlignment.start,
