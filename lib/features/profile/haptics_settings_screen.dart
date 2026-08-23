@@ -37,8 +37,9 @@ class HapticsSettingsScreen extends ConsumerWidget {
               // The same switch as the channel rows below. This one used to
               // be a hand-built row around a different toggle, which made the
               // master control look like it belonged to another screen.
-              SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
+              AdaptiveListTile(
+                padding: EdgeInsets.zero,
+                hideBottomDivider: true,
                 title: Text(
                   'Haptic feedback',
                   style: theme.textTheme.titleSmall,
@@ -49,11 +50,20 @@ class HapticsSettingsScreen extends ConsumerWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                value: settings.enabled,
-                onChanged: (bool v) async {
-                  await notifier.setEnabled(v);
-                  if (v) await ref.read(hapticsProvider).impact();
+                onTap: () async {
+                  await notifier.setEnabled(!settings.enabled);
+                  if (!settings.enabled) {
+                    await ref.read(hapticsProvider).impact();
+                  }
                 },
+                trailing: AdaptiveSwitch(
+                  value: settings.enabled,
+                  onChanged: (bool v) async {
+                    await notifier.setEnabled(v);
+                    // Feel it the moment it is switched on.
+                    if (v) await ref.read(hapticsProvider).impact();
+                  },
+                ),
               ),
             ],
           ),
@@ -87,17 +97,28 @@ class HapticsSettingsScreen extends ConsumerWidget {
           _SectionLabel('What gets feedback'),
           const SizedBox(height: 6),
           for (final HapticChannel channel in HapticChannel.values)
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
+            AdaptiveListTile(
+              padding: EdgeInsets.zero,
+              hideBottomDivider: true,
               title: Text(channel.label),
               subtitle: Text(channel.description),
-              value: settings.channels.contains(channel),
-              onChanged: settings.enabled
-                  ? (bool v) async {
-                      await notifier.setChannel(channel, v);
-                      if (v) await ref.read(hapticsProvider).selection();
+              enabled: settings.enabled,
+              onTap: settings.enabled
+                  ? () async {
+                      final bool on = !settings.channels.contains(channel);
+                      await notifier.setChannel(channel, on);
+                      if (on) await ref.read(hapticsProvider).selection();
                     }
                   : null,
+              trailing: AdaptiveSwitch(
+                value: settings.channels.contains(channel),
+                onChanged: settings.enabled
+                    ? (bool v) async {
+                        await notifier.setChannel(channel, v);
+                        if (v) await ref.read(hapticsProvider).selection();
+                      }
+                    : (bool _) {},
+              ),
             ),
         ],
       ),

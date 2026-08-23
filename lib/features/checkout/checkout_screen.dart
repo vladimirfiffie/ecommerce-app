@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'dart:async';
 
@@ -1046,9 +1047,10 @@ class _CreditSection extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-          child: SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            secondary: Icon(
+          child: AdaptiveListTile(
+            padding: EdgeInsets.zero,
+            hideBottomDivider: true,
+            leading: Icon(
               Icons.account_balance_wallet_outlined,
               color: theme.colorScheme.primary,
             ),
@@ -1071,8 +1073,11 @@ class _CreditSection extends ConsumerWidget {
                     ).creditKeptForLater(formatPrice(balance)),
               style: theme.textTheme.bodySmall,
             ),
-            value: use,
-            onChanged: ref.read(useStoreCreditProvider.notifier).set,
+            onTap: () => ref.read(useStoreCreditProvider.notifier).set(!use),
+            trailing: AdaptiveSwitch(
+              value: use,
+              onChanged: ref.read(useStoreCreditProvider.notifier).set,
+            ),
           ),
         ),
       ),
@@ -1117,9 +1122,10 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              secondary: Icon(
+            AdaptiveListTile(
+              padding: EdgeInsets.zero,
+              hideBottomDivider: true,
+              leading: Icon(
                 Icons.card_giftcard_rounded,
                 color: theme.colorScheme.primary,
               ),
@@ -1133,8 +1139,11 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
                 ).giftWrapSubtitle(formatPrice(GiftOptions.wrapFee)),
                 style: theme.textTheme.bodySmall,
               ),
-              value: gift.wrapped,
-              onChanged: notifier.setWrapped,
+              onTap: () => notifier.setWrapped(!gift.wrapped),
+              trailing: AdaptiveSwitch(
+                value: gift.wrapped,
+                onChanged: notifier.setWrapped,
+              ),
             ),
             TextField(
               controller: _message,

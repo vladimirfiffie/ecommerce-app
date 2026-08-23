@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -128,8 +129,12 @@ class SettingsSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return SwitchListTile.adaptive(
-      secondary: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
+    // A tile with a switch in its trailing slot rather than
+    // SwitchListTile: that draws a Material switch on iOS too, and the row
+    // itself is what iOS styles differently — separators inset to the text,
+    // no ink, a taller touch target.
+    return AdaptiveListTile(
+      leading: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
       title: Text(title, style: theme.textTheme.titleSmall),
       subtitle: subtitle == null
           ? null
@@ -139,9 +144,14 @@ class SettingsSwitch extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-      value: value,
-      onChanged: onChanged,
-      shape: const RoundedRectangleBorder(),
+      enabled: onChanged != null,
+      // Tapping the row is the same as flicking the switch, which is what
+      // SwitchListTile gave for free and a plain tile does not.
+      onTap: onChanged == null ? null : () => onChanged!(!value),
+      trailing: AdaptiveSwitch(
+        value: value,
+        onChanged: onChanged ?? (bool _) {},
+      ),
     );
   }
 }

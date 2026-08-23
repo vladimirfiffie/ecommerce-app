@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -148,18 +149,28 @@ class _Body extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
-        SwitchListTile.adaptive(
-          contentPadding: EdgeInsets.zero,
+        AdaptiveListTile(
+          padding: EdgeInsets.zero,
+          hideBottomDivider: true,
           title: const Text('Verify before paying'),
           subtitle: Text(
             status.usable
                 ? 'Ask for ${status.label.toLowerCase()} when placing an order'
                 : 'Set up a fingerprint, face or screen lock first',
           ),
-          value: required && status.usable,
-          onChanged: status.usable
-              ? (bool v) => ref.read(requireBiometricsProvider.notifier).set(v)
+          // Nothing to switch on until the device has a way to verify.
+          enabled: status.usable,
+          onTap: status.usable
+              ? () =>
+                    ref.read(requireBiometricsProvider.notifier).set(!required)
               : null,
+          trailing: AdaptiveSwitch(
+            value: required && status.usable,
+            onChanged: status.usable
+                ? (bool v) =>
+                      ref.read(requireBiometricsProvider.notifier).set(v)
+                : (bool _) {},
+          ),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(

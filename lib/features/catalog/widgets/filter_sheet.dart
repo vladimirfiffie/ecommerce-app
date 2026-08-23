@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -157,17 +158,24 @@ class FilterSheet extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
+                AdaptiveListTile(
+                  padding: EdgeInsets.zero,
                   title: const Text('On sale only'),
-                  value: filter.onSaleOnly,
-                  onChanged: notifier.setOnSaleOnly,
+                  onTap: () => notifier.setOnSaleOnly(!filter.onSaleOnly),
+                  trailing: AdaptiveSwitch(
+                    value: filter.onSaleOnly,
+                    onChanged: notifier.setOnSaleOnly,
+                  ),
                 ),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
+                AdaptiveListTile(
+                  padding: EdgeInsets.zero,
+                  hideBottomDivider: true,
                   title: const Text('In stock only'),
-                  value: filter.inStockOnly,
-                  onChanged: notifier.setInStockOnly,
+                  onTap: () => notifier.setInStockOnly(!filter.inStockOnly),
+                  trailing: AdaptiveSwitch(
+                    value: filter.inStockOnly,
+                    onChanged: notifier.setInStockOnly,
+                  ),
                 ),
               ],
             ),

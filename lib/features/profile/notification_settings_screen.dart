@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,23 +107,38 @@ class NotificationSettingsScreen extends ConsumerWidget {
           ],
           const SizedBox(height: 24),
 
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
+          AdaptiveListTile(
+            padding: EdgeInsets.zero,
+            hideBottomDivider: true,
             title: const Text('Notifications'),
             subtitle: const Text('Master switch for everything below'),
-            value: settings.enabled,
-            onChanged: notifier.setEnabled,
+            onTap: () => notifier.setEnabled(!settings.enabled),
+            trailing: AdaptiveSwitch(
+              value: settings.enabled,
+              onChanged: notifier.setEnabled,
+            ),
           ),
           const Divider(height: 24),
           for (final NotifyChannel channel in NotifyChannel.values)
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
+            AdaptiveListTile(
+              padding: EdgeInsets.zero,
+              hideBottomDivider: true,
               title: Text(channel.label),
               subtitle: Text(channel.description),
-              value: settings.channels.contains(channel),
-              onChanged: settings.enabled
-                  ? (bool v) => notifier.setChannel(channel, v)
+              // A channel means nothing with the master switch off.
+              enabled: settings.enabled,
+              onTap: settings.enabled
+                  ? () => notifier.setChannel(
+                      channel,
+                      !settings.channels.contains(channel),
+                    )
                   : null,
+              trailing: AdaptiveSwitch(
+                value: settings.channels.contains(channel),
+                onChanged: settings.enabled
+                    ? (bool v) => notifier.setChannel(channel, v)
+                    : (bool _) {},
+              ),
             ),
           const SizedBox(height: 26),
 
