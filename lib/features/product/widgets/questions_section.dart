@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -237,7 +238,7 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
               ),
             ),
             const SizedBox(height: 18),
-            TextField(
+            AdaptiveTextField(
               controller: _body,
               autofocus: true,
               minLines: 3,

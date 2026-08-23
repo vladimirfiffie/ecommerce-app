@@ -605,7 +605,7 @@ class _DeliveryInstructionsState extends ConsumerState<_DeliveryInstructions> {
           },
         ),
         const SizedBox(height: 12),
-        TextField(
+        AdaptiveTextField(
           controller: _note,
           minLines: 2,
           maxLines: 3,
@@ -1145,7 +1145,7 @@ class _GiftSectionState extends ConsumerState<_GiftSection> {
                 onChanged: notifier.setWrapped,
               ),
             ),
-            TextField(
+            AdaptiveTextField(
               controller: _message,
               minLines: 2,
               maxLines: 3,

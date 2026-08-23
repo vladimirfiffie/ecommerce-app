@@ -79,7 +79,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-            child: TextField(
+            child: AdaptiveTextField(
               controller: _search,
               textInputAction: TextInputAction.search,
               onChanged: (String value) => setState(() => _query = value),

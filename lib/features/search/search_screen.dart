@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -97,7 +98,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
-        title: TextField(
+        title: AdaptiveTextField(
           controller: _controller,
           focusNode: _focus,
           textInputAction: TextInputAction.search,

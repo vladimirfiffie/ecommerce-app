@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -106,7 +107,7 @@ class _SaveToListSheetState extends ConsumerState<SaveToListSheet> {
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                      child: TextField(
+                      child: AdaptiveTextField(
                         controller: _name,
                         autofocus: true,
                         maxLength: WishList.maxNameLength,

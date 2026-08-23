@@ -291,7 +291,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
                 ],
               ),
               const SizedBox(height: 18),
-              TextFormField(
+              AdaptiveTextFormField(
                 controller: _number,
                 keyboardType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
@@ -310,7 +310,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
               Row(
                 children: <Widget>[
                   Expanded(
-                    child: TextFormField(
+                    child: AdaptiveTextFormField(
                       controller: _expiry,
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
@@ -328,7 +328,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: TextFormField(
+                    child: AdaptiveTextFormField(
                       controller: _cvv,
                       keyboardType: TextInputType.number,
                       obscureText: true,
@@ -347,7 +347,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
                 ],
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              AdaptiveTextFormField(
                 controller: _holder,
                 keyboardType: TextInputType.name,
                 // The last field in the form, so the key says so.

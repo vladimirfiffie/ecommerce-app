@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -133,7 +134,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 child: Column(
                   children: <Widget>[
                     if (_signUp) ...<Widget>[
-                      TextFormField(
+                      AdaptiveTextFormField(
                         controller: _name,
                         keyboardType: TextInputType.name,
                         textCapitalization: TextCapitalization.words,
@@ -151,7 +152,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                       const SizedBox(height: 12),
                     ],
-                    TextFormField(
+                    AdaptiveTextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
@@ -168,7 +169,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             ),
                     ),
                     const SizedBox(height: 12),
-                    TextFormField(
+                    AdaptiveTextFormField(
                       controller: _password,
                       obscureText: _obscure,
                       textInputAction: _signUp
@@ -179,7 +180,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             ? AutofillHints.newPassword
                             : AutofillHints.password,
                       ],
-                      onFieldSubmitted: (_) {
+                      onSubmitted: (_) {
                         if (!_signUp) _submit();
                       },
                       decoration: InputDecoration(
@@ -208,11 +209,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     if (_signUp) ...<Widget>[
                       const SizedBox(height: 12),
-                      TextFormField(
+                      AdaptiveTextFormField(
                         controller: _confirm,
                         obscureText: _obscure,
                         textInputAction: TextInputAction.done,
-                        onFieldSubmitted: (_) => _submit(),
+                        onSubmitted: (_) => _submit(),
                         decoration: const InputDecoration(
                           labelText: 'Confirm password',
                           prefixIcon: Icon(Icons.lock_reset_rounded),

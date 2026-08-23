@@ -247,7 +247,7 @@ Future<String?> _askForName(
     context: context,
     builder: (BuildContext context) => AlertDialog(
       title: Text(title),
-      content: TextField(
+      content: AdaptiveTextField(
         controller: controller,
         autofocus: true,
         maxLength: WishList.maxNameLength,

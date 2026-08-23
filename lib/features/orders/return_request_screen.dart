@@ -191,7 +191,7 @@ class _ReturnRequestScreenState extends ConsumerState<ReturnRequestScreen> {
             ],
           ),
           const SizedBox(height: 14),
-          TextField(
+          AdaptiveTextField(
             controller: _note,
             minLines: 2,
             maxLines: 4,

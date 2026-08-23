@@ -107,6 +107,10 @@ class _PromoFieldState extends ConsumerState<PromoField> {
         Row(
           children: <Widget>[
             Expanded(
+              // A Material TextField: a promo code is typed from a card or
+              // an email, and the keyboard offering to complete it from the
+              // shopper's own vocabulary gets in the way. enableSuggestions
+              // is what turns that off, and neither adaptive field has it.
               child: TextField(
                 controller: _controller,
                 autocorrect: false,

@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../../shared/widgets/messages.dart';
 import 'dart:async';
 
@@ -268,7 +269,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
                   ),
                 ),
                 const SizedBox(height: 22),
-                TextFormField(
+                AdaptiveTextFormField(
                   controller: _title,
                   textCapitalization: TextCapitalization.sentences,
                   textInputAction: TextInputAction.next,
@@ -279,7 +280,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
+                AdaptiveTextFormField(
                   controller: _body,
                   keyboardType: TextInputType.multiline,
                   textInputAction: TextInputAction.newline,

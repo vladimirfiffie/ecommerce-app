@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,7 +111,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
               Row(
                 children: <Widget>[
                   Expanded(
-                    child: TextFormField(
+                    child: AdaptiveTextFormField(
                       controller: _label,
                       validator: (String? v) =>
                           AddressValidator.validateLabel(v ?? ''),
@@ -126,7 +127,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                   const SizedBox(width: 12),
                   Expanded(
                     flex: 2,
-                    child: TextFormField(
+                    child: AdaptiveTextFormField(
                       controller: _recipient,
                       keyboardType: TextInputType.name,
                       validator: (String? v) =>
@@ -144,7 +145,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                 ],
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              AdaptiveTextFormField(
                 controller: _line1,
                 validator: (String? v) =>
                     AddressValidator.validateLine1(v ?? ''),
@@ -163,7 +164,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                 children: <Widget>[
                   Expanded(
                     flex: 2,
-                    child: TextFormField(
+                    child: AdaptiveTextFormField(
                       controller: _city,
                       validator: (String? v) =>
                           AddressValidator.validateCity(v ?? ''),
@@ -179,7 +180,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: TextFormField(
+                    child: AdaptiveTextFormField(
                       controller: _postcode,
                       // Country decides the rule, so the postcode has to be
                       // re-checked whenever the country changes underneath it.
@@ -216,7 +217,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                 ],
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              AdaptiveTextFormField(
                 controller: _country,
                 validator: (String? v) =>
                     AddressValidator.validateCountry(v ?? ''),
@@ -224,7 +225,7 @@ class _AddressSheetState extends ConsumerState<AddressSheet> {
                 textInputAction: TextInputAction.done,
                 autofillHints: const <String>[AutofillHints.countryName],
                 inputFormatters: _limit(AddressValidator.maxShortField),
-                onFieldSubmitted: (_) => _save(),
+                onSubmitted: (_) => _save(),
                 decoration: InputDecoration(
                   labelText: AppL10n.of(context).addressCountry,
                   prefixIcon: const Icon(Icons.public_rounded),

@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'dart:async';
 
@@ -83,7 +84,7 @@ class _StoreCreditScreenState extends ConsumerState<StoreCreditScreen> {
           const SizedBox(height: 24),
           Text('Redeem a gift card', style: theme.textTheme.titleMedium),
           const SizedBox(height: 12),
-          TextField(
+          AdaptiveTextField(
             controller: _code,
             autocorrect: false,
             textCapitalization: TextCapitalization.characters,

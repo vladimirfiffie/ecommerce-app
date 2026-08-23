@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -61,7 +62,7 @@ class _EditNameSheetState extends ConsumerState<EditNameSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            TextField(
+            AdaptiveTextFormField(
               controller: _controller,
               autofocus: true,
               keyboardType: TextInputType.name,

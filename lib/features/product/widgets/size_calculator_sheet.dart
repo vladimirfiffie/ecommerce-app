@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,7 +90,7 @@ class _SizeCalculatorSheetState extends ConsumerState<_SizeCalculatorSheet> {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: TextField(
+                  child: AdaptiveTextField(
                     controller: _height,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
@@ -106,7 +107,7 @@ class _SizeCalculatorSheetState extends ConsumerState<_SizeCalculatorSheet> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: TextField(
+                  child: AdaptiveTextField(
                     controller: _weight,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
