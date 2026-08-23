@@ -189,9 +189,24 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       ),
     );
 
-    if (!twoPane) return Scaffold(body: master);
+    // Creating a list was reachable from an overflow menu at the top right
+    // and a small chip in the strip — both a stretch on a tall phone, and
+    // neither obviously the primary thing. Addresses and payment methods
+    // already put their "add" here; this matches them.
+    final Widget? newListButton = _section == 0
+        ? AdaptiveFloatingActionButton(
+            onPressed: _createList,
+            tooltip: 'New list',
+            child: const Icon(Icons.playlist_add_rounded),
+          )
+        : null;
+
+    if (!twoPane) {
+      return Scaffold(floatingActionButton: newListButton, body: master);
+    }
 
     return Scaffold(
+      floatingActionButton: newListButton,
       body: TwoPane(
         list: master,
         detail: selected == null

@@ -132,4 +132,30 @@ void main() {
     ).readAsStringSync();
     expect(settings.contains('Saved for later'), isFalse);
   });
+
+  testWidgets('making a list is reachable without a menu', (
+    WidgetTester tester,
+  ) async {
+    await pumpSaved(tester);
+
+    // Creating one used to mean the overflow menu at the top right or a
+    // small chip — both a stretch on a tall phone.
+    expect(find.byIcon(Icons.playlist_add_rounded), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.playlist_add_rounded));
+    await settle(tester);
+    expect(find.text('New list'), findsWidgets);
+  });
+
+  testWidgets('and it is absent where it would mean nothing', (
+    WidgetTester tester,
+  ) async {
+    await pumpSaved(tester);
+
+    await tester.tap(find.text('For later'));
+    await settle(tester);
+
+    // Nothing on this section is a list, so "new list" has nothing to do.
+    expect(find.byIcon(Icons.playlist_add_rounded), findsNothing);
+  });
 }
