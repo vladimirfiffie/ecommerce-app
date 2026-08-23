@@ -127,7 +127,9 @@ void main() {
 
     await tester.tap(find.text('Cancel order'));
     await settle(tester);
-    await tester.tap(find.widgetWithText(FilledButton, 'Cancel order'));
+    // The dialog is the platform's now, so its actions are whatever the
+    // platform draws — tap the label rather than a button type.
+    await tester.tap(find.text('Cancel order').last);
     await settle(tester);
 
     expect(c.read(ordersProvider).first.status, OrderStatus.cancelled);

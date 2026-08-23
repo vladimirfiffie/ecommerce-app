@@ -1,5 +1,4 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
 /// A filled button in the error color, for the action that deletes,
@@ -58,83 +57,26 @@ Future<bool> confirmDestructive(
   required String confirmLabel,
   String cancelLabel = 'Cancel',
 }) async {
-  // iOS gets the platform's own alert: red destructive text, bold cancel,
-  // sheet-style presentation. A Material dialog there is the clearest sign an
-  // app was built somewhere else, and this is the control the shopper meets
-  // at every irreversible moment.
-  //
-  // Android keeps the dialog below rather than handing it to the same
-  // adaptive widget. What is drawn here is deliberate — a red *filled*
-  // confirm button, sized for a dialog rather than a page, with both actions
-  // held on one row — and destructive_ui_test.dart exists to keep it that
-  // way. The adaptive dialog draws none of it.
-  if (defaultTargetPlatform == TargetPlatform.iOS) {
-    bool confirmed = false;
-    await AdaptiveAlertDialog.show(
-      context: context,
-      title: title,
-      message: message,
-      actions: <AlertAction>[
-        AlertAction(
-          title: cancelLabel,
-          style: AlertActionStyle.cancel,
-          onPressed: () {},
-        ),
-        AlertAction(
-          title: confirmLabel,
-          style: AlertActionStyle.destructive,
-          onPressed: () => confirmed = true,
-        ),
-      ],
-    );
-    return confirmed;
-  }
-
-  // Keep both labels short: AlertDialog stacks its actions when they don't
-  // fit one row, which put the way out *underneath* the destructive button.
-  final ThemeData theme = Theme.of(context);
-  final bool? yes = await showDialog<bool>(
+  // The platform's own alert on both sides: a Cupertino sheet on iOS, a
+  // Material dialog on Android, with the confirming action styled
+  // destructive so it reads as the dangerous one wherever it is drawn.
+  bool confirmed = false;
+  await AdaptiveAlertDialog.show(
     context: context,
-    builder: (BuildContext context) => AlertDialog(
-      title: Text(title),
-      content: Text(message),
-      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      // One Row rather than two loose children: AlertDialog's OverflowBar
-      // stacks actions the moment they don't fit, and the app theme's button
-      // labels are wide enough that even "Cancel" + "Remove" tipped over on a
-      // 360px screen — putting the way out *underneath* the destructive
-      // button. A Row keeps the order, and the labels ellipsize instead.
-      actions: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Flexible(
-              child: TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(56, 40),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  textStyle: theme.textTheme.labelLarge,
-                ),
-                child: Text(
-                  cancelLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: DangerButton(
-                dense: true,
-                onPressed: () => Navigator.of(context).pop(true),
-                label: confirmLabel,
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
+    title: title,
+    message: message,
+    actions: <AlertAction>[
+      AlertAction(
+        title: cancelLabel,
+        style: AlertActionStyle.cancel,
+        onPressed: () {},
+      ),
+      AlertAction(
+        title: confirmLabel,
+        style: AlertActionStyle.destructive,
+        onPressed: () => confirmed = true,
+      ),
+    ],
   );
-  return yes ?? false;
+  return confirmed;
 }

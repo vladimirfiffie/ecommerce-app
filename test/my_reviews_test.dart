@@ -132,7 +132,8 @@ void main() {
 
     await tester.tap(find.byTooltip('Delete'));
     await settle(tester);
-    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    // The confirmation is the platform's dialog; tap its label.
+    await tester.tap(find.text('Delete').last);
     await settle(tester);
 
     expect(c.read(userReviewsProvider), isEmpty);

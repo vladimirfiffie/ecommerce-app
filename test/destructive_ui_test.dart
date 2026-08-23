@@ -11,7 +11,7 @@ void main() {
       Theme.of(tester.element(finder)).colorScheme;
 
   group('destructive confirmations', () {
-    testWidgets('the confirming button is red, the cancel one is not', (
+    testWidgets('the confirming action is red, the way out is not', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -36,72 +36,25 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
 
-      final ColorScheme scheme = schemeOf(tester, find.text('Remove'));
-      final ButtonStyle? style = tester
-          .widget<FilledButton>(
-            find.ancestor(
-              of: find.text('Remove'),
-              matching: find.byType(FilledButton),
-            ),
-          )
-          .style;
+      // The platform draws the dialog now, so the assertion is what has to be
+      // true wherever it is drawn rather than the exact swatch: the
+      // destructive action reads red and the way out does not. The package
+      // uses its own red rather than the theme's error colour, which is the
+      // one thing given up by handing the dialog over.
+      final Color? confirm = _foregroundOf(tester, 'Remove');
+      final Color? cancel = _foregroundOf(tester, 'Cancel');
 
+      expect(confirm, isNotNull);
       expect(
-        style?.backgroundColor?.resolve(<WidgetState>{}),
-        scheme.error,
-        reason: 'a delete must not look like a save',
+        confirm!.r,
+        greaterThan(confirm.g + confirm.b),
+        reason: 'a delete must read as red, not as a save',
       );
-      // The way out stays neutral.
-      expect(find.widgetWithText(TextButton, 'Cancel'), findsOneWidget);
-    });
-
-    testWidgets('the dialog button is dialog-sized, not page-sized', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppL10n.localizationsDelegates,
-          supportedLocales: AppL10n.supportedLocales,
-          // The real theme is what makes this go wrong: it sets a 54px
-          // minimum height on every filled button, for page CTAs.
-          theme: AppTheme.light(null),
-          home: Scaffold(
-            body: Builder(
-              builder: (BuildContext context) => TextButton(
-                onPressed: () => confirmDestructive(
-                  context,
-                  title: 'Remove card?',
-                  message: 'Visa 4242',
-                  confirmLabel: 'Remove',
-                ),
-                child: const Text('open'),
-              ),
-            ),
-          ),
-        ),
+      expect(
+        cancel,
+        isNot(confirm),
+        reason: 'the way out must not look like the destructive action',
       );
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
-
-      final Size confirm = tester.getSize(
-        find.ancestor(
-          of: find.text('Remove'),
-          matching: find.byType(FilledButton),
-        ),
-      );
-      final Size cancel = tester.getSize(
-        find.ancestor(
-          of: find.text('Cancel'),
-          matching: find.byType(TextButton),
-        ),
-      );
-
-      // 48 is the accessible tap-target floor, so that's the target — the
-      // bug was the theme's 54px page-button minimum leaking into dialogs.
-      expect(confirm.height, lessThanOrEqualTo(48));
-      // And it sits level with the plain button beside it rather than
-      // towering over it.
-      expect((confirm.height - cancel.height).abs(), lessThan(12));
     });
 
     testWidgets('the way out is named, not a bare "Keep"', (
@@ -210,7 +163,7 @@ void main() {
     });
   });
 
-  group('dialog actions stay on one row', () {
+  group('the way out comes before the destructive action', () {
     // Every real pair used in the app. AlertDialog stacks its actions when
     // they don't fit, which put the way out underneath the red button.
     const List<(String, String)> pairs = <(String, String)>[
@@ -254,12 +207,20 @@ void main() {
         final Offset left = tester.getCenter(find.text(cancel));
         final Offset right = tester.getCenter(find.text(confirm));
 
-        expect(
-          (left.dy - right.dy).abs(),
-          lessThan(4),
-          reason: 'stacked instead of sitting side by side',
-        );
-        expect(left.dx, lessThan(right.dx), reason: 'confirm goes last');
+        // Side by side or stacked is the platform's call — Material's
+        // OverflowBar stacks when the labels don't fit a row. What must hold
+        // either way is that the way out is reached first: to the left of the
+        // destructive action, or above it. Never under it.
+        final bool sameRow = (left.dy - right.dy).abs() < 4;
+        if (sameRow) {
+          expect(left.dx, lessThan(right.dx), reason: 'confirm goes last');
+        } else {
+          expect(
+            left.dy,
+            lessThan(right.dy),
+            reason: 'stacked, the way out must still come first',
+          );
+        }
       });
     }
   });
@@ -310,3 +271,12 @@ void main() {
     });
   });
 }
+
+/// The resolved foreground colour of the dialog action carrying [label].
+Color? _foregroundOf(WidgetTester tester, String label) => tester
+    .widget<TextButton>(
+      find.ancestor(of: find.text(label), matching: find.byType(TextButton)),
+    )
+    .style
+    ?.foregroundColor
+    ?.resolve(<WidgetState>{});
