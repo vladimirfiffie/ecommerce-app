@@ -299,59 +299,53 @@ class _StepButtonState extends State<_StepButton> {
         ? Duration.zero
         : const Duration(milliseconds: 200);
 
-    // A Material Tooltip, not the adaptive one: this needs
-    // excludeFromSemantics (the label is announced once already) and
-    // triggerMode (long-press belongs to hold-to-repeat, not to the
-    // tooltip), and AdaptiveTooltip exposes neither.
-    return Tooltip(
-      message: widget.tooltip,
-      // The tooltip and the semantic label would otherwise both be announced,
-      // giving "Decrease quantity, Decrease quantity".
-      excludeFromSemantics: true,
-      // A tooltip listens for a long press by default, and wins the gesture
-      // arena about half a second in — which cancelled the tap underneath it
-      // and killed the hold after a single repeat. Here the long press means
-      // "keep counting", so the tooltip gives it up. Hover still shows it.
-      triggerMode: TooltipTriggerMode.manual,
-      child: Semantics(
-        label: widget.tooltip,
-        button: true,
-        enabled: widget.enabled,
-        // Carried on this node because excluding the descendants takes the
-        // ink response's own tap action with them.
-        onTap: widget.enabled ? () => _step(repeated: false) : null,
-        excludeSemantics: true,
-        child: InkResponse(
-          // A tap that turned into a hold has already counted its steps, so
-          // releasing must not add one more on top.
-          onTap: widget.enabled
-              ? () {
-                  if (_steps == 0) _step(repeated: false);
-                  _endHold();
-                }
-              : null,
-          onTapDown: widget.enabled ? (TapDownDetails _) => _beginHold() : null,
-          onTapCancel: widget.enabled ? _endHold : null,
-          radius: widget.size / 2 + 4,
-          child: SizedBox(
-            // No press animation of its own: the ink ripple spreading from
-            // the touch is the feedback. Scaling the glyph and fading a
-            // circle behind it were both read as a pulse, which is the
-            // wrong note for a button you tap repeatedly or lean on.
-            width: widget.size,
-            height: widget.size,
-            child: Center(
-              child: AnimatedOpacity(
-                // A button that switches off at the stock ceiling should
-                // fade out of reach rather than blink into a paler color.
-                opacity: widget.enabled ? 1 : 0.3,
-                duration: settle,
-                child: _SwappingIcon(
-                  icon: widget.icon,
-                  size: widget.size * 0.52,
-                  color: theme.colorScheme.onSurface,
-                  still: still,
-                ),
+    // No tooltip wrapper here, adaptive or Material.
+    //
+    // A tooltip has to register a long-press recogniser, and on this button
+    // the long press is hold-to-repeat: the recogniser wins the arena half a
+    // second in, cancels the tap underneath and kills the hold after a single
+    // step. The Material tooltip was already set to triggerMode.manual to
+    // give that gesture back, which meant it never appeared on a touch
+    // screen — on Android and iOS it drew nothing and cost a widget. The
+    // name is still announced, by the Semantics node below.
+    return Semantics(
+      label: widget.tooltip,
+      button: true,
+      enabled: widget.enabled,
+      // Carried on this node because excluding the descendants takes the
+      // ink response's own tap action with them.
+      onTap: widget.enabled ? () => _step(repeated: false) : null,
+      excludeSemantics: true,
+      child: InkResponse(
+        // A tap that turned into a hold has already counted its steps, so
+        // releasing must not add one more on top.
+        onTap: widget.enabled
+            ? () {
+                if (_steps == 0) _step(repeated: false);
+                _endHold();
+              }
+            : null,
+        onTapDown: widget.enabled ? (TapDownDetails _) => _beginHold() : null,
+        onTapCancel: widget.enabled ? _endHold : null,
+        radius: widget.size / 2 + 4,
+        child: SizedBox(
+          // No press animation of its own: the ink ripple spreading from
+          // the touch is the feedback. Scaling the glyph and fading a
+          // circle behind it were both read as a pulse, which is the
+          // wrong note for a button you tap repeatedly or lean on.
+          width: widget.size,
+          height: widget.size,
+          child: Center(
+            child: AnimatedOpacity(
+              // A button that switches off at the stock ceiling should
+              // fade out of reach rather than blink into a paler color.
+              opacity: widget.enabled ? 1 : 0.3,
+              duration: settle,
+              child: _SwappingIcon(
+                icon: widget.icon,
+                size: widget.size * 0.52,
+                color: theme.colorScheme.onSurface,
+                still: still,
               ),
             ),
           ),

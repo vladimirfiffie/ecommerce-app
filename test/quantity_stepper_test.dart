@@ -39,7 +39,11 @@ void main() {
     return () => quantity;
   }
 
-  Finder plus() => find.byTooltip('Increase quantity');
+  // By semantics label, not by tooltip: the stepper buttons carry no
+  // Tooltip any more — one would register a long-press recogniser and take
+  // the hold-to-repeat gesture — so the label is what names them, to a
+  // screen reader and here.
+  Finder plus() => find.bySemanticsLabel('Increase quantity');
 
   /// Holds for [total], drawing frames along the way.
   ///
