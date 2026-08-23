@@ -1,3 +1,4 @@
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -218,7 +219,11 @@ class _AsterRatingState extends ConsumerState<AsterRating>
 }
 
 /// Slide-to-confirm pill, falling back to a plain button.
-class AsterSlideToConfirm extends ConsumerWidget {
+///
+/// Once it has been slid it stays confirmed — green, with a tick — rather
+/// than snapping back to an idle control. Placing an order takes a beat, and
+/// a slider that looks untouched while it happens invites a second slide.
+class AsterSlideToConfirm extends ConsumerStatefulWidget {
   const AsterSlideToConfirm({
     required this.label,
     required this.fallbackLabel,
@@ -233,24 +238,79 @@ class AsterSlideToConfirm extends ConsumerWidget {
   final VoidCallback onConfirmed;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AsterSlideToConfirm> createState() =>
+      _AsterSlideToConfirmState();
+}
+
+class _AsterSlideToConfirmState extends ConsumerState<AsterSlideToConfirm> {
+  bool _confirmed = false;
+
+  void _confirm() {
+    if (_confirmed) return;
+    setState(() => _confirmed = true);
+    widget.onConfirmed();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+
+    if (_confirmed) {
+      return _ConfirmedPill(label: widget.label);
+    }
+
     final HapticService haptics = ref.watch(hapticsProvider);
     if (!haptics.isOn(HapticChannel.buttons)) {
       return FilledButton.icon(
-        onPressed: onConfirmed,
+        onPressed: _confirm,
         icon: const Icon(Icons.lock_outline_rounded, size: 18),
-        label: Text(fallbackLabel),
+        label: Text(widget.fallbackLabel),
       );
     }
-    final ColorScheme scheme = Theme.of(context).colorScheme;
     return SlideToConfirm(
-      label: label,
-      onConfirmed: onConfirmed,
+      label: widget.label,
+      onConfirmed: _confirm,
       trackColor: scheme.primaryContainer,
       handleColor: scheme.primary,
       textColor: scheme.onPrimaryContainer,
     );
   }
+}
+
+/// What the slider becomes once it has been slid.
+class _ConfirmedPill extends StatelessWidget {
+  const _ConfirmedPill({required this.label});
+
+  /// Kept for the screen reader, which should hear what was confirmed rather
+  /// than only that something was.
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: label,
+    enabled: false,
+    liveRegion: true,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+      height: 54,
+      decoration: BoxDecoration(
+        color: AppTheme.success,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+      ),
+      child: Center(
+        child: const Icon(Icons.check_rounded, color: Colors.white, size: 26)
+            .animate()
+            .scale(
+              begin: const Offset(0.4, 0.4),
+              end: const Offset(1, 1),
+              duration: 260.ms,
+              curve: Curves.easeOutBack,
+            )
+            .fadeIn(duration: 160.ms),
+      ),
+    ),
+  );
 }
 
 /// Hold-to-confirm target for destructive actions. Without haptics it becomes

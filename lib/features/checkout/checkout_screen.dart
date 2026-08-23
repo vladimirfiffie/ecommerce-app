@@ -267,7 +267,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
                   ),
                 Expanded(
-                  child: _placing
+                  // No spinner on the last step: the slider has already
+                  // turned into a green tick, and swapping that out for a
+                  // loading button the moment it lands takes the
+                  // confirmation away just as it arrives.
+                  child: _placing && _step < 2
                       ? const FilledButton(
                           onPressed: null,
                           child: SizedBox(
