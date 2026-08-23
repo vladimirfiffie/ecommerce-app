@@ -299,6 +299,10 @@ class _StepButtonState extends State<_StepButton> {
         ? Duration.zero
         : const Duration(milliseconds: 200);
 
+    // A Material Tooltip, not the adaptive one: this needs
+    // excludeFromSemantics (the label is announced once already) and
+    // triggerMode (long-press belongs to hold-to-repeat, not to the
+    // tooltip), and AdaptiveTooltip exposes neither.
     return Tooltip(
       message: widget.tooltip,
       // The tooltip and the semantic label would otherwise both be announced,

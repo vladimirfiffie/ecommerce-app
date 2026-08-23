@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -261,7 +262,7 @@ class _ReviewTile extends StatelessWidget {
                         ],
                         if (review.verified && !isMine) ...<Widget>[
                           const SizedBox(width: 6),
-                          Tooltip(
+                          AdaptiveTooltip(
                             message: 'Bought this from the shop',
                             child: Icon(
                               Icons.verified_rounded,

@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -322,7 +323,7 @@ class _CartLine extends ConsumerWidget {
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: Card(
+        child: AdaptiveCard(
           child: ProductRow(
             product: item.product,
             heroPrefix: 'cart',
@@ -461,7 +462,7 @@ class _SavedForLaterSection extends ConsumerWidget {
         for (final CartItem item in saved)
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
-            child: Card(
+            child: AdaptiveCard(
               child: ProductRow(
                 product: item.product,
                 heroPrefix: 'saved',

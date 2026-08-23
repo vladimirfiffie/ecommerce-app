@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -203,9 +204,10 @@ class InboxButton extends ConsumerWidget {
     return IconButton(
       onPressed: () => context.push(Routes.inbox),
       tooltip: unread == 0 ? 'Notifications' : 'Notifications, $unread unread',
-      icon: Badge(
-        isLabelVisible: unread > 0,
-        label: Text('$unread'),
+      // count rather than a label: AdaptiveBadge hides itself at zero, which
+      // is what isLabelVisible was doing by hand.
+      icon: AdaptiveBadge(
+        count: unread,
         child: const Icon(Icons.notifications_none_rounded),
       ),
     );

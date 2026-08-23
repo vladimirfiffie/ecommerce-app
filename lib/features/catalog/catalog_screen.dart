@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -380,7 +381,7 @@ class _ResultsList extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         final Product product = products[index];
         final bool selected = product.id == selectedId;
-        return Card(
+        return AdaptiveCard(
           color: selected
               ? theme.colorScheme.primaryContainer.withValues(alpha: 0.45)
               : null,

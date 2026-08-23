@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -83,7 +84,7 @@ class _MyReviewCard extends ConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final Product? item = product;
 
-    return Card(
+    return AdaptiveCard(
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(

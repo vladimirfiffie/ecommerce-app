@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -253,7 +254,7 @@ class _CountBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (count <= 0) return child;
-    return Badge.count(
+    return AdaptiveBadge(
       count: count,
       backgroundColor: Theme.of(context).colorScheme.error,
       textColor: Theme.of(context).colorScheme.onError,

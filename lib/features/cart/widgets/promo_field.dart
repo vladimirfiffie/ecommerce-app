@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -150,7 +151,7 @@ class _PromoFieldState extends ConsumerState<PromoField> {
               else
                 // Offering a code the bag can't use yet, and rejecting it on
                 // tap, is a worse introduction than saying what it needs.
-                Tooltip(
+                AdaptiveTooltip(
                   message: AppL10n.of(
                     context,
                   ).promoMinSpend(formatPrice(promo.minSubtotal)),

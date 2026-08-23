@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'dart:async';
 
@@ -393,7 +394,7 @@ class _TopicCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
-        Card(
+        AdaptiveCard(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Column(
@@ -484,7 +485,7 @@ class _ContactCard extends ConsumerWidget {
           padding: EdgeInsets.zero,
         ),
         const SizedBox(height: 10),
-        Card(
+        AdaptiveCard(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Column(

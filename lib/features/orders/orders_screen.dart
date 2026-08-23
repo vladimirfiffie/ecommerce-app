@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -119,7 +120,7 @@ class OrderCard extends ConsumerWidget {
     // Keeps the status pill honest while the list sits open.
     ref.watch(orderClockProvider);
 
-    return Card(
+    return AdaptiveCard(
       color: selected
           ? theme.colorScheme.primaryContainer.withValues(alpha: 0.45)
           : null,
