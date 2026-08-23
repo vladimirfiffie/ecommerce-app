@@ -30,6 +30,48 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.16.0',
+    headline: 'Aster the way your phone does things',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'animation_outlined',
+        'The animations are back',
+        'Moving between pages lost its transition in 0.15.1 — the new '
+            'Material package and the router disagreed about where the '
+            'animation came from, and nothing was left to draw one. Pages '
+            'slide and the back gesture peels again.',
+      ),
+      ReleaseHighlight(
+        'palette_outlined',
+        'Controls that behave like your phone’s',
+        'Switches, sliders, list rows, text fields, menus, alerts and the '
+            'navigation bars are all drawn the way the platform draws them, '
+            'through adaptive_platform_ui. On Android that is the Material '
+            'you already had; the work is what lets an iPhone build look '
+            'like an iPhone app rather than an Android one wearing a '
+            'different colour. Where a control could not survive the swap it '
+            'stayed Material — the quantity stepper keeps its hold-to-repeat '
+            'because a tooltip would have taken that gesture.',
+      ),
+      ReleaseHighlight(
+        'card_giftcard_rounded',
+        'Type a gift card the way it is printed',
+        'The code field puts the dashes and capitals in as you type, so '
+            'ASTER-GIFT-25 read off a card can be typed however you like. '
+            'Redeeming one now has haptics, and a refused code buzzes rather '
+            'than only writing an error under the keyboard.',
+      ),
+      ReleaseHighlight(
+        'tune_rounded',
+        'Small things that were wrong',
+        'The ZIP field brings up the number pad in the United States and a '
+            'normal keyboard everywhere else, the address form leads each '
+            'row with an icon, and Settings has one notifications entry '
+            'instead of two that looked like the same thing.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.15.1',
     headline: 'Same shop, newer foundations',
     highlights: <ReleaseHighlight>[

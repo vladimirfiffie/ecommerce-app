@@ -35,6 +35,7 @@ just Flutter widgets and pub plugins.
 | **Biometrics** | Opt-in verification before payment, with a capability report and a test prompt |
 | **Screen readers** | A product card is one sentence, not six fragments; sale prices say which number is the old one; stars, steppers and gallery images are named. Flutter's tap-target, label and contrast guidelines are asserted in tests |
 | **Large screens** | Navigation rail from 840dp, 2–6 column grids, two-pane product page and cart, unrestricted orientation |
+| **Platform chrome** | Every control is the platform's own — Material on Android, Cupertino on iOS, including the navigation bars, alerts and the banner that replaces a snackbar where iOS has none |
 | **AMOLED** | True-black dark surfaces that keep the brand palette and elevation tiers intact |
 | **Deep links** | `aster://product/<id>` and https App Links resolve to in-app routes |
 | **App shortcuts** | Long-press the launcher icon for Orders, Saved, Search and Bag — static, so they work before the app's first run |
@@ -64,6 +65,14 @@ connection.
 - **local_auth** — biometric verification before payment
 - **flutter_local_notifications** + **timezone** — order-status notifications
 - **flutter_animate** — entrance choreography
+- **adaptive_platform_ui** — the app's chrome and controls, drawn the way the
+  platform draws them. `AdaptiveApp` builds a `MaterialApp` on Android and a
+  `CupertinoApp` on iOS, and the switches, sliders, list rows, fields, menus,
+  alerts, badges and navigation bars follow. Where a control does something
+  the package can't express it stays Material and says why in a comment —
+  the quantity stepper's tooltip would take the hold-to-repeat gesture, and
+  checkout's pay bar has no home in `AdaptiveScaffold`'s bottom slot, so
+  `AdaptiveScreen` carries it instead
 - **dynamic_color** — Material You palette on Android 12+
 - **crypto** — PBKDF2-HMAC-SHA256 for local account passwords
 - **flutter_localizations** + **intl** — `gen_l10n` against `lib/l10n/app_en.arb`
