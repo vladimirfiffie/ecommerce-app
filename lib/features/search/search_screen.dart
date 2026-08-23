@@ -229,8 +229,8 @@ class _Suggestions extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           for (final String term in history)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
+            AdaptiveListTile(
+              padding: EdgeInsets.zero,
               leading: const Icon(Icons.history_rounded),
               title: Text(term),
               trailing: IconButton(
@@ -372,11 +372,8 @@ class _Results extends StatelessWidget {
           const Divider(height: 1, indent: 84),
       itemBuilder: (BuildContext context, int index) {
         final Product product = products[index];
-        return ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 6,
-          ),
+        return AdaptiveListTile(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           leading: SizedBox(
             width: 52,
             height: 52,

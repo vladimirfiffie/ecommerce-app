@@ -487,7 +487,7 @@ class _ContactCard extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Column(
               children: <Widget>[
-                ListTile(
+                AdaptiveListTile(
                   leading: Icon(
                     Icons.bug_report_outlined,
                     color: theme.colorScheme.onSurfaceVariant,
@@ -514,7 +514,7 @@ class _ContactCard extends ConsumerWidget {
                     );
                   },
                 ),
-                ListTile(
+                AdaptiveListTile(
                   leading: Icon(
                     Icons.auto_awesome_outlined,
                     color: theme.colorScheme.onSurfaceVariant,

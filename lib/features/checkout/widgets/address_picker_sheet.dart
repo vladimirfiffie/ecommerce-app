@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -101,7 +102,7 @@ class _AddressTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return ListTile(
+    return AdaptiveListTile(
       onTap: onTap,
       leading: Icon(
         address.label == 'Work' ? Icons.business_rounded : Icons.home_rounded,

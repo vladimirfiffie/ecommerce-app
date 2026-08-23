@@ -85,6 +85,9 @@ class SettingsRow extends StatelessWidget {
         ? theme.colorScheme.error
         : theme.colorScheme.onSurface;
 
+    // A Material ListTile: every settings row is a navigation target, and
+    // the adaptive tile does not take a tap across the whole row the way
+    // this one does — the hit test lands past the text.
     return ListTile(
       leading: Icon(
         icon,
@@ -96,15 +99,20 @@ class SettingsRow extends StatelessWidget {
         title,
         style: theme.textTheme.titleSmall?.copyWith(color: tint),
       ),
-      subtitle: subtitle == null ? null : Text(subtitle!),
-      subtitleTextStyle: theme.textTheme.bodySmall?.copyWith(
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
+      // Styled on the Text rather than through subtitleTextStyle, which is
+      // a ListTileTheme hook the adaptive tile has no equivalent for.
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
       trailing:
           trailing ??
           (onTap == null ? null : const Icon(Icons.chevron_right_rounded)),
       onTap: onTap,
-      shape: const RoundedRectangleBorder(),
     );
   }
 }
