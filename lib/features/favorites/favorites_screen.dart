@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -293,26 +294,45 @@ class _ListMenu extends StatelessWidget {
   final VoidCallback onNew;
 
   @override
-  Widget build(BuildContext context) => PopupMenuButton<String>(
-    tooltip: 'List options',
-    icon: const Icon(Icons.more_vert_rounded),
-    onSelected: (String value) => switch (value) {
-      'new' => onNew(),
-      'rename' => onRename(),
-      'empty' => onEmpty(),
-      _ => onDelete(),
-    },
-    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-      const PopupMenuItem<String>(value: 'new', child: Text('New list')),
-      const PopupMenuItem<String>(value: 'rename', child: Text('Rename list')),
+  Widget build(BuildContext context) => AdaptivePopupMenuButton.icon<String>(
+    icon: PlatformInfo.isIOS26OrHigher()
+        ? 'ellipsis.circle'
+        : Icons.more_vert_rounded,
+    items: <AdaptivePopupMenuEntry>[
+      AdaptivePopupMenuItem<String>(
+        label: 'New list',
+        icon: PlatformInfo.isIOS26OrHigher() ? 'plus' : Icons.add_rounded,
+        value: 'new',
+      ),
+      AdaptivePopupMenuItem<String>(
+        label: 'Rename list',
+        icon: PlatformInfo.isIOS26OrHigher() ? 'pencil' : Icons.edit_outlined,
+        value: 'rename',
+      ),
       if (list.length > 0)
-        const PopupMenuItem<String>(value: 'empty', child: Text('Empty list')),
+        AdaptivePopupMenuItem<String>(
+          label: 'Empty list',
+          icon: PlatformInfo.isIOS26OrHigher()
+              ? 'minus.circle'
+              : Icons.remove_circle_outline_rounded,
+          value: 'empty',
+        ),
       // The default list has to survive: a heart tap needs somewhere to land.
       if (!list.isDefault)
-        const PopupMenuItem<String>(
+        AdaptivePopupMenuItem<String>(
+          label: 'Delete list',
+          icon: PlatformInfo.isIOS26OrHigher()
+              ? 'trash'
+              : Icons.delete_outline_rounded,
           value: 'delete',
-          child: Text('Delete list'),
         ),
     ],
+    onSelected: (int _, AdaptivePopupMenuItem<String> entry) =>
+        switch (entry.value) {
+          'new' => onNew(),
+          'rename' => onRename(),
+          'empty' => onEmpty(),
+          _ => onDelete(),
+        },
   );
 }

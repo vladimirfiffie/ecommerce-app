@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import '../../shared/widgets/adaptive_screen.dart';
 import 'dart:io' show Platform;
@@ -63,6 +64,14 @@ class SettingsScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
+
+/// The order the mode control draws them in, and the only place that order
+/// is written down.
+const List<ThemeMode> _themeModes = <ThemeMode>[
+  ThemeMode.light,
+  ThemeMode.system,
+  ThemeMode.dark,
+];
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   SettingsPane? _pane;
@@ -216,27 +225,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: <Widget>[
                   Text('Mode', style: theme.textTheme.titleSmall),
                   const SizedBox(height: 10),
-                  SegmentedButton<ThemeMode>(
-                    segments: const <ButtonSegment<ThemeMode>>[
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.light,
-                        icon: Icon(Icons.light_mode_rounded),
-                        label: Text('Light'),
-                      ),
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.system,
-                        icon: Icon(Icons.brightness_auto_rounded),
-                        label: Text('Auto'),
-                      ),
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.dark,
-                        icon: Icon(Icons.dark_mode_rounded),
-                        label: Text('Dark'),
-                      ),
+                  // Index-based rather than typed: a Cupertino segmented
+                  // control is positional, so the order here is the contract.
+                  AdaptiveSegmentedControl(
+                    labels: const <String>['Light', 'Auto', 'Dark'],
+                    sfSymbols: const <String>[
+                      'sun.max',
+                      'circle.lefthalf.filled',
+                      'moon',
                     ],
-                    selected: <ThemeMode>{settings.themeMode},
-                    onSelectionChanged: (Set<ThemeMode> s) =>
-                        notifier.setThemeMode(s.first),
+                    selectedIndex: _themeModes.indexOf(settings.themeMode),
+                    onValueChanged: (int index) =>
+                        notifier.setThemeMode(_themeModes[index]),
                   ),
                   const SizedBox(height: 18),
                   Text('Color', style: theme.textTheme.titleSmall),

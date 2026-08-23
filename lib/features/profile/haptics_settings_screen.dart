@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -60,18 +61,17 @@ class HapticsSettingsScreen extends ConsumerWidget {
 
           _SectionLabel('Strength'),
           const SizedBox(height: 10),
-          SegmentedButton<HapticIntensity>(
-            segments: <ButtonSegment<HapticIntensity>>[
-              for (final HapticIntensity i in HapticIntensity.values)
-                ButtonSegment<HapticIntensity>(value: i, label: Text(i.label)),
+          AdaptiveSegmentedControl(
+            labels: <String>[
+              for (final HapticIntensity i in HapticIntensity.values) i.label,
             ],
-            selected: <HapticIntensity>{settings.intensity},
-            onSelectionChanged: settings.enabled
-                ? (Set<HapticIntensity> s) async {
-                    await notifier.setIntensity(s.first);
-                    await ref.read(hapticsProvider).impact();
-                  }
-                : null,
+            selectedIndex: HapticIntensity.values.indexOf(settings.intensity),
+            enabled: settings.enabled,
+            onValueChanged: (int index) async {
+              await notifier.setIntensity(HapticIntensity.values[index]);
+              // Feel the strength you just picked, at that strength.
+              await ref.read(hapticsProvider).impact();
+            },
           ),
           const SizedBox(height: 6),
           Text(

@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,10 +30,12 @@ class PaymentMethodsScreen extends ConsumerWidget {
       ),
       floatingActionButton: cards.isEmpty
           ? null
-          : FloatingActionButton.extended(
+          // Extended FABs are a Material idea; iOS gets a round button, so
+          // the label rides inside it rather than beside it.
+          : AdaptiveFloatingActionButton(
               onPressed: () => showAddCardSheet(context),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Add card'),
+              tooltip: 'Add card',
+              child: const Icon(Icons.add_rounded),
             ),
       body: cards.isEmpty
           ? EmptyState(

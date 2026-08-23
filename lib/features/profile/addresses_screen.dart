@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,10 +29,12 @@ class AddressesScreen extends ConsumerWidget {
       ),
       floatingActionButton: addresses.isEmpty
           ? null
-          : FloatingActionButton.extended(
+          // Extended FABs are a Material idea; iOS gets a round button, so
+          // the label rides inside it rather than beside it.
+          : AdaptiveFloatingActionButton(
               onPressed: () => showAddressSheet(context),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Add address'),
+              tooltip: 'Add address',
+              child: const Icon(Icons.add_rounded),
             ),
       body: addresses.isEmpty
           ? EmptyState(
