@@ -30,6 +30,43 @@ class ReleaseHighlight {
 /// list is the source of truth for whether an update has been seen.
 const List<ReleaseNote> kReleaseNotes = <ReleaseNote>[
   ReleaseNote(
+    version: '0.17.0',
+    headline: 'Somewhere to put things down, and a clearer no',
+    highlights: <ReleaseHighlight>[
+      ReleaseHighlight(
+        'bookmarks_outlined',
+        'Saved for later has its own place',
+        'It used to be a footer of your bag and nothing else. The Saved tab '
+            'now holds both things it is for — your lists, and everything you '
+            'set down mid-purchase with the size and quantity it had at the '
+            'time. Settings no longer throws you into the Bag to find it.',
+      ),
+      ReleaseHighlight(
+        'location_on_outlined',
+        'Tell an address what it is',
+        'Home, Work, School, Gym, Family — pick one and the address takes '
+            'its icon, so you find the right one at a glance instead of '
+            'reading streets. Anything that was not Work used to draw a '
+            'house, including the ones that were a school.',
+      ),
+      ReleaseHighlight(
+        'animation_outlined',
+        'Paying lands on a tick',
+        'The slider turns green and stays there while the order goes '
+            'through, rather than snapping back to looking untouched — which '
+            'invited a second slide at the one control that must never run '
+            'twice.',
+      ),
+      ReleaseHighlight(
+        'warning_amber_rounded',
+        'A refusal looks like a refusal',
+        '"Pick a size first" arrived in the same grey as "Added to your '
+            'bag". It is red now, along with everything else that stops you, '
+            'and the things that worked read green.',
+      ),
+    ],
+  ),
+  ReleaseNote(
     version: '0.16.0',
     headline: 'Aster the way your phone does things',
     highlights: <ReleaseHighlight>[

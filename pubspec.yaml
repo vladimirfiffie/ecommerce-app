@@ -1,7 +1,7 @@
 name: ecommerce_app
 description: "Aster — a Material 3 storefront built entirely in Flutter."
 publish_to: 'none'
-version: 0.16.0+21
+version: 0.17.0+22
 
 environment:
   sdk: ^3.12.2
