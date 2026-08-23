@@ -26,7 +26,6 @@ import '../../state/orders_provider.dart';
 import '../../state/payments_provider.dart';
 import '../../state/profile_provider.dart';
 import '../../state/reviews_provider.dart';
-import '../../state/saved_for_later_provider.dart';
 import '../../state/settings_provider.dart';
 import 'widgets/edit_name_sheet.dart';
 import 'widgets/settings_group.dart';
@@ -118,7 +117,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final String name = ref.watch(displayNameProvider);
     final int addressCount = ref.watch(addressesProvider).length;
     final int cardCount = ref.watch(paymentCardsProvider).length;
-    final int savedCount = ref.watch(savedForLaterProvider).length;
     final double credit = ref.watch(storeCreditProvider);
     final int reviewCount = ref.watch(userReviewsProvider).length;
 
@@ -185,14 +183,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () =>
                   _open(SettingsPane.storeCredit, Routes.storeCredit, twoPane),
             ),
-            SettingsRow(
-              icon: Icons.bookmark_border_rounded,
-              title: 'Saved for later',
-              subtitle: savedCount == 0
-                  ? 'Nothing put aside'
-                  : '$savedCount waiting in your bag',
-              onTap: () => context.go(Routes.cart),
-            ),
+            // No row for saved-for-later any more. It used to jump straight
+            // into the Bag tab, which threw the shopper out of Settings and
+            // out of whatever they were doing — and it was pointing at the
+            // bag because that was the only place the list existed. It has
+            // its own section on the Saved tab now, which is a destination
+            // in the navigation bar rather than somewhere Settings has to
+            // teleport you.
+
             SettingsRow(
               icon: Icons.rate_review_outlined,
               title: 'Your reviews',

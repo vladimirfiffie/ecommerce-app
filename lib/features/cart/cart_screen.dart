@@ -1,3 +1,4 @@
+import '../favorites/widgets/saved_for_later_section.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,6 @@ import '../../shared/widgets/product_card.dart';
 import '../../shared/widgets/quantity_stepper.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../state/app_providers.dart';
-import '../../shared/widgets/section_header.dart';
 import '../../state/cart_provider.dart';
 import '../../state/saved_for_later_provider.dart';
 import 'widgets/order_summary.dart';
@@ -91,7 +91,7 @@ class CartScreen extends ConsumerWidget {
                     // screen: what was saved is the reason to come back.
                     : ListView(
                         padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
-                        children: const <Widget>[_SavedForLaterSection()],
+                        children: const <Widget>[SavedForLaterSection()],
                       ),
               )
             else ...<Widget>[
@@ -188,7 +188,7 @@ class CartScreen extends ConsumerWidget {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: OrderSummary(),
                       ),
-                      const _SavedForLaterSection(),
+                      const SavedForLaterSection(),
                     ],
                   ),
                 ),
@@ -437,77 +437,3 @@ class _CheckoutBar extends StatelessWidget {
 ///
 /// Draws nothing at all when the list is empty — an empty section here would
 /// be a permanent invitation to a feature nobody has used yet.
-class _SavedForLaterSection extends ConsumerWidget {
-  const _SavedForLaterSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ThemeData theme = Theme.of(context);
-    final List<CartItem> saved = ref.watch(savedForLaterItemsProvider);
-    if (saved.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 26),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: SectionHeader(
-            title: AppL10n.of(context).savedForLaterTitle,
-            subtitle: AppL10n.of(context).savedForLaterCount(saved.length),
-            padding: EdgeInsets.zero,
-          ),
-        ),
-        const SizedBox(height: 10),
-        for (final CartItem item in saved)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: AdaptiveCard(
-              child: ProductRow(
-                product: item.product,
-                heroPrefix: 'saved',
-                subtitle: item.variantLabel == null
-                    ? null
-                    : Text(item.variantLabel!),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Text(
-                      formatPrice(item.lineTotal),
-                      style: theme.textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        IconButton(
-                          tooltip: AppL10n.of(context).removeItem,
-                          visualDensity: VisualDensity.compact,
-                          icon: const Icon(Icons.close_rounded, size: 18),
-                          onPressed: () => ref
-                              .read(savedForLaterProvider.notifier)
-                              .remove(item.lineId),
-                        ),
-                        FilledButton.tonal(
-                          onPressed: () => ref
-                              .read(savedForLaterProvider.notifier)
-                              .moveToBag(item.entry),
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(0, 36),
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(AppL10n.of(context).savedMoveToBag),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}

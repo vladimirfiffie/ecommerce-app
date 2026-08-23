@@ -1,3 +1,6 @@
+import 'widgets/saved_for_later_section.dart';
+import '../../state/saved_for_later_provider.dart';
+import '../../data/models/cart_item.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
@@ -33,10 +36,20 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
   String? _selectedId;
   String _listId = WishList.defaultId;
 
+  /// Which of the two things this tab holds is on screen.
+  ///
+  /// Lists are products liked and kept; "for later" is a bag line set down
+  /// mid-purchase, with its size, colour and quantity. Different enough that
+  /// mixing them into one grid would lose what each is for — and the second
+  /// had no home at all before, which is why Settings could only reach it by
+  /// throwing you into the Bag tab.
+  int _section = 0;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final List<WishList> lists = ref.watch(wishListsProvider);
+    final List<CartItem> setAside = ref.watch(savedForLaterItemsProvider);
 
     // A list the shopper just deleted leaves the tab pointing at nothing.
     final WishList list = lists.firstWhere(
@@ -67,23 +80,38 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 Expanded(
                   child: Text('Saved', style: theme.textTheme.headlineMedium),
                 ),
-                _ListMenu(
-                  list: list,
-                  onRename: () => _rename(list),
-                  onDelete: () => _delete(list),
-                  onEmpty: () => _empty(list),
-                  onNew: _createList,
-                ),
+                if (_section == 0)
+                  _ListMenu(
+                    list: list,
+                    onRename: () => _rename(list),
+                    onDelete: () => _delete(list),
+                    onEmpty: () => _empty(list),
+                    onNew: _createList,
+                  ),
               ],
             ),
           ),
-          ListStrip(
-            lists: lists,
-            selectedId: list.id,
-            onSelect: (String id) => setState(() => _listId = id),
-            onNew: _createList,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: AdaptiveSegmentedControl(
+              labels: <String>[
+                'Lists',
+                setAside.isEmpty
+                    ? 'For later'
+                    : 'For later (${setAside.length})',
+              ],
+              selectedIndex: _section,
+              onValueChanged: (int index) => setState(() => _section = index),
+            ),
           ),
-          if (products.isNotEmpty)
+          if (_section == 0)
+            ListStrip(
+              lists: lists,
+              selectedId: list.id,
+              onSelect: (String id) => setState(() => _listId = id),
+              onNew: _createList,
+            ),
+          if (_section == 0 && products.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Row(
@@ -105,38 +133,58 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 ],
               ),
             ),
-          Expanded(
-            child: unresolved && catalog.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : unresolved
-                ? CatalogUnavailable(
-                    title: AppL10n.of(context).couldNotLoadSaves,
-                  )
-                : products.isEmpty
-                ? EmptyState(
-                    icon: Icons.favorite_border_rounded,
-                    title: list.isDefault
-                        ? 'Nothing saved yet'
-                        : '${list.name} is empty',
-                    message: list.isDefault
-                        ? 'Tap the heart on anything you like and it’ll wait for you here.'
-                        : 'Hold the heart on anything you like to put it in this list.',
-                    actionLabel: 'Browse the shop',
-                    onAction: () => context.go(Routes.catalog),
-                  )
-                : AsterRefresh(
-                    child: ProductGrid(
-                      products: products,
-                      heroPrefix: 'saved',
-                      key: ValueKey<String>(list.id),
-                      padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 32),
-                      selectedId: selected,
-                      onSelect: twoPane
-                          ? (String id) => setState(() => _selectedId = id)
-                          : null,
+          if (_section == 1)
+            Expanded(
+              child: setAside.isEmpty
+                  ? EmptyState(
+                      icon: Icons.bookmark_border_rounded,
+                      title: 'Nothing set aside',
+                      message:
+                          'Anything you move out of your bag waits here, with '
+                          'the size and quantity it had when you set it down.',
+                      actionLabel: 'Open your bag',
+                      onAction: () => context.go(Routes.cart),
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 32),
+                      children: const <Widget>[
+                        SavedForLaterSection(showHeader: false),
+                      ],
                     ),
-                  ),
-          ),
+            )
+          else
+            Expanded(
+              child: unresolved && catalog.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : unresolved
+                  ? CatalogUnavailable(
+                      title: AppL10n.of(context).couldNotLoadSaves,
+                    )
+                  : products.isEmpty
+                  ? EmptyState(
+                      icon: Icons.favorite_border_rounded,
+                      title: list.isDefault
+                          ? 'Nothing saved yet'
+                          : '${list.name} is empty',
+                      message: list.isDefault
+                          ? 'Tap the heart on anything you like and it’ll wait for you here.'
+                          : 'Hold the heart on anything you like to put it in this list.',
+                      actionLabel: 'Browse the shop',
+                      onAction: () => context.go(Routes.catalog),
+                    )
+                  : AsterRefresh(
+                      child: ProductGrid(
+                        products: products,
+                        heroPrefix: 'saved',
+                        key: ValueKey<String>(list.id),
+                        padding: EdgeInsets.fromLTRB(gutter, 12, gutter, 32),
+                        selectedId: selected,
+                        onSelect: twoPane
+                            ? (String id) => setState(() => _selectedId = id)
+                            : null,
+                      ),
+                    ),
+            ),
         ],
       ),
     );
