@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'dart:async';
 
@@ -90,50 +91,50 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ? _selectedId
         : null;
 
-    return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.home),
-        ),
-        title: AdaptiveTextField(
-          controller: _controller,
-          focusNode: _focus,
-          textInputAction: TextInputAction.search,
-          onChanged: _onChanged,
-          onSubmitted: _submit,
-          decoration: InputDecoration(
-            hintText: 'Search products, brands…',
-            filled: false,
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            contentPadding: EdgeInsets.zero,
-            suffixIcon: _controller.text.isEmpty
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 20),
-                    onPressed: () {
-                      _controller.clear();
-                      setState(() => _query = '');
-                    },
-                  ),
-          ),
-        ),
-        actions: <Widget>[
-          if (q.isNotEmpty)
-            IconButton(
-              onPressed: () =>
-                  ref.read(settingsProvider.notifier).setGridView(!gridView),
-              tooltip: gridView ? 'Show as a list' : 'Show as a grid',
-              icon: Icon(
-                gridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-              ),
-            ),
-        ],
+    return AdaptiveScreen(
+      // The bar holds a search field rather than a name, so the name is only
+      // what iOS falls back to when it has nowhere to put the field.
+      title: 'Search',
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_rounded),
+        onPressed: () =>
+            context.canPop() ? context.pop() : context.go(Routes.home),
       ),
+      titleWidget: AdaptiveTextField(
+        controller: _controller,
+        focusNode: _focus,
+        textInputAction: TextInputAction.search,
+        onChanged: _onChanged,
+        onSubmitted: _submit,
+        decoration: InputDecoration(
+          hintText: 'Search products, brands…',
+          filled: false,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+          suffixIcon: _controller.text.isEmpty
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: () {
+                    _controller.clear();
+                    setState(() => _query = '');
+                  },
+                ),
+        ),
+      ),
+      actions: <Widget>[
+        if (q.isNotEmpty)
+          IconButton(
+            onPressed: () =>
+                ref.read(settingsProvider.notifier).setGridView(!gridView),
+            tooltip: gridView ? 'Show as a list' : 'Show as a grid',
+            icon: Icon(
+              gridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+            ),
+          ),
+      ],
       body: _maybeTwoPane(
         twoPane: twoPane,
         selected: selected,

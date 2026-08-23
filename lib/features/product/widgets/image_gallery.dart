@@ -1,3 +1,4 @@
+import '../../../shared/widgets/adaptive_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -304,10 +305,25 @@ class _FullScreenViewerState extends State<_FullScreenViewer>
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    final String position = widget.images.length > 1
+        ? '${_index + 1} / ${widget.images.length}'
+        : '';
+
+    return AdaptiveScreen(
+      title: position,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
+      actions: <Widget>[
+        if (_zoomed)
+          IconButton(
+            tooltip: 'Reset zoom',
+            icon: const Icon(Icons.zoom_out_map_rounded),
+            onPressed: () => _animateTo(Matrix4.identity()),
+          ),
+      ],
+      // The bar has to be transparent and white over the photographs, which
+      // is not something a platform bar does — so this one is handed in
+      // whole. iOS still builds its own from the title and actions above.
+      materialAppBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -322,14 +338,14 @@ class _FullScreenViewerState extends State<_FullScreenViewer>
               onPressed: () => _animateTo(Matrix4.identity()),
             ),
         ],
-        title: widget.images.length > 1
-            ? Text(
-                '${_index + 1} / ${widget.images.length}',
+        title: position.isEmpty
+            ? null
+            : Text(
+                position,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: Colors.white,
                 ),
-              )
-            : null,
+              ),
       ),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {

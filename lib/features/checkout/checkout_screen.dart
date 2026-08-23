@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'dart:async';
@@ -199,17 +200,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ],
     );
 
-    // A Scaffold, not AdaptiveScreen: checkout keeps a pay bar pinned to the
-    // bottom for the whole flow, and AdaptiveScaffold's bottom slot only
-    // takes its own AdaptiveBottomNavigationBar — there is nowhere to put a
-    // persistent action bar that stays above the keyboard.
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.checkoutTitle),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(52),
-          child: _StepIndicator(step: _step),
-        ),
+    return AdaptiveScreen(
+      title: l10n.checkoutTitle,
+      // The step indicator rides under the title on Android; iOS draws it
+      // beneath its own navigation bar.
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(52),
+        child: _StepIndicator(step: _step),
       ),
       // On a tablet the running total sits alongside the step instead of
       // being something you scroll to at the end.
@@ -230,7 +227,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
             )
           : stepBody,
-      bottomNavigationBar: Container(
+      // The pay bar stays put for the whole flow. AdaptiveScaffold's
+      // bottom slot only takes its own navigation bar, so this goes in
+      // the page's own bottom slot, which lays it under the body inside
+      // the safe area.
+      bottomBar: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainer,
           border: Border(
