@@ -107,14 +107,13 @@ class _PromoFieldState extends ConsumerState<PromoField> {
         Row(
           children: <Widget>[
             Expanded(
-              // A Material TextField: a promo code is typed from a card or
-              // an email, and the keyboard offering to complete it from the
-              // shopper's own vocabulary gets in the way. enableSuggestions
-              // is what turns that off, and neither adaptive field has it.
-              child: TextField(
+              child: AdaptiveTextField(
                 controller: _controller,
+                // A promo code is copied off a card or an email, so the
+                // keyboard should not try to complete it. autocorrect is
+                // what the adaptive field exposes; enableSuggestions, which
+                // also hides Android's suggestion strip, it does not.
                 autocorrect: false,
-                enableSuggestions: false,
                 textCapitalization: TextCapitalization.characters,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _apply(),

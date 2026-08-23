@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
@@ -23,11 +24,9 @@ class PaymentMethodsScreen extends ConsumerWidget {
     final List<PaymentCard> cards = ref.watch(paymentCardsProvider);
     final PaymentCard? selected = ref.watch(selectedCardProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Payment methods'),
-        automaticallyImplyLeading: !embedded,
-      ),
+    return AdaptiveScreen(
+      title: 'Payment methods',
+      automaticallyImplyLeading: !embedded,
       floatingActionButton: cards.isEmpty
           ? null
           // Extended FABs are a Material idea; iOS gets a round button, so

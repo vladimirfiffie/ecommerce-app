@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,8 +28,8 @@ class BrandScreen extends ConsumerWidget {
     final BrandPage page = ref.watch(brandProvider(brand));
     final double gutter = Breakpoints.gutter(Breakpoints.of(context));
 
-    return Scaffold(
-      appBar: AppBar(title: Text(page.name)),
+    return AdaptiveScreen(
+      title: page.name,
       body: switch (catalog) {
         // The catalog is what the brand is derived from, so an empty page
         // during the load would read as "this brand sells nothing".

@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'dart:async';
@@ -72,11 +73,9 @@ class _StoreCreditScreenState extends ConsumerState<StoreCreditScreen> {
     final double balance = ref.watch(storeCreditProvider);
     final List<CreditEntry> history = ref.watch(creditHistoryProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gift cards & credit'),
-        automaticallyImplyLeading: !widget.embedded,
-      ),
+    return AdaptiveScreen(
+      title: 'Gift cards & credit',
+      automaticallyImplyLeading: !widget.embedded,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
         children: <Widget>[

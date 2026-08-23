@@ -207,9 +207,9 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    // Material, like the settings rows: these are navigation targets, and
-    // the adaptive tile's tap area doesn't cover the row the way this does.
-    return ListTile(
+    return AdaptiveListTile(
+      // Material's row geometry — see SettingsRow for why.
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       leading: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
       title: Text(title, style: theme.textTheme.titleSmall),
       subtitle: Text(

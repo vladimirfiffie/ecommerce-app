@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'dart:async';
 
@@ -100,8 +101,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     // from Profile afterwards, it's an ordinary pushed page with a back arrow.
     final bool isGate = !ref.watch(pastAuthGateProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(_signUp ? 'Create account' : 'Sign in')),
+    return AdaptiveScreen(
+      title: _signUp ? 'Create account' : 'Sign in',
       body: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: wide ? 460 : double.infinity),

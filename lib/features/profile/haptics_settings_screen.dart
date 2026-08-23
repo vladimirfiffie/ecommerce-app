@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,11 +23,9 @@ class HapticsSettingsScreen extends ConsumerWidget {
       hapticSettingsProvider.notifier,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Haptics'),
-        automaticallyImplyLeading: !embedded,
-      ),
+    return AdaptiveScreen(
+      title: 'Haptics',
+      automaticallyImplyLeading: !embedded,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: <Widget>[

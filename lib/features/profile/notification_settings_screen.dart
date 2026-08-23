@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import '../../shared/widgets/messages.dart';
 import 'package:flutter/material.dart';
@@ -33,11 +34,9 @@ class NotificationSettingsScreen extends ConsumerWidget {
       showMessage(context, message);
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        automaticallyImplyLeading: !embedded,
-      ),
+    return AdaptiveScreen(
+      title: 'Notifications',
+      automaticallyImplyLeading: !embedded,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: <Widget>[

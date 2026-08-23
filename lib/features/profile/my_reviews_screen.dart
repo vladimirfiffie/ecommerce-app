@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,11 +31,9 @@ class MyReviewsScreen extends ConsumerWidget {
     final List<UserReview> mine = ref.watch(userReviewsProvider);
     final Catalog catalog = ref.watch(catalogDataProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your reviews'),
-        automaticallyImplyLeading: !embedded,
-      ),
+    return AdaptiveScreen(
+      title: 'Your reviews',
+      automaticallyImplyLeading: !embedded,
       body: mine.isEmpty
           ? EmptyState(
               icon: Icons.rate_review_outlined,

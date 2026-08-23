@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,19 +20,17 @@ class InboxScreen extends ConsumerWidget {
     final Set<String> read = ref.watch(readNotificationsProvider);
     final int unread = ref.watch(unreadInboxCountProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        actions: <Widget>[
-          if (unread > 0)
-            TextButton(
-              onPressed: () => ref
-                  .read(readNotificationsProvider.notifier)
-                  .markAllRead(items.map((AppNotification n) => n.id)),
-              child: const Text('Mark all read'),
-            ),
-        ],
-      ),
+    return AdaptiveScreen(
+      title: 'Notifications',
+      actions: <Widget>[
+        if (unread > 0)
+          TextButton(
+            onPressed: () => ref
+                .read(readNotificationsProvider.notifier)
+                .markAllRead(items.map((AppNotification n) => n.id)),
+            child: const Text('Mark all read'),
+          ),
+      ],
       body: items.isEmpty
           ? EmptyState(
               icon: Icons.notifications_none_rounded,

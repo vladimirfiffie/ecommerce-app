@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,11 +23,9 @@ class AddressesScreen extends ConsumerWidget {
     final List<Address> addresses = ref.watch(addressesProvider);
     final Address? selected = ref.watch(selectedAddressProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Addresses'),
-        automaticallyImplyLeading: !embedded,
-      ),
+    return AdaptiveScreen(
+      title: 'Addresses',
+      automaticallyImplyLeading: !embedded,
       floatingActionButton: addresses.isEmpty
           ? null
           // Extended FABs are a Material idea; iOS gets a round button, so

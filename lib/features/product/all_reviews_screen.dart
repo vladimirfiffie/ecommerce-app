@@ -1,3 +1,4 @@
+import '../../shared/widgets/adaptive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,8 +22,8 @@ class AllReviewsScreen extends ConsumerWidget {
     final AsyncValue<Catalog> catalog = ref.watch(catalogProvider);
     final Product? product = catalog.value?.byId(productId);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(product?.name ?? 'Reviews')),
+    return AdaptiveScreen(
+      title: product?.name ?? 'Reviews',
       body: switch ((catalog, product)) {
         (AsyncLoading<Catalog>(), _) => const Center(
           child: CircularProgressIndicator(),

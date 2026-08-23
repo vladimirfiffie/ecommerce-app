@@ -134,51 +134,49 @@ class InvoiceScreen extends ConsumerWidget {
 
     final String text = buildInvoiceText(order, items, AppL10n.of(context));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppL10n.of(context).receiptTitle),
-        actions: <Widget>[
-          IconButton(
-            tooltip: AppL10n.of(context).receiptCopy,
-            icon: const Icon(Icons.copy_rounded),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: text));
-              if (!context.mounted) return;
-              showMessage(context, AppL10n.of(context).receiptCopied);
-            },
-          ),
-          IconButton(
-            tooltip: AppL10n.of(context).receiptShare,
-            icon: const Icon(Icons.ios_share_rounded),
-            onPressed: () => SharePlus.instance.share(
-              ShareParams(
-                text: text,
-                subject: AppL10n.of(context).receiptShareSubject(order.id),
-              ),
+    return AdaptiveScreen(
+      title: AppL10n.of(context).receiptTitle,
+      actions: <Widget>[
+        IconButton(
+          tooltip: AppL10n.of(context).receiptCopy,
+          icon: const Icon(Icons.copy_rounded),
+          onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: text));
+            if (!context.mounted) return;
+            showMessage(context, AppL10n.of(context).receiptCopied);
+          },
+        ),
+        IconButton(
+          tooltip: AppL10n.of(context).receiptShare,
+          icon: const Icon(Icons.ios_share_rounded),
+          onPressed: () => SharePlus.instance.share(
+            ShareParams(
+              text: text,
+              subject: AppL10n.of(context).receiptShareSubject(order.id),
             ),
           ),
-          IconButton(
-            tooltip: AppL10n.of(context).receiptExportPdf,
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            // Handed to the platform's own share and print sheet, which is
-            // where a receipt actually needs to go: a mail app, a cloud
-            // folder, a printer. Building the document is cheap; deciding
-            // where it lands is not this app's business.
-            onPressed: () async {
-              final Uint8List bytes = await buildInvoicePdf(
-                order,
-                items,
-                AppL10n.of(context),
-              );
-              await Printing.sharePdf(
-                bytes: bytes,
-                filename: 'aster-receipt-${order.id}.pdf',
-              );
-            },
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
+        ),
+        IconButton(
+          tooltip: AppL10n.of(context).receiptExportPdf,
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          // Handed to the platform's own share and print sheet, which is
+          // where a receipt actually needs to go: a mail app, a cloud
+          // folder, a printer. Building the document is cheap; deciding
+          // where it lands is not this app's business.
+          onPressed: () async {
+            final Uint8List bytes = await buildInvoicePdf(
+              order,
+              items,
+              AppL10n.of(context),
+            );
+            await Printing.sharePdf(
+              bytes: bytes,
+              filename: 'aster-receipt-${order.id}.pdf',
+            );
+          },
+        ),
+        const SizedBox(width: 4),
+      ],
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: <Widget>[

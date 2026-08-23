@@ -85,10 +85,12 @@ class SettingsRow extends StatelessWidget {
         ? theme.colorScheme.error
         : theme.colorScheme.onSurface;
 
-    // A Material ListTile: every settings row is a navigation target, and
-    // the adaptive tile does not take a tap across the whole row the way
-    // this one does — the hit test lands past the text.
-    return ListTile(
+    return AdaptiveListTile(
+      // Material's own row geometry. AdaptiveListTile otherwise defaults to
+      // four logical pixels of vertical padding, which Material's ListTile
+      // does not have — every row grew by eight and pushed the bottom of a
+      // long settings list under the navigation bar.
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       leading: Icon(
         icon,
         color: destructive
